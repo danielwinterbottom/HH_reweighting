@@ -7,4 +7,13 @@ mkdir Template/loop_material/StandAlone/SubProcesses/MadLoop5_resources
 
 echo install MadAnalysis5 --madanalysis5_tarball=https://launchpad.net/madanalysis5/trunk/v1.9/+download/MadAnalysis5_v1.9.60.tgz | python2 bin/mg5_aMC
 echo "install oneloop; install ninja ; install collier;" | python2 bin/mg5_aMC
+
+wget https://gitlab.com/apapaefs/twosinglet/-/archive/master/twosinglet-master.tar.gz?path=loop_sm_twoscalar -O loop_sm_twoscalar.tar.gz
+
+tar -xvf loop_sm_twoscalar.tar.gz
+
+mv twosinglet-master-loop_sm_twoscalar/loop_sm_twoscalar models/.
+rm -r twosinglet-master-loop_sm_twoscalar
+rm loop_sm_twoscalar.tar.gz
+
 cd ..
