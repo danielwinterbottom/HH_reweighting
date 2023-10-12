@@ -1,0 +1,4 @@
+change mode NLO
+
+launch --rwgt_name=box
+change process p p > h h QCD=2 [QCD] / iota0 h eta0 

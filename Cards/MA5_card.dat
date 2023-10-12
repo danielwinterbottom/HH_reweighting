@@ -4,3 +4,4 @@
 @MG5aMC analysis_name = analysis1
 
 plot M(h[1] h[2]) 80 0  1000 [logY ]
+plot M(h[1] h[2]) 80 0  1000
