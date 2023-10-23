@@ -1,41 +1,40 @@
-change mode NLO
-
 # bsm 6 = a12
 # bsm 15 = kap111
 # bsm 16 = kap112
 
-launch --rwgt_name=box
-  change process p p > h h QCD=2 [QCD] / iota0 h eta0 
-  set bsm 6 0.000000e-01
-  set bsm 15 31.803878252
-  set bsm 16 0.000000e+00
+# note for all reweighting we set a12 to pi/4
+# this means that htt and Htt Yukawa = 1/2 the SM values and therefore the weights will need to be rescaled later on 
+# to effectivly give Yukawa's = 1
 
-launch --rwgt_name=schannel_h
-  change process p p > h > h h QCD=2 [QCD] / iota0
-  set bsm 6 0.000000e-01
-  set bsm 15 31.803878252 
-  set bsm 16 0.000000e+00
-
-launch --rwgt_name=schannel_H
-change process p p > eta0 > h h QCD=2 [QCD] / iota0
-set bsm 6 1.570796
-set bsm 15 0.000000e+00
-set bsm 16 31.803878252
-
-launch --rwgt_name=box_and_schannel_h
-change process p p > h h QCD=2 [QCD] / iota0 eta0
-set bsm 6 0.000000e-01 
-set bsm 15 31.803878252 
-set bsm 16 0.000000e+00 
-
-launch --rwgt_name=box_and_schannel_H
-change process p p > h h QCD=2 [QCD] / iota0 h
-set bsm 6 1.570796
-set bsm 15 0.000000e+00
-set bsm 16 31.803878252
+# reweighting does not seem to work properly when using change process so we will perform reweighting by only modifying the model parameters instead 
 
 launch --rwgt_name=all
-change process p p > h h QCD=2 [QCD] / iota0 h eta0
-set bsm 6 0.785398
-set bsm 15 31.803878252 
-set bsm 16 31.803878252 
+  set bsm 6 0.785398
+  set bsm 15 31.803878252
+  set bsm 16 31.803878252
+
+launch --rwgt_name=schannel_H
+  set bsm 6 1.570796
+  set bsm 15 0.000000e+00
+  set bsm 16 31.803878252
+
+launch --rwgt_name=box
+  set bsm 6 0.000000e+00
+  set bsm 15 0.000000e+00
+  set bsm 16 0.000000e+00
+
+launch --rwgt_name=box_and_schannel_H
+  set bsm 6 0.785398
+  set bsm 15 0.000000e+00
+  set bsm 16 31.803878252
+
+launch --rwgt_name=box_and_schannel_h_1
+  set bsm 6 0.000000e+00 
+  set bsm 15 31.803878252 
+  set bsm 16 0.000000e+00 
+
+launch --rwgt_name=box_and_schannel_h_2
+  set bsm 6 0.000000e+00 
+  set bsm 15 318.03878252
+  set bsm 16 0.000000e+00
+
