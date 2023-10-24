@@ -7,6 +7,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--input', '-i', help= 'LHE file to be converted')
 parser.add_argument('--output', '-o', help= 'Name of output file',default='output.root')
 parser.add_argument('--n_events', '-n', help= 'Maximum number of events to process', default=-1, type=int)
+parser.add_argument('--no_weights', help= 'Do not store weights', action='store_true')
 args = parser.parse_args()
 
 # Open the LHE file for reading
@@ -25,18 +26,21 @@ wt_box_out  = array('f',[0])
 wt_schannel_h_out  = array('f',[0])
 wt_box_and_schannel_h_i_out  = array('f',[0])
 wt_schannel_H_out  = array('f',[0])
+wt_schannel_H_alt_out  = array('f',[0])
 wt_box_and_schannel_H_i_out  = array('f',[0])
 wt_schannel_H_and_schannel_h_i_out  = array('f',[0])
  
 # create the branches and assign the fill-variables to them
 tree.Branch("hh_mass",  hh_mass,  'hh_mass/F')
 tree.Branch("wt_nom",  wt_nom_out,  'wt_nom/F')
-tree.Branch("wt_box",  wt_box_out,  'wt_box/F')
-tree.Branch("wt_schannel_h",  wt_schannel_h_out,  'wt_schannel_h/F')
-tree.Branch("wt_box_and_schannel_h_i",  wt_box_and_schannel_h_i_out,  'wt_box_and_schannel_h_i/F')
-tree.Branch("wt_schannel_H",  wt_schannel_H_out,  'wt_schannel_H/F')
-tree.Branch("wt_box_and_schannel_H_i",  wt_box_and_schannel_H_i_out,  'wt_box_and_schannel_H_i/F')
-tree.Branch("wt_schannel_H_and_schannel_h_i",  wt_schannel_H_and_schannel_h_i_out,  'wt_schannel_H_and_schannel_h_i/F')
+if not args.no_weights:
+    tree.Branch("wt_box",  wt_box_out,  'wt_box/F')
+    tree.Branch("wt_schannel_h",  wt_schannel_h_out,  'wt_schannel_h/F')
+    tree.Branch("wt_box_and_schannel_h_i",  wt_box_and_schannel_h_i_out,  'wt_box_and_schannel_h_i/F')
+    tree.Branch("wt_schannel_H",  wt_schannel_H_out,  'wt_schannel_H/F')
+    tree.Branch("wt_schannel_H_alt",  wt_schannel_H_alt_out,  'wt_schannel_H_alt/F')
+    tree.Branch("wt_box_and_schannel_H_i",  wt_box_and_schannel_H_i_out,  'wt_box_and_schannel_H_i/F')
+    tree.Branch("wt_schannel_H_and_schannel_h_i",  wt_schannel_H_and_schannel_h_i_out,  'wt_schannel_H_and_schannel_h_i/F')
 
 # Parse the LHE file and fill the TTree
 event_started = False
@@ -50,7 +54,8 @@ for line in lhe_file:
 
         higgs_bosons=[]
         wt_box = None
-        wt_box_and_schannel_H = None
+        wt_box_and_schannel_H_1 = None
+        wt_box_and_schannel_H_2 = None
         wt_box_and_schannel_h_1 = None
         wt_box_and_schannel_h_2 = None
         wt_all = None
@@ -66,80 +71,37 @@ for line in lhe_file:
         if len(higgs_bosons)==2: hh_mass[0]=(higgs_bosons[0]+higgs_bosons[1]).M()
         else: h_mass[0]=-1
 
-       ### # compute weights
-       ### # get the inteference contributions
-       ### wt_box_and_schannel_H_i = wt_box_and_schannel_H - wt_box
-       ### wt_box_and_schannel_h_i = wt_box_and_schannel_h - wt_box
-       ### wt_schannel_H_and_schannel_h_i = wt_all - wt_box - wt_schannel_H - wt_schannel_h - wt_box_and_schannel_H_i - wt_box_and_schannel_h_i
+        # compute weights which will all be multiplied by factors of sin(a) and cos(a) for now
 
-       ### # the weights that we need to produce our final templates are:
-       ### # wt_box, wt_schannel_H, wt_schannel_h, wt_box_and_schannel_H_i, wt_box_and_schannel_h_i, and wt_schannel_H_and_schannel_h_i 
+        if not args.no_weights:
 
-       ### # we scale all these weights so that they correspond to kappa_t=1 for both h and H
-       ### # the mixing angle used during generation of events was 0.785398 and kappa_t for h and H = cos(alpha) and sin(alpha) respectively
-       ### # note that the lambdas are already set equal to the SM lambda
-       ### wt_box*=(1./math.cos(0.785398))**4
-       ### wt_schannel_h*=(1./math.cos(0.785398))**2 
-       ### wt_box_and_schannel_h_i*=(1./math.cos(0.785398))**3
-       ### wt_schannel_H*=(1./math.sin(0.785398))**2 
-       ### wt_box_and_schannel_h_i*=(1./math.cos(0.785398))**2*(1./math.sin(0.785398))
+            wt_schannel_H_alt_out[0] = wt_schannel_H
+    
+            # get the s-channel weights by solving simultaneous equations for cases where kappa_lambda equals 1 and 100
+            wt_schannel_h = float( ((wt_box_and_schannel_h_2-wt_box) - 10.*(wt_box_and_schannel_h_1-wt_box))/90. )
+            wt_schannel_H = float( ((wt_box_and_schannel_H_2-wt_box) - 10.*(wt_box_and_schannel_H_1-wt_box))/90. )
+    
+    
+            # get the inteference contributions
+            wt_box_and_schannel_H_i = wt_box_and_schannel_H_1 - wt_box - wt_schannel_H
+            wt_box_and_schannel_h_i = wt_box_and_schannel_h_1 - wt_box - wt_schannel_h
+    
+            wt_schannel_H_and_schannel_h_i = wt_all - wt_box - wt_schannel_H - wt_schannel_h - wt_box_and_schannel_H_i - wt_box_and_schannel_h_i
+    
+            # multiple weights to account for effect of mixing angles on top Yukawa couplings
+            # by convention scale all weights to the scenario where both Yukawa couplings equal 1
+    
+            a = 0.785398
+            ca = math.cos(a)
+            sa = math.sin(a)
+    
+            wt_box_out[0] = float(wt_box/ca**4)
+            wt_schannel_h_out[0] = float(wt_schannel_h/ca**2)
+            wt_schannel_H_out[0] = float(wt_schannel_H/sa**2)
+            wt_box_and_schannel_H_i_out[0] = float(wt_box_and_schannel_H_i/(ca**2*sa))
+            wt_box_and_schannel_h_i_out[0] = float(wt_box_and_schannel_h_i/ca**3)
+            wt_schannel_H_and_schannel_h_i_out[0] = float(wt_schannel_H_and_schannel_h_i/(ca*sa))
 
-       ### wt_box_out[0] = wt_box
-       ### wt_schannel_h_out[0] = wt_schannel_h
-       ### wt_box_and_schannel_h_i_out[0] = wt_box_and_schannel_h_i
-       ### wt_schannel_H_out[0] = wt_schannel_H
-       ### wt_box_and_schannel_H_i_out[0] = wt_box_and_schannel_H_i
-       ### wt_schannel_H_and_schannel_h_i_out[0] = wt_schannel_H_and_schannel_h_i
-
-        # couplings for box process and H s-channel process already have kappas = 1 so can take the weights directly
-        wt_box_out[0] = float( wt_box )
-        wt_schannel_H_out[0] = float( wt_schannel_H )
-
-        # box+s-channel_H process produced with mixing angle=0.785398 so we need to subtract box-only and s-channel-only taking this into account and then scale up the resulting
-        # weight to obtain the component for kappas all equal to 1 
-        wt_box_and_schannel_H_i_out[0] = float( (wt_box_and_schannel_H - wt_box*math.cos(0.785398)**4 - wt_schannel_H*math.sin(0.785398)**2)/(math.cos(0.785398)**2*math.sin(0.785398)) )
-
-        # wt_box_and_schannel_h_1 generated with all h kappas = 1, wt_box_and_schannel_h_2 is generate with lambda_hhh equal to 10 times the SM
-        # we can solve the two equations to determine the s-channel only, and the inteference term for kappas = 1 
-        wt_schannel_h_out[0] = float( ((wt_box_and_schannel_h_2-wt_box) - 10.*(wt_box_and_schannel_h_1-wt_box))/90. )
-        
-        wt_box_and_schannel_h_i_out[0] = float( ((wt_box_and_schannel_h_2-wt_box) - 100.*(wt_box_and_schannel_h_1-wt_box)/-90.) )
-
-        # finally, now that we have the weights for all components except the s-channel_h-s_channel_H inteference
-        # we can then subtract the other weights from the weight computed for the scenario with mixing angle = 0.785398 and lambda = SM lambda_hhh 
-
-        wt_schannel_H_and_schannel_h_i_out[0] = wt_all - wt_box_out[0]*math.cos(0.785398)**4 - wt_schannel_H_out[0]*math.sin(0.785398)**2 - wt_schannel_h_out[0]*math.cos(0.785398)**2 - wt_box_and_schannel_H_i_out[0]*math.cos(0.785398)**2*math.sin(0.785398) - wt_box_and_schannel_h_i_out[0]*math.cos(0.785398)**3
- 
-####launch --rwgt_name=all
-####  set bsm 6 0.785398
-####  set bsm 15 31.803878252
-####  set bsm 16 31.803878252
-####
-####launch --rwgt_name=schannel_H
-####  set bsm 6 1.570796
-####  set bsm 15 0.000000e+00
-####  set bsm 16 31.803878252
-####
-####launch --rwgt_name=box
-####  set bsm 6 0.000000e+00
-####  set bsm 15 0.000000e+00
-####  set bsm 16 0.000000e+00
-####
-####launch --rwgt_name=box_and_schannel_H
-####  set bsm 6 0.785398
-####  set bsm 15 0.000000e+00
-####  set bsm 16 31.803878252
-####
-####launch --rwgt_name=box_and_schannel_h_1
-####  set bsm 6 0.000000e+00
-####  set bsm 15 31.803878252
-####  set bsm 16 0.000000e+00
-####
-####launch --rwgt_name=box_and_schannel_h_2
-####  set bsm 6 0.000000e+00
-####  set bsm 15 318.03878252
-####  set bsm 16 0.000000e+00
- 
         tree.Fill()
 
     elif event_started:
@@ -158,21 +120,21 @@ for line in lhe_file:
             if line.startswith("<wgt id=\'box\'>"):
                 wt_box=float(parts[2])
                 #print 'wt_box = ', wt_box
-            elif line.startswith("<wgt id=\'box_and_schannel_H\'>"):
-                wt_box_and_schannel_H=float(parts[2])
-                #print 'wt_box_and_schannel_H = ', wt_box_and_schannel_H
             elif line.startswith("<wgt id=\'box_and_schannel_h_1\'>"):
                 wt_box_and_schannel_h_1=float(parts[2])
                 #print 'wt_box_and_schannel_h_1 = ', wt_box_and_schannel_h_1
             elif line.startswith("<wgt id=\'box_and_schannel_h_2\'>"):
                 wt_box_and_schannel_h_2=float(parts[2])
                 #print 'wt_box_and_schannel_h_2 = ', wt_box_and_schannel_h_2
+            elif line.startswith("<wgt id=\'box_and_schannel_H_1\'>"):
+                wt_box_and_schannel_H_1=float(parts[2])
+                #print 'wt_box_and_schannel_H_1 = ', wt_box_and_schannel_H_1
+            elif line.startswith("<wgt id=\'box_and_schannel_H_2\'>"):
+                wt_box_and_schannel_H_2=float(parts[2])
+                #print 'wt_box_and_schannel_H_2 = ', wt_box_and_schannel_H_2
             elif line.startswith("<wgt id=\'all\'>"):
                 wt_all=float(parts[2])
                 #print 'wt_all = ', wt_all
-            elif line.startswith("<wgt id=\'schannel_h\'>"):
-                wt_schannel_h=float(parts[2])
-                #print 'wt_schannel_h = ', wt_schannel_h
             elif line.startswith("<wgt id=\'schannel_H\'>"):
                 wt_schannel_H=float(parts[2])
                 #print 'wt_schannel_H = ', wt_schannel_H

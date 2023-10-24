@@ -19,22 +19,26 @@ launch --rwgt_name=schannel_H
   set bsm 16 31.803878252
 
 launch --rwgt_name=box
-  set bsm 6 0.000000e+00
+  set bsm 6 0.785398
   set bsm 15 0.000000e+00
   set bsm 16 0.000000e+00
 
-launch --rwgt_name=box_and_schannel_H
-  set bsm 6 0.785398
-  set bsm 15 0.000000e+00
-  set bsm 16 31.803878252
-
 launch --rwgt_name=box_and_schannel_h_1
-  set bsm 6 0.000000e+00 
+  set bsm 6 0.785398
   set bsm 15 31.803878252 
   set bsm 16 0.000000e+00 
 
 launch --rwgt_name=box_and_schannel_h_2
-  set bsm 6 0.000000e+00 
+  set bsm 6 0.785398 
   set bsm 15 318.03878252
   set bsm 16 0.000000e+00
 
+launch --rwgt_name=box_and_schannel_H_1
+  set bsm 6 0.785398
+  set bsm 15 0.000000e+00
+  set bsm 16 31.803878252
+
+launch --rwgt_name=box_and_schannel_H_2
+  set bsm 6 0.785398
+  set bsm 15 0.000000e+00
+  set bsm 16 318.03878252
