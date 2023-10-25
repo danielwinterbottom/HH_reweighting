@@ -1,11 +1,22 @@
 import ROOT
 import math
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--use_smeared_mass', help= 'Use di-Higgs masses with experimental smearing', action='store_true')
+parser.add_argument('--width','-w', help= 'The width used for generating the reweighted templates (changes the input file names)', default='4p97918')
+args = parser.parse_args()
+
 
 BM='600'
-f1 = ROOT.TFile('outputs/output_W4p97918_10000.root')
+width=args.width
+use_smeared_mass=args.use_smeared_mass
+
+f1 = ROOT.TFile('outputs/output_W%(width)s_10000.root' % vars())
 f2 = ROOT.TFile('outputs/output_BM_10000.root')
 f3 = ROOT.TFile('outputs/output_SM_10000.root')
-fout = ROOT.TFile('hhmass_output_BM%(BM)s.root' % vars(),'RECREATE')
+if use_smeared_mass: fout = ROOT.TFile('hhmass_output_BM%(BM)s_Width%(width)s_smeared.root' % vars(),'RECREATE')
+else: fout = ROOT.TFile('hhmass_output_BM%(BM)s_Width%(width)s.root' % vars(),'RECREATE')
 
 t1 = f1.Get('ntuple')
 t2 = f2.Get('ntuple')
@@ -47,28 +58,31 @@ h2_box_and_schannel_h_i = ROOT.TH1D('h2_box_and_schannel_h_i','',50,200,1000)
 h2_schannel_H_and_schannel_h_i = ROOT.TH1D('h2_schannel_H_and_schannel_h_i','',50,200,1000)
 h3 = ROOT.TH1D('h3','',50,200,1000)
 
+var='hh_mass'
+if use_smeared_mass: var = 'hh_mass_smear_improved'
+
 # get SM distribution generated directly
-t3.Draw('hh_mass>>h3','wt_nom', 'goff')
+t3.Draw('%(var)s>>h3'  % vars(),'wt_nom', 'goff')
 h3 = t3.GetHistogram()
 h3.Scale(1./N3)
 
 # get sample generated directly for the benchmark
-t2.Draw('hh_mass>>h1','wt_nom', 'goff')
+t2.Draw('%(var)s>>h1' % vars(),'wt_nom', 'goff')
 h1 = t2.GetHistogram()
 h1.Scale(1./N2)
 
 # get individual templates
-t1.Draw('hh_mass>>h2_box','wt_box', 'goff')
+t1.Draw('%(var)s>>h2_box' % vars(),'wt_box', 'goff')
 h2_box = t1.GetHistogram()
-t1.Draw('hh_mass>>h2_schannel_h','wt_schannel_h', 'goff')
+t1.Draw('%(var)s>>h2_schannel_h' % vars(),'wt_schannel_h' % vars(), 'goff')
 h2_schannel_h = t1.GetHistogram()
-t1.Draw('hh_mass>>h2_box_and_schannel_h_i','wt_box_and_schannel_h_i', 'goff')
+t1.Draw('%(var)s>>h2_box_and_schannel_h_i' % vars(),'wt_box_and_schannel_h_i', 'goff')
 h2_box_and_schannel_h_i = t1.GetHistogram()
-t1.Draw('hh_mass>>h2_schannel_H','wt_schannel_H', 'goff')
+t1.Draw('%(var)s>>h2_schannel_H' % vars(),'wt_schannel_H', 'goff')
 h2_schannel_H = t1.GetHistogram()
-t1.Draw('hh_mass>>h2_box_and_schannel_H_i','wt_box_and_schannel_H_i', 'goff')
+t1.Draw('%(var)s>>h2_box_and_schannel_H_i' % vars(),'wt_box_and_schannel_H_i', 'goff')
 h2_box_and_schannel_H_i = t1.GetHistogram()
-t1.Draw('hh_mass>>h2_schannel_H_and_schannel_h_i','wt_schannel_H_and_schannel_h_i', 'goff')
+t1.Draw('%(var)s>>h2_schannel_H_and_schannel_h_i' % vars(),'wt_schannel_H_and_schannel_h_i', 'goff')
 h2_schannel_H_and_schannel_h_i = t1.GetHistogram()
 
 h2_box.Scale(1./N1)

@@ -21,6 +21,8 @@ tree = ROOT.TTree("ntuple", "Event Tree")
 
 # Define variables to store event information
 hh_mass  = array('f',[0])
+hh_mass_smear  = array('f',[0])
+hh_mass_smear_improved  = array('f',[0])
 wt_nom_out  = array('f',[0])
 wt_box_out  = array('f',[0])
 wt_schannel_h_out  = array('f',[0])
@@ -29,9 +31,16 @@ wt_schannel_H_out  = array('f',[0])
 wt_schannel_H_alt_out  = array('f',[0])
 wt_box_and_schannel_H_i_out  = array('f',[0])
 wt_schannel_H_and_schannel_h_i_out  = array('f',[0])
+
+# mbb resolution taken from Figure 5 here: https://arxiv.org/pdf/1912.06046.pdf
+func1 = ROOT.TF1("func1","TMath::Gaus(x,0,0.12)",-5*0.12,5*0.12)
+# mgamgam resolutiosn taken from page 3 here: https://arxiv.org/pdf/2310.01643.pdf
+func2 = ROOT.TF1("func2","TMath::Gaus(x,0,0.01)",-5*0.01,5*0.01)
  
 # create the branches and assign the fill-variables to them
 tree.Branch("hh_mass",  hh_mass,  'hh_mass/F')
+tree.Branch("hh_mass_smear",  hh_mass_smear,  'hh_mass_smear/F')
+tree.Branch("hh_mass_smear_improved",  hh_mass_smear_improved,  'hh_mass_smear_improved/F')
 tree.Branch("wt_nom",  wt_nom_out,  'wt_nom/F')
 if not args.no_weights:
     tree.Branch("wt_box",  wt_box_out,  'wt_box/F')
@@ -68,8 +77,22 @@ for line in lhe_file:
         event_started = False
 
         # store di-Higgs mass
-        if len(higgs_bosons)==2: hh_mass[0]=(higgs_bosons[0]+higgs_bosons[1]).M()
-        else: h_mass[0]=-1
+        if len(higgs_bosons)==2: 
+            hh_mass[0]=(higgs_bosons[0]+higgs_bosons[1]).M()
+            rand1 = 1.+func1.GetRandom() 
+            rand2 = 1.+func2.GetRandom()
+
+            higgs_smeared_1 = higgs_bosons[0]*rand1
+            higgs_smeared_2 = higgs_bosons[1]*rand2
+
+            hh_mass_smear[0] = (higgs_smeared_1+higgs_smeared_2).M()
+            hh_mass_smear_improved[0] = hh_mass_smear[0] - (higgs_smeared_1.M()-125.) - (higgs_smeared_2.M()-125.)
+
+            #print rand1, rand2, higgs_smeared_1.M(), higgs_smeared_2.M(), hh_mass[0], hh_mass_smear[0], hh_mass_smear_improved[0]
+        else: 
+            h_mass[0]=-1
+            hh_mass_smear[0]=-1
+            hh_mass_smear_improved[0]=-1
 
         # compute weights which will all be multiplied by factors of sin(a) and cos(a) for now
 
