@@ -3,7 +3,7 @@ import math
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--use_smeared_mass', help= 'Use di-Higgs masses with experimental smearing', action='store_true')
+parser.add_argument('--use_smeared_mass', help= 'Use di-Higgs masses with experimental smearing', type=int, default=0)
 parser.add_argument('--width','-w', help= 'The width used for generating the reweighted templates (changes the input file names)', default='4p97918')
 args = parser.parse_args()
 
@@ -12,10 +12,11 @@ BM='600'
 width=args.width
 use_smeared_mass=args.use_smeared_mass
 
-f1 = ROOT.TFile('outputs/output_W%(width)s_10000.root' % vars())
+f1 = ROOT.TFile('outputs/output_W%(width)s_1M.root' % vars())
 f2 = ROOT.TFile('outputs/output_BM_10000.root')
 f3 = ROOT.TFile('outputs/output_SM_10000.root')
-if use_smeared_mass: fout = ROOT.TFile('hhmass_output_BM%(BM)s_Width%(width)s_smeared.root' % vars(),'RECREATE')
+if use_smeared_mass==1: fout = ROOT.TFile('hhmass_output_BM%(BM)s_Width%(width)s_smeared.root' % vars(),'RECREATE')
+elif use_smeared_mass==2: fout = ROOT.TFile('hhmass_output_BM%(BM)s_Width%(width)s_smeared_4b.root' % vars(),'RECREATE')
 else: fout = ROOT.TFile('hhmass_output_BM%(BM)s_Width%(width)s.root' % vars(),'RECREATE')
 
 t1 = f1.Get('ntuple')
@@ -41,6 +42,8 @@ BM_params['600'] = {
 
 params = BM_params[BM]
 
+width_sf=float(width.replace('p','.'))/params['width']
+
 kappa_h_t = math.cos(params['a12'])
 kappa_H_t = math.sin(params['a12'])
 
@@ -59,7 +62,8 @@ h2_schannel_H_and_schannel_h_i = ROOT.TH1D('h2_schannel_H_and_schannel_h_i','',5
 h3 = ROOT.TH1D('h3','',50,200,1000)
 
 var='hh_mass'
-if use_smeared_mass: var = 'hh_mass_smear_improved'
+if use_smeared_mass==1:   var = 'hh_mass_smear_improved'
+elif use_smeared_mass==2: var = 'hh_mass_smear_4b_improved'
 
 # get SM distribution generated directly
 t3.Draw('%(var)s>>h3'  % vars(),'wt_nom', 'goff')
@@ -97,13 +101,14 @@ h_sm.Add(h2_schannel_h)
 h_sm.Add(h2_box_and_schannel_h_i)
 
 box_SF                         = kappa_h_t**4
-schannel_H_SF                  = kappa_H_t**2*kappa_H_lam**2
+schannel_H_SF                  = kappa_H_t**2*kappa_H_lam**2*width_sf
 schannel_h_SF                  = kappa_h_t**2*kappa_h_lam**2
 box_and_schannel_h_i_SF        = kappa_h_t**3*kappa_h_lam
 box_and_schannel_H_i_SF        = kappa_h_t**2*kappa_H_t*kappa_H_lam
 schannel_H_and_schannel_h_i_SF = kappa_H_t*kappa_H_lam*kappa_h_t*kappa_h_lam
 
 print '\nScale factors applied:'
+print 'width SF = %.3f' % width_sf
 print 'box_SF = %.3f' % box_SF 
 print 'schannel_H_SF = %.3f' % schannel_H_SF 
 print 'schannel_h_SF = %.3f' % schannel_h_SF
@@ -153,6 +158,16 @@ h2_box_and_schannel_h_i.Write('BM_box_and_schannel_h_i')
 h2_schannel_H_and_schannel_h_i.Write('BM_schannel_H_and_schannel_h_i')
 h2.Write('BM_total')
 h3.Write('SM_generated')
+
+h_approx = h_sm.Clone()
+h_approx.Add(h2_schannel_H)
+
+h_approx.Write('BM_total_approx')
+
+h_approx_2 = h_sm_like.Clone()
+h_approx_2.Add(h2_schannel_H)
+
+h_approx_2.Write('BM_total_approx_2')
 
 fout.Close()
 f1.Close()

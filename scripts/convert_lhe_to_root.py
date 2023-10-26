@@ -23,6 +23,8 @@ tree = ROOT.TTree("ntuple", "Event Tree")
 hh_mass  = array('f',[0])
 hh_mass_smear  = array('f',[0])
 hh_mass_smear_improved  = array('f',[0])
+hh_mass_smear_4b  = array('f',[0])
+hh_mass_smear_4b_improved  = array('f',[0])
 wt_nom_out  = array('f',[0])
 wt_box_out  = array('f',[0])
 wt_schannel_h_out  = array('f',[0])
@@ -31,6 +33,16 @@ wt_schannel_H_out  = array('f',[0])
 wt_schannel_H_alt_out  = array('f',[0])
 wt_box_and_schannel_H_i_out  = array('f',[0])
 wt_schannel_H_and_schannel_h_i_out  = array('f',[0])
+
+hh_dphi  = array('f',[0])
+hh_deta  = array('f',[0])
+hh_dR  = array('f',[0])
+hh_pt1  = array('f',[0])
+hh_pt2  = array('f',[0])
+hh_eta1  = array('f',[0])
+hh_eta2  = array('f',[0])
+hh_phi1  = array('f',[0])
+hh_phi2  = array('f',[0])
 
 # mbb resolution taken from Figure 5 here: https://arxiv.org/pdf/1912.06046.pdf
 func1 = ROOT.TF1("func1","TMath::Gaus(x,0,0.12)",-5*0.12,5*0.12)
@@ -41,6 +53,20 @@ func2 = ROOT.TF1("func2","TMath::Gaus(x,0,0.01)",-5*0.01,5*0.01)
 tree.Branch("hh_mass",  hh_mass,  'hh_mass/F')
 tree.Branch("hh_mass_smear",  hh_mass_smear,  'hh_mass_smear/F')
 tree.Branch("hh_mass_smear_improved",  hh_mass_smear_improved,  'hh_mass_smear_improved/F')
+
+tree.Branch("hh_mass_smear_4b",  hh_mass_smear_4b,  'hh_mass_smear_4b/F')
+tree.Branch("hh_mass_smear_4b_improved",  hh_mass_smear_4b_improved,  'hh_mass_smear_4b_improved/F')
+
+tree.Branch("hh_dphi",  hh_dphi,  'hh_dphi/F')
+tree.Branch("hh_deta",  hh_deta,  'hh_deta/F')
+tree.Branch("hh_dR",  hh_dR,  'hh_dR/F')
+tree.Branch("hh_pt1",  hh_pt1,  'hh_pt1/F')
+tree.Branch("hh_pt2",  hh_pt2,  'hh_pt2/F')
+tree.Branch("hh_eta1",  hh_eta1,  'hh_eta1/F')
+tree.Branch("hh_eta2",  hh_eta2,  'hh_eta2/F')
+tree.Branch("hh_phi1",  hh_phi1,  'hh_phi1/F')
+tree.Branch("hh_phi2",  hh_phi2,  'hh_phi2/F')
+
 tree.Branch("wt_nom",  wt_nom_out,  'wt_nom/F')
 if not args.no_weights:
     tree.Branch("wt_box",  wt_box_out,  'wt_box/F')
@@ -81,18 +107,44 @@ for line in lhe_file:
             hh_mass[0]=(higgs_bosons[0]+higgs_bosons[1]).M()
             rand1 = 1.+func1.GetRandom() 
             rand2 = 1.+func2.GetRandom()
+            rand3 = 1.+func1.GetRandom()
 
             higgs_smeared_1 = higgs_bosons[0]*rand1
             higgs_smeared_2 = higgs_bosons[1]*rand2
 
+            higgs_smeared_2_bb = higgs_bosons[1]*rand3
+
             hh_mass_smear[0] = (higgs_smeared_1+higgs_smeared_2).M()
             hh_mass_smear_improved[0] = hh_mass_smear[0] - (higgs_smeared_1.M()-125.) - (higgs_smeared_2.M()-125.)
+            hh_mass_smear_4b[0] = (higgs_smeared_1+higgs_smeared_2_bb).M()
+            hh_mass_smear_4b_improved[0] = hh_mass_smear_4b[0] - (higgs_smeared_1.M()-125.) - (higgs_smeared_2_bb.M()-125.)
 
             #print rand1, rand2, higgs_smeared_1.M(), higgs_smeared_2.M(), hh_mass[0], hh_mass_smear[0], hh_mass_smear_improved[0]
+
+            hh_dphi[0] = abs(higgs_bosons[0].DeltaPhi(higgs_bosons[1]))
+            hh_deta[0] = abs(higgs_bosons[0].Eta() - higgs_bosons[1].Eta())
+            hh_dR[0] = higgs_bosons[0].DeltaR(higgs_bosons[1])
+            hh_phi1[0] = higgs_bosons[0].Phi()
+            hh_phi2[0] = higgs_bosons[1].Phi()
+            hh_eta1[0] = higgs_bosons[0].Eta()
+            hh_eta2[0] = higgs_bosons[1].Eta()
+            hh_pt1[0] = higgs_bosons[0].Pt()
+            hh_pt2[0] = higgs_bosons[1].Pt()
         else: 
             h_mass[0]=-1
             hh_mass_smear[0]=-1
             hh_mass_smear_improved[0]=-1
+            hh_mass_smear_4b[0]=-1
+            hh_mass_smear_4b_improved[0]=-1
+            hh_dphi[0] = -1 
+            hh_deta[0] = -1
+            hh_dR[0] = -1
+            hh_phi1[0] = -1
+            hh_phi2[0] = -1
+            hh_eta1[0] = -1
+            hh_eta2[0] = -1
+            hh_pt1[0] = -1
+            hh_pt2[0] = -1
 
         # compute weights which will all be multiplied by factors of sin(a) and cos(a) for now
 
