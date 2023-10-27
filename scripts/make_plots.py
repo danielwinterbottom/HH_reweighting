@@ -95,9 +95,12 @@ for x in ['', '_smeared']:
     
     total_approx_1 = sm.Clone()
     total_approx_1.Add(schannel_H)
+
+    total_approx_2 = sm_like.Clone()
+    total_approx_2.Add(schannel_H)
     
-    hists = [total, schannel_H,total_approx_1]
-    titles = ['BSM total','S_{H}','SM+S_{H}']
+    hists = [total, schannel_H,total_approx_1]#, total_approx_2]
+    titles = ['BSM total','S_{H}','S_{H}+SM']#, 'S_{H}+SM-like']
     
     plotting.CompareHists(hists=hists,
                  legend_titles=titles,
@@ -119,4 +122,39 @@ for x in ['', '_smeared']:
                  plot_name="plots/dihiggs_totals_Mass%(mass)s_Width%(width)s_BM_scaled%(x)s".replace('.','p') % vars(),
                  label="",
                  norm_bins=False) 
-    
+
+
+    total_sm_sub=total.Clone()
+    total_sm_sub.Add(sm,-1)
+    hists = [total_sm_sub, schannel_H]#, total_approx_2]
+    titles = ['BSM-SM','S_{H}']#, 'S_{H}+SM-like']
+
+    print total_sm_sub.GetMinimum()
+
+    plotting.CompareHists(hists=hists,
+                 legend_titles=titles,
+                 title="m_{H} = %(mass)s GeV,  #Gamma_{H} = %(width_val).2f GeV" % vars(),
+                 ratio=True,
+                 log_y=False,
+                 log_x=False,
+                 ratio_range="0.,3.",
+                 custom_x_range=True,
+                 x_axis_max=900,
+                 x_axis_min=250,
+                 custom_y_range=False,
+                 y_axis_max=4000,
+                 y_axis_min=0,
+                 x_title="m_{hh} (GeV)",
+                 y_title="a.u",
+                 extra_pad=0,
+                 norm_hists=False,
+                 plot_name="plots/dihiggs_totals_SM_subtracted_Mass%(mass)s_Width%(width)s_BM_scaled%(x)s".replace('.','p') % vars(),
+                 label="",
+                 norm_bins=False)   
+
+    if x!='':
+        lo_i, hi_i = plotting.GetRangeAroundMax(schannel_H) 
+
+        val_used=schannel_H.Integral(lo_i, hi_i)
+        val_actual=total_sm_sub.Integral(lo_i, hi_i)
+        print val_used, val_actual, val_actual/val_used

@@ -1,11 +1,10 @@
 import ROOT
 
-use_smeared_mass=True
+use_smeared_mass=False
 
-#f1 = ROOT.TFile('outputs/output_W4p97918_1M.root')
 f1 = ROOT.TFile('outputs/output_W4p97918_1M.root')
-f2 = ROOT.TFile('outputs/output_W12_10000.root')
-f3 = ROOT.TFile('outputs/output_W3_10000.root')
+f2 = ROOT.TFile('outputs/output_W12_1M.root')
+f3 = ROOT.TFile('outputs/output_W3_1M.root')
 if use_smeared_mass: fout = ROOT.TFile('hhmass_compareWidths_smeared_output.root' % vars(),'RECREATE')
 else: fout = ROOT.TFile('hhmass_compareWidths_output.root' % vars(),'RECREATE')
 
@@ -24,9 +23,9 @@ if use_smeared_mass: var = 'hh_mass_smear_improved'
 
 for wt in weights:
 
-  h1 = ROOT.TH1D('h1','',50,200,1000)
-  h2 = ROOT.TH1D('h2','',50,200,1000)
-  h3 = ROOT.TH1D('h3','',50,200,1000)
+  h1 = ROOT.TH1D('h1','',200,200,1000)
+  h2 = ROOT.TH1D('h2','',200,200,1000)
+  h3 = ROOT.TH1D('h3','',200,200,1000)
 
   t1.Draw('%(var)s>>h1' % vars(),'wt_%(wt)s' % vars(),'goff')
   h1 = t1.GetHistogram()

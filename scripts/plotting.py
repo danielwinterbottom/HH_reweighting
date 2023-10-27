@@ -1,5 +1,28 @@
 import ROOT as R
 
+def GetRangeAroundMax(hist,frac=0.6):
+  hist_scaled = hist.Clone()
+  hist_scaled.Scale(1./hist.Integral(-1,-1))
+  max_i=hist_scaled.GetMaximumBin()
+
+  # get upper value but finding bin number for bin that changes ...
+  tot_upper=0.
+  for hi_i in range(max_i,hist.GetNbinsX()+1):
+      tot_upper+=hist_scaled.GetBinContent(hi_i)
+      if tot_upper>frac/2: break  
+
+  
+  tot_lower=0.
+  for lo_i in range(max_i-1,0,-1):
+      tot_lower+=hist_scaled.GetBinContent(lo_i)
+      if tot_lower>frac/2: break
+
+  lo_i+=1
+  #print max_i, hi_i, lo_i
+  #print hist.GetBinLowEdge(max_i), hist.GetBinLowEdge(hi_i), hist.GetBinLowEdge(lo_i)
+  #print hist_scaled.Integral(lo_i,hi_i)
+  return (lo_i,hi_i)
+
 def SetTDRStyle():
     """Sets the PubComm recommended style
 
@@ -408,15 +431,15 @@ def CompareHists(hists=[],
             for h in hists:
               if h is None: continue
               for i in range(1,h.GetNbinsX()+1): 
-                lo = h.GetBinContent(i)-h.GetBinError(i) 
-                hi = h.GetBinContent(i)+h.GetBinError(i) 
+                lo = h.GetBinContent(i)#-h.GetBinError(i) 
+                hi = h.GetBinContent(i)#+h.GetBinError(i) 
                 if mini is None:
                   mini = min(lo,hi) 
                   maxi = max(lo,hi) 
                 else:
                   mini = min(mini,lo,hi) 
                   maxi = max(maxi,lo,hi) 
-            mini-= abs(mini)*extra_pad
+            mini-= abs(mini)#*extra_pad
             axish[0].SetMinimum(mini)
             maxi*=(1.+extra_pad)
             axish[0].SetMaximum(maxi)
@@ -427,8 +450,9 @@ def CompareHists(hists=[],
     
     #Setup legend
     tot = len(hists)
-    if tot > 4: legend = PositionedLegend(0.35,0.3,3,0.05)
+    if tot < 4: legend = PositionedLegend(0.2,0.3,3,0.05)
     else: legend = PositionedLegend(0.3,0.3,3,0.05)
+    legend.SetFillStyle(0)
     legend.SetTextFont(42)
     legend.SetTextSize(0.035)
     legend.SetFillColor(0)

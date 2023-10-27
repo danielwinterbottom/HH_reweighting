@@ -27,7 +27,7 @@ N1=t1.GetEntries()
 N2=t2.GetEntries()
 N3=t3.GetEntries()
 
-bins = '(50,200,1000)'
+bins = '(200,200,1000)'
 
 BM_params = {}
 
@@ -52,14 +52,14 @@ kappa_H_lam = params['kap112'] / sm_lambda
 
 print 'Re-weighting to kappa_h_t = %.3f, kappa_H_t = %.3f, kappa_h_lam = %.3f, kappa_H_lam = %.3f' % (kappa_h_t, kappa_H_t, kappa_h_lam, kappa_H_lam )
 
-h1 = ROOT.TH1D('h1','',50,200,1000)
-h2_box = ROOT.TH1D('h2_box','',50,200,1000)
-h2_schannel_h = ROOT.TH1D('h2_schannel_h','',50,200,1000)
-h2_schannel_H = ROOT.TH1D('h2_schannel_H','',50,200,1000)
-h2_box_and_schannel_H_i = ROOT.TH1D('h2_box_and_schannel_H_i','',50,200,1000)
-h2_box_and_schannel_h_i = ROOT.TH1D('h2_box_and_schannel_h_i','',50,200,1000)
-h2_schannel_H_and_schannel_h_i = ROOT.TH1D('h2_schannel_H_and_schannel_h_i','',50,200,1000)
-h3 = ROOT.TH1D('h3','',50,200,1000)
+h1 = ROOT.TH1D('h1','',200,200,1000)
+h2_box = ROOT.TH1D('h2_box','',200,200,1000)
+h2_schannel_h = ROOT.TH1D('h2_schannel_h','',200,200,1000)
+h2_schannel_H = ROOT.TH1D('h2_schannel_H','',200,200,1000)
+h2_box_and_schannel_H_i = ROOT.TH1D('h2_box_and_schannel_H_i','',200,200,1000)
+h2_box_and_schannel_h_i = ROOT.TH1D('h2_box_and_schannel_h_i','',200,200,1000)
+h2_schannel_H_and_schannel_h_i = ROOT.TH1D('h2_schannel_H_and_schannel_h_i','',200,200,1000)
+h3 = ROOT.TH1D('h3','',200,200,1000)
 
 var='hh_mass'
 if use_smeared_mass==1:   var = 'hh_mass_smear_improved'
@@ -101,7 +101,7 @@ h_sm.Add(h2_schannel_h)
 h_sm.Add(h2_box_and_schannel_h_i)
 
 box_SF                         = kappa_h_t**4
-schannel_H_SF                  = kappa_H_t**2*kappa_H_lam**2*width_sf
+schannel_H_SF                  = kappa_H_t**2*kappa_H_lam**2#*width_sf
 schannel_h_SF                  = kappa_h_t**2*kappa_h_lam**2
 box_and_schannel_h_i_SF        = kappa_h_t**3*kappa_h_lam
 box_and_schannel_H_i_SF        = kappa_h_t**2*kappa_H_t*kappa_H_lam
@@ -115,6 +115,13 @@ print 'schannel_h_SF = %.3f' % schannel_h_SF
 print 'box_and_schannel_H_i_SF = %.3f' % box_and_schannel_H_i_SF 
 print 'box_and_schannel_h_i_SF = %.3f' % box_and_schannel_h_i_SF 
 print 'schannel_H_and_schannel_h_i_SF = %.3f' % schannel_H_and_schannel_h_i_SF
+
+h2_box.Write('BM_box_KappasEq1')
+h2_schannel_H.Write('BM_schannel_H_KappasEq1')
+h2_schannel_h.Write('BM_schannel_h_KappasEq1')
+h2_box_and_schannel_H_i.Write('BM_box_and_schannel_H_i_KappasEq1')
+h2_box_and_schannel_h_i.Write('BM_box_and_schannel_h_i_KappasEq1')
+h2_schannel_H_and_schannel_h_i.Write('BM_schannel_H_and_schannel_h_i_KappasEq1')
 
 h2_box.Scale(box_SF)
 h2_schannel_H.Scale(schannel_H_SF)
