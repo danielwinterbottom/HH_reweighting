@@ -14,6 +14,20 @@ args = parser.parse_args()
 lhe_filename = args.input
 lhe_file = open(lhe_filename, "r")
 
+weights=[]
+
+# first determine names of all weights
+for line in lhe_file:
+
+    line = line.strip()
+    if line.startswith('<weight id='):
+        weights.append(line.split('\'')[1])
+    if line.startswith("<event>"):
+      break # break loop once we have read all weights
+
+# go back to start of the file
+lhe_file.seek(0)
+
 # Create a ROOT TTree to store the event information
 root_filename = args.output
 root_file = ROOT.TFile(root_filename, "RECREATE")
@@ -26,6 +40,8 @@ hh_mass_smear_improved  = array('f',[0])
 hh_mass_smear_4b  = array('f',[0])
 hh_mass_smear_4b_improved  = array('f',[0])
 wt_nom_out  = array('f',[0])
+
+weights_map = {}
 wt_box_out  = array('f',[0])
 wt_schannel_h_out  = array('f',[0])
 wt_box_and_schannel_h_i_out  = array('f',[0])
@@ -66,20 +82,43 @@ tree.Branch("hh_eta1",  hh_eta1,  'hh_eta1/F')
 tree.Branch("hh_eta2",  hh_eta2,  'hh_eta2/F')
 tree.Branch("hh_phi1",  hh_phi1,  'hh_phi1/F')
 tree.Branch("hh_phi2",  hh_phi2,  'hh_phi2/F')
-
 tree.Branch("wt_nom",  wt_nom_out,  'wt_nom/F')
-if not args.no_weights:
-    tree.Branch("wt_box",  wt_box_out,  'wt_box/F')
-    tree.Branch("wt_schannel_h",  wt_schannel_h_out,  'wt_schannel_h/F')
-    tree.Branch("wt_box_and_schannel_h_i",  wt_box_and_schannel_h_i_out,  'wt_box_and_schannel_h_i/F')
-    tree.Branch("wt_schannel_H",  wt_schannel_H_out,  'wt_schannel_H/F')
-    tree.Branch("wt_schannel_H_alt",  wt_schannel_H_alt_out,  'wt_schannel_H_alt/F')
-    tree.Branch("wt_box_and_schannel_H_i",  wt_box_and_schannel_H_i_out,  'wt_box_and_schannel_H_i/F')
-    tree.Branch("wt_schannel_H_and_schannel_h_i",  wt_schannel_H_and_schannel_h_i_out,  'wt_schannel_H_and_schannel_h_i/F')
+
+###if not args.no_weights:
+###    tree.Branch("wt_box",  wt_box_out,  'wt_box/F')
+###    tree.Branch("wt_schannel_h",  wt_schannel_h_out,  'wt_schannel_h/F')
+###    tree.Branch("wt_box_and_schannel_h_i",  wt_box_and_schannel_h_i_out,  'wt_box_and_schannel_h_i/F')
+###    tree.Branch("wt_schannel_H",  wt_schannel_H_out,  'wt_schannel_H/F')
+###    tree.Branch("wt_schannel_H_alt",  wt_schannel_H_alt_out,  'wt_schannel_H_alt/F')
+###    tree.Branch("wt_box_and_schannel_H_i",  wt_box_and_schannel_H_i_out,  'wt_box_and_schannel_H_i/F')
+###    tree.Branch("wt_schannel_H_and_schannel_h_i",  wt_schannel_H_and_schannel_h_i_out,  'wt_schannel_H_and_schannel_h_i/F')
+
+for wt in weights:
+    if 'Mass' in wt and 'Width' in wt:
+        key = wt[wt.find("Mass"):]
+        wt_name = 'wt_'+wt[0:wt.find("Mass")-1]
+    else:
+        key = 'nominal'
+        wt_name = 'wt_'+wt
+
+    if key not in weights_map: weights_map[key] = {}
+    weights_map[key][wt_name] = array('f',[0]) 
+  
+for masswidth in weights_map:
+
+    if masswidth != 'nominal': postfix = '_%(masswidth)s' % vars()
+    else: postfix = ''
+
+    for wt in weights_map[masswidth]:
+        tree.Branch("%(wt)s%(postfix)s" % vars(), weights_map[masswidth][wt], '%(wt)s%(postfix)s/F' % vars())
 
 # Parse the LHE file and fill the TTree
 event_started = False
 count=0
+
+# go back to start of the file
+lhe_file.seek(0)
+
 for line in lhe_file:
     line = line.strip()
     if line.startswith("<event>"):
