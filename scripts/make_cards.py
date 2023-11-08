@@ -6,6 +6,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--mass', '-m', help= 'Mass to use for the heavy Higgs in the nominal sample', default='600')
 parser.add_argument('--masses', help= 'Masses to use for the heavy Higgs in the reweighting', default='')
 parser.add_argument('--output', '-o', help= 'Name of output directory',default='MCCards')
+parser.add_argument('--width', '-w', help= 'Fractional width to use for the nominal events', type=float, default=0.01)
+parser.add_argument('--noH', help= 'If this option is specified then the heavy scalar H is excluded from the generation', action='store_true')
 args = parser.parse_args()
 
 mass=float(args.mass)
@@ -80,25 +82,31 @@ launch --rwgt_name=box_and_schannel_H_2_$postfix\n\
   set mass 99925 $M\n\
   set DECAY 99925 $W\n\n'
 
-param_base_file=open("Cards/param_card_BSM.dat","r")
+param_base_file=open("../Cards/param_card_BSM.dat","r")
+
+nominal_frac_width = args.width
 
 # for generating samples scale the s-channel H production to ensure we get plenty of events near resonance peak but still a good number of events in the non-resonant part
 # this method is quite approximate and could be improved
-kap_sf = 1.5/300.*(mass-300.) + 0.5
+kap_sf = (1.5/300.*(mass-300.) + 0.5)*nominal_frac_width/0.05
 kap112_param = 31.80387825*kap_sf
 
+if args.noH: kap112_param = 0.
+
 # set width of generated sample to largest width
-param_out_string = param_base_file.read().replace('$W','%g' % (0.05*mass)).replace('$M','%g' % mass).replace('$k','%g' % kap112_param)
+param_out_string = param_base_file.read().replace('$W','%g' % (nominal_frac_width*mass)).replace('$M','%g' % mass).replace('$k','%g' % kap112_param)
 
 with open("%s/param_card.dat" % args.output, "w") as param_file:
     param_file.write(param_out_string)
 
 for m in masses:
 
-    # widths go from 0.5%-5% in 1% intervals
-    sep=0.01
-    widths = arange(sep,0.05+sep,sep)*m
-    
+    # widths go from ~0 to 2*nominal_frac_width in 1% intervals
+    sep=nominal_frac_width/5
+    widths = arange(sep,nominal_frac_width*2+sep,sep)*m
+    np.insert(widths,0,0.001*m)
+    # the smallest width is set to 0.1%    
+
     # append exact widths for BM scenario
     if m==600:
         widths = np.append(widths,[4.979180])

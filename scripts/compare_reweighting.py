@@ -8,10 +8,15 @@ parser.add_argument('--width','-w', help= 'The width used for generating the rew
 args = parser.parse_args()
 
 
-BM='600'
 width=args.width
 use_smeared_mass=args.use_smeared_mass
 
+#BM='300'
+#f1 = ROOT.TFile('outputs/output_M300_W%(width)s_10000.root' % vars())
+#f2 = ROOT.TFile('outputs/output_M300_BM_10000.root')
+#f3 = ROOT.TFile('outputs/output_SM_10000.root')
+
+BM='600'
 f1 = ROOT.TFile('outputs/output_W%(width)s_1M.root' % vars())
 f2 = ROOT.TFile('outputs/output_BM_10000.root')
 f3 = ROOT.TFile('outputs/output_SM_10000.root')
@@ -38,6 +43,13 @@ BM_params['600'] = {
   'kap111': 30.18578,
   'kap112': 167.5027,
   'width': 4.979180, 
+}
+
+BM_params['300'] = {
+  'a12': 0.1708,
+  'kap111': 29.92029,
+  'kap112': 63.85499,
+  'width': 0.5406704,
 }
 
 params = BM_params[BM]
