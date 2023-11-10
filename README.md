@@ -49,4 +49,29 @@ This script also produce reco-like di-Higgs masses implementing some realistic s
 
 Run MadAnalysis5 on an already produced LHE file
 
-	python2 MG5_aMC_v2_6_7/HEPTools/madanalysis5/madanalysis5/bin/ma5 -s scripts/ma5_sm_script 	
+	python2 MG5_aMC_v2_6_7/HEPTools/madanalysis5/madanalysis5/bin/ma5 -s scripts/ma5_sm_script 
+
+
+# make a gridpack for running b atch jobs
+
+Open run_card.dat and change nevents to small number e.g 100 and change gridpack option to True
+Then run generate_events as normal. Note this will fix the parameters 
+
+# running batch jobs
+
+The scripts/submit_ic_batch_jobs.py script will produce a gridpack for running batch jobs and then submit them as batch jobs. It is only setup to use the IC batch system at the moment
+
+An example command to run 100 jobs each producing 10000 events:
+
+	python scripts/submit_ic_batch_jobs.py -i MG5_aMC_v2_6_7/BSM_hh_M600_6 --events_per_job 10000 --total_events 1000000
+
+# merging LHE files
+
+You can merge all lhe files into one large on using:
+
+	python scripts/mergeLHEFiles.py batch_job_outputs/BSM_hh_M600_W6_Ntot_1000000_Njob_10000/events_all.lhe batch_job_outputs/BSM_hh_M600_W6_Ntot_1000000_Njob_10000/job_output_*/events_*.lhe
+
+the individual files can then be removed:
+	
+	rm batch_job_outputs/BSM_hh_M600_W6_Ntot_1000000_Njob_10000/job_output_*/events_*.lhe
+
