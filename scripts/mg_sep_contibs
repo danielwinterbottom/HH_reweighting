@@ -1,0 +1,18 @@
+import model loop_sm_twoscalar
+generate p p > h h [QCD] / eta0 iota0 LAM111=0
+output BSM_hh_BOX
+
+generate p p > h h [QCD] / eta0 iota0 LAM111^2==2
+output BSM_hh_SChan_h
+
+generate p p > h h [QCD] / eta0 iota0 LAM111^2==1
+output BSM_hh_BOX_SChan_h_inteference
+
+generate p p > h h [QCD] / h iota0 LAM112^2==2 
+output BSM_hh_SChan_eta0
+
+generate p p > h h [QCD] / h iota0 LAM112^2==1
+output BSM_hh_BOX_SChan_eta0_inteference
+
+generate p p > h h [QCD] / iota0 LAM111^2==1 LAM112^2==1
+output BSM_hh_SChan_h_SChan_eta0_inteference
