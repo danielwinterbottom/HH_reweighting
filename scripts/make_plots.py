@@ -1,16 +1,27 @@
 import ROOT
 import plotting
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--width','-w', help= 'The width used for generating the reweighted templates (changes the input file names)', default='4p97918')
+args = parser.parse_args()
+
+
+width=args.width
 #mass='300'
 #width='0p5406704'
+#mass='600'
+#width='12'
 mass='600'
-width='12'
+#width='4p97918'
+#width='3'
 
 f1 = ROOT.TFile('hhmass_output_BM%(mass)s_Width%(width)s.root' % vars())
 
 # first make plots of contributions with kappas all set to 1
 box = f1.Get('BM_box_KappasEq1')
 schannel_H = f1.Get('BM_schannel_H_KappasEq1')
+if width!='4p97918': schannel_H.Scale(float(width)/4.97918)
 schannel_h = f1.Get('BM_schannel_h_KappasEq1')
 box_and_schannel_H_i = f1.Get('BM_box_and_schannel_H_i_KappasEq1')
 box_and_schannel_h_i = f1.Get('BM_box_and_schannel_h_i_KappasEq1')
@@ -40,6 +51,36 @@ plotting.CompareHists(hists=hists,
              extra_pad=0,
              norm_hists=False,
              plot_name="plots/dihiggs_contributions_Mass%(mass)s_Width%(width)s".replace('.','p') % vars(),
+             label="",
+             norm_bins=False)
+
+# compare to generated BM point
+
+bm_generated = f1.Get('BM_generated')
+bm_reweighted = f1.Get('BM_total')
+bm_approx = f1.Get('BM_total_approx')
+
+hists = [bm_generated.Clone(),bm_reweighted.Clone(),bm_approx.Clone()]
+titles = ['Benchmark generated', 'Benchmark reweighted', 'S_{H}+SM hh']
+
+plotting.CompareHists(hists=hists,
+             legend_titles=titles,
+             title="m_{H} = %(mass)s GeV,  #Gamma_{H} = %(width)s GeV" % vars(),
+             ratio=True,
+             log_y=False,
+             log_x=False,
+             ratio_range="0.7,1.3",
+             custom_x_range=True,
+             x_axis_max=900,
+             x_axis_min=250,
+             custom_y_range=False,
+             y_axis_max=4000,
+             y_axis_min=0,
+             x_title="m_{hh} (GeV)",
+             y_title="a.u",
+             extra_pad=0,
+             norm_hists=False,
+             plot_name="plots/dihiggs_compare_reweighted_Mass%(mass)s_Width%(width)s".replace('.','p') % vars(),
              label="",
              norm_bins=False)
 
@@ -137,18 +178,19 @@ plotting.CompareHists(hists=[sm.Clone(), sm_kap_t_1p1.Clone(), sm_kap_t_0p9.Clon
 #now make a plots for specific benchmark scenarios
 
 # BM scenario for 600 GeV
-mass = '600'
-width = '4p97918'
+#mass = '600'
+#width = '4p97918'
 
 #mass = '300'
 #width = '0p5406704'
 
-for x in ['', '_smeared']:
+for x in ['', '_smeared','_smeared_2b2ta']:
 
     f2 = ROOT.TFile('hhmass_output_BM%(mass)s_Width%(width)s%(x)s.root' % vars())
     
     box = f2.Get('BM_box')
     schannel_H = f2.Get('BM_schannel_H')
+    if width!='4p97918': schannel_H.Scale(float(width)/4.97918)
     schannel_h = f2.Get('BM_schannel_h')
     box_and_schannel_H_i = f2.Get('BM_box_and_schannel_H_i')
     box_and_schannel_h_i = f2.Get('BM_box_and_schannel_h_i')

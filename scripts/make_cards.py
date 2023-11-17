@@ -18,6 +18,8 @@ masses = [float(i) for i in masses]
 if mass not in masses: masses.append(mass)
 
 reweight_out_string='\
+change process p p > h h [QCD] / iota0\n\
+\n\
 launch --rwgt_name=box\n\
   set bsm 6 0.785398\n\
   set bsm 15 0.000000e+00\n\
@@ -86,10 +88,12 @@ param_base_file=open("../Cards/param_card_BSM.dat","r")
 
 nominal_frac_width = args.width
 
-# for generating samples scale the s-channel H production to ensure we get plenty of events near resonance peak but still a good number of events in the non-resonant part
-# this method is quite approximate and could be improved
-kap_sf = (1.5/300.*(mass-300.) + 0.5)*nominal_frac_width/0.05
-kap112_param = 31.80387825*kap_sf
+## for generating samples scale the s-channel H production to ensure we get plenty of events near resonance peak but still a good number of events in the non-resonant part
+## this method is quite approximate and could be improved
+##kap_sf = (1.5/300.*(mass-300.) + 0.5)*nominal_frac_width/0.05
+##kap112_param = 31.80387825*kap_sf
+
+kap112_param = 31.80387825
 
 if args.noH: kap112_param = 0.
 
@@ -101,24 +105,19 @@ with open("%s/param_card.dat" % args.output, "w") as param_file:
 
 for m in masses:
 
-    # widths go from ~0 to 2*nominal_frac_width in 1% intervals
-    sep=nominal_frac_width/5
-    widths = arange(sep,nominal_frac_width*2+sep,sep)*m
-    np.insert(widths,0,0.001*m)
-    # the smallest width is set to 0.1%    
+    widths = np.array([0.001,0.01,0.02,0.03,0.04,0.05,0.06,0.07,0.08,0.09,0.1,0.011,0.012,0.013,0.014,0.15])*m 
 
-    # append exact widths for BM scenario
+    # append exact widths for BM scenarios
     if m==600:
-        widths = np.append(widths,[4.979180])
+        widths = np.append(widths,[4.979180/m])
     elif m==300:
-        widths = np.append(widths,[0.5406704])
-    
-    # Add 0.5 GeV width as the smallest width if a smaller width was not already used 
-    if 0.5 not in widths and widths[0]>0.5:
-        widths  = np.insert(widths,0,0.5)
+        widths = np.append(widths,[0.5406704/m])
     
     for width in widths:
-        reweight_out_string+=mass_and_width_dep_string.replace('$postfix',('Mass%g_Width%g' % (m,width)).replace('.','p')).replace('$W','%g' % width).replace('$M','%g' % m)
+        if len(masses)==1 and float(masses[0]) == float(mass):
+            reweight_out_string+=mass_and_width_dep_string.replace('$postfix',('RelativeWidt%g' % (width)).replace('.','p')).replace('$W','%g' % width*m).replace('$M','%g' % m)
+ 
+        else: reweight_out_string+=mass_and_width_dep_string.replace('$postfix',('Mass%g_RelativeWidth%g' % (m,width)).replace('.','p')).replace('$W','%g' % width*m).replace('$M','%g' % m)
     
     with open("%s/reweight_card.dat" % args.output, "w") as reweight_file:
         reweight_file.write(reweight_out_string)

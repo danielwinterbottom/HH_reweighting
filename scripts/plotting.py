@@ -454,7 +454,7 @@ def CompareHists(hists=[],
     else: legend = PositionedLegend(0.3,0.3,3,0.05)
     legend.SetFillStyle(0)
     legend.SetTextFont(42)
-    legend.SetTextSize(0.035)
+    legend.SetTextSize(0.032)
     legend.SetFillColor(0)
     
 

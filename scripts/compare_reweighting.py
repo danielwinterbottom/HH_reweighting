@@ -17,11 +17,11 @@ use_smeared_mass=args.use_smeared_mass
 #f3 = ROOT.TFile('outputs/output_SM_10000.root')
 
 BM='600'
-f1 = ROOT.TFile('outputs/output_W%(width)s_1M.root' % vars())
-f2 = ROOT.TFile('outputs/output_BM_10000.root')
-f3 = ROOT.TFile('outputs/output_SM_10000.root')
+f1 = ROOT.TFile('outputs_new/output_M600_W%(width)s.root' % vars())
+f2 = ROOT.TFile('outputs_new/output_M600_BM.root')
+f3 = ROOT.TFile('outputs_new/output_SM.root')
 if use_smeared_mass==1: fout = ROOT.TFile('hhmass_output_BM%(BM)s_Width%(width)s_smeared.root' % vars(),'RECREATE')
-elif use_smeared_mass==2: fout = ROOT.TFile('hhmass_output_BM%(BM)s_Width%(width)s_smeared_4b.root' % vars(),'RECREATE')
+elif use_smeared_mass==2: fout = ROOT.TFile('hhmass_output_BM%(BM)s_Width%(width)s_smeared_2b2ta.root' % vars(),'RECREATE')
 else: fout = ROOT.TFile('hhmass_output_BM%(BM)s_Width%(width)s.root' % vars(),'RECREATE')
 
 t1 = f1.Get('ntuple')
@@ -52,7 +52,7 @@ BM_params['300'] = {
   'width': 0.5406704,
 }
 
-params = BM_params[BM]
+params = BM_params['600']
 
 width_sf=float(width.replace('p','.'))/params['width']
 
@@ -75,7 +75,7 @@ h3 = ROOT.TH1D('h3','',200,200,1000)
 
 var='hh_mass'
 if use_smeared_mass==1:   var = 'hh_mass_smear_improved'
-elif use_smeared_mass==2: var = 'hh_mass_smear_4b_improved'
+elif use_smeared_mass==2: var = 'hh_mass_smear_2b2ta'
 
 # get SM distribution generated directly
 t3.Draw('%(var)s>>h3'  % vars(),'wt_nom', 'goff')
@@ -113,7 +113,7 @@ h_sm.Add(h2_schannel_h)
 h_sm.Add(h2_box_and_schannel_h_i)
 
 box_SF                         = kappa_h_t**4
-schannel_H_SF                  = kappa_H_t**2*kappa_H_lam**2#*width_sf
+schannel_H_SF                  = kappa_H_t**2*kappa_H_lam**2*width_sf
 schannel_h_SF                  = kappa_h_t**2*kappa_h_lam**2
 box_and_schannel_h_i_SF        = kappa_h_t**3*kappa_h_lam
 box_and_schannel_H_i_SF        = kappa_h_t**2*kappa_H_t*kappa_H_lam

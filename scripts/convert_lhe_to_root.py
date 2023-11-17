@@ -65,7 +65,7 @@ hh_phi2  = array('f',[0])
 func1 = ROOT.TF1("func1","TMath::Gaus(x,0,0.12)",-5*0.12,5*0.12)
 # mgamgam resolutiosn taken from page 3 here: https://arxiv.org/pdf/2310.01643.pdf
 func2 = ROOT.TF1("func2","TMath::Gaus(x,0,0.01)",-5*0.01,5*0.01)
-func3 = ROOT.TF1("func3","TMath::Gaus(x,0,0.1)",-5*0.01,5*0.01)
+func3 = ROOT.TF1("func3","TMath::Gaus(x,0,0.1)",-5*0.1,5*0.1)
  
 # create the branches and assign the fill-variables to them
 tree.Branch("hh_mass",  hh_mass,  'hh_mass/F')
@@ -204,15 +204,7 @@ for line in lhe_file:
 
         # compute weights which will all be multiplied by factors of sin(a) and cos(a) for now
 
-        #if not args.no_weights:
- 
-        #print weights_map
-
-
         for masswidth in weights_map:
-     
-            print masswidth
-            print weights_map[masswidth] 
  
             if masswidth != 'nominal': postfix = '_%(masswidth)s' % vars()
             else: postfix = ''
