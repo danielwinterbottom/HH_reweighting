@@ -39,8 +39,12 @@ lam_SM = 1./(2*vev**2) *mh**2 #* vev
 
 for cosbma in [0.1, 0.25]:
 
+  width = None
+  if cosbma == 0.1: width = 2.47253022
+  if cosbma == 0.25: width =  11.8110613
+
   yH = YukawaH(cosbma,tanb)
   yh = Yukawah(cosbma,tanb)
   lam111 = Lambda111(cosbma, m12sq, tanb)
   lam112 = Lambda112(cosbma, m12sq, tanb)
-  print cosbma, yH, yh, lam111/lam_SM, lam112 
+  print cosbma, yH, yh, lam111/lam_SM, lam112/lam_SM, width 

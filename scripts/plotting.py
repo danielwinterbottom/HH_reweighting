@@ -338,14 +338,15 @@ def CompareHists(hists=[],
              norm_hists=False,
              plot_name="plot",
              label="",
-             norm_bins=False):
+             norm_bins=False,
+             IncErrors=False):
 
     objects=[]
     R.gROOT.SetBatch(R.kTRUE)
     R.TH1.AddDirectory(False)
     ModTDRStyle(r=0.04, l=0.14)
 
-    colourlist=[R.kBlack,R.kBlue,R.kRed,R.kGreen+3,R.kYellow+2,R.kOrange,R.kCyan+3,R.kMagenta+2,R.kViolet-5,R.kGray]
+    colourlist=[R.kBlack,R.kBlue,R.kRed,R.kGreen+2,R.kMagenta,R.kCyan+1,R.kYellow+2,R.kViolet-5,R.kOrange,R.kCyan+3,R.kGray]
 
     hs = R.THStack("hs","")
     hist_count=0
@@ -439,19 +440,20 @@ def CompareHists(hists=[],
                 else:
                   mini = min(mini,lo,hi) 
                   maxi = max(maxi,lo,hi) 
-            mini-= abs(mini)#*extra_pad
+            mini= -abs(mini)*(1.+extra_pad)
             axish[0].SetMinimum(mini)
             maxi*=(1.+extra_pad)
             axish[0].SetMaximum(maxi)
     axish[0].Draw()
 
-    hs.Draw("nostack hist same")
+    if IncErrors: hs.Draw("nostack hist e same")
+    else: hs.Draw("nostack hist same")
     axish[0].Draw("axissame")
     
     #Setup legend
     tot = len(hists)
-    if tot < 4: legend = PositionedLegend(0.2,0.3,3,0.05)
-    else: legend = PositionedLegend(0.3,0.3,3,0.05)
+    if tot < 4 and False: legend = PositionedLegend(0.2,0.3,3,0.05)
+    else: legend = PositionedLegend(0.27,0.3,3,0.02)
     legend.SetFillStyle(0)
     legend.SetTextFont(42)
     legend.SetTextSize(0.032)
@@ -470,7 +472,8 @@ def CompareHists(hists=[],
     latex2.SetTextAngle(0)
     latex2.SetTextColor(R.kBlack)
     latex2.SetTextSize(0.028)
-    latex2.DrawLatex(0.145,0.955,label)
+    #latex2.DrawLatex(0.145,0.955,label)
+    DrawTitle(pads[0], label, 1)
     
     #Add ratio plot if required
     if ratio:
@@ -497,7 +500,7 @@ def CompareHists(hists=[],
             h.SetMarkerSize(0)
 
             h.Divide(div_hist)
-            if first_hist:
+            if first_hist and not IncErrors:
                 for i in range(1,h.GetNbinsX()+1): h.SetBinError(i,0.00001)
             #    first_hist=False
             o = h.Clone()

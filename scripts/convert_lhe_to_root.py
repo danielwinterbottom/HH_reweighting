@@ -21,7 +21,7 @@ for line in lhe_file:
 
     line = line.strip()
     if line.startswith('<weight id='):
-        weights.append(line.split('\'')[1])
+        if '\'' in line: weights.append(line.split('\'')[1])
     if line.startswith("<event>"):
       break # break loop once we have read all weights
 
@@ -203,48 +203,49 @@ for line in lhe_file:
             hh_pt2[0] = -1
 
         # compute weights which will all be multiplied by factors of sin(a) and cos(a) for now
+        if not args.no_weights:
 
-        for masswidth in weights_map:
- 
-            if masswidth != 'nominal': postfix = '_%(masswidth)s' % vars()
-            else: postfix = ''
-
-            wt_box_and_schannel_h_1 = weights_map['nominal']['wt_box_and_schannel_h_1'][0]
-            wt_box_and_schannel_H_1 = weights_map[masswidth]['wt_box_and_schannel_H_1'][0]
-            wt_box_and_schannel_h_2 = weights_map['nominal']['wt_box_and_schannel_h_2'][0]
-            wt_box_and_schannel_H_2 = weights_map[masswidth]['wt_box_and_schannel_H_2'][0]
-            wt_box = weights_map['nominal']['wt_box'][0]
-            wt_all = weights_map[masswidth]['wt_all'][0]
-
-
-            weights_map[masswidth]['wt_schannel_H_alt'][0] = weights_map[masswidth]['wt_schannel_H'][0] 
-            ###wt_schannel_H_alt_out[0] = wt_schannel_H
+            for masswidth in weights_map:
+     
+                if masswidth != 'nominal': postfix = '_%(masswidth)s' % vars()
+                else: postfix = ''
     
-            # get the s-channel weights by solving simultaneous equations for cases where kappa_lambda equals 1 and 100
-            wt_schannel_h = float( ((wt_box_and_schannel_h_2-wt_box) - 10.*(wt_box_and_schannel_h_1-wt_box))/90. )
-            wt_schannel_H = float( ((wt_box_and_schannel_H_2-wt_box) - 10.*(wt_box_and_schannel_H_1-wt_box))/90. )
+                wt_box_and_schannel_h_1 = weights_map['nominal']['wt_box_and_schannel_h_1'][0]
+                wt_box_and_schannel_H_1 = weights_map[masswidth]['wt_box_and_schannel_H_1'][0]
+                wt_box_and_schannel_h_2 = weights_map['nominal']['wt_box_and_schannel_h_2'][0]
+                wt_box_and_schannel_H_2 = weights_map[masswidth]['wt_box_and_schannel_H_2'][0]
+                wt_box = weights_map['nominal']['wt_box'][0]
+                wt_all = weights_map[masswidth]['wt_all'][0]
     
-            # get the inteference contributions
-            wt_box_and_schannel_H_i = wt_box_and_schannel_H_1 - wt_box - wt_schannel_H
-            wt_box_and_schannel_h_i = wt_box_and_schannel_h_1 - wt_box - wt_schannel_h
     
-            wt_schannel_H_and_schannel_h_i = wt_all - wt_box - wt_schannel_H - wt_schannel_h - wt_box_and_schannel_H_i - wt_box_and_schannel_h_i
-    
-            # multiple weights to account for effect of mixing angles on top Yukawa couplings
-            # by convention scale all weights to the scenario where both Yukawa couplings equal 1
-    
-            a = 0.785398
-            ca = math.cos(a)
-            sa = math.sin(a)
-    
-            if masswidth == 'nominal':
-                # store the weights that don't depend on the width or the mass only for the nominal case
-                weights_map[masswidth]['wt_box'][0] = float(wt_box/ca**4)
-                weights_map[masswidth]['wt_schannel_h'][0] = float(wt_schannel_h/ca**2)
-                weights_map[masswidth]['wt_box_and_schannel_h_i'][0] = float(wt_box_and_schannel_h_i/ca**3)
-            weights_map[masswidth]['wt_schannel_H'][0] = float(wt_schannel_H/sa**2)
-            weights_map[masswidth]['wt_box_and_schannel_H_i'][0] = float(wt_box_and_schannel_H_i/(ca**2*sa))
-            weights_map[masswidth]['wt_schannel_H_and_schannel_h_i'][0] = float(wt_schannel_H_and_schannel_h_i/(ca*sa))
+                weights_map[masswidth]['wt_schannel_H_alt'][0] = weights_map[masswidth]['wt_schannel_H'][0] 
+                ###wt_schannel_H_alt_out[0] = wt_schannel_H
+        
+                # get the s-channel weights by solving simultaneous equations for cases where kappa_lambda equals 1 and 100
+                wt_schannel_h = float( ((wt_box_and_schannel_h_2-wt_box) - 10.*(wt_box_and_schannel_h_1-wt_box))/90. )
+                wt_schannel_H = float( ((wt_box_and_schannel_H_2-wt_box) - 10.*(wt_box_and_schannel_H_1-wt_box))/90. )
+        
+                # get the inteference contributions
+                wt_box_and_schannel_H_i = wt_box_and_schannel_H_1 - wt_box - wt_schannel_H
+                wt_box_and_schannel_h_i = wt_box_and_schannel_h_1 - wt_box - wt_schannel_h
+        
+                wt_schannel_H_and_schannel_h_i = wt_all - wt_box - wt_schannel_H - wt_schannel_h - wt_box_and_schannel_H_i - wt_box_and_schannel_h_i
+        
+                # multiple weights to account for effect of mixing angles on top Yukawa couplings
+                # by convention scale all weights to the scenario where both Yukawa couplings equal 1
+        
+                a = 0.785398
+                ca = math.cos(a)
+                sa = math.sin(a)
+        
+                if masswidth == 'nominal':
+                    # store the weights that don't depend on the width or the mass only for the nominal case
+                    weights_map[masswidth]['wt_box'][0] = float(wt_box/ca**4)
+                    weights_map[masswidth]['wt_schannel_h'][0] = float(wt_schannel_h/ca**2)
+                    weights_map[masswidth]['wt_box_and_schannel_h_i'][0] = float(wt_box_and_schannel_h_i/ca**3)
+                weights_map[masswidth]['wt_schannel_H'][0] = float(wt_schannel_H/sa**2)
+                weights_map[masswidth]['wt_box_and_schannel_H_i'][0] = float(wt_box_and_schannel_H_i/(ca**2*sa))
+                weights_map[masswidth]['wt_schannel_H_and_schannel_h_i'][0] = float(wt_schannel_H_and_schannel_h_i/(ca*sa))
 
         tree.Fill()
 
@@ -264,34 +265,14 @@ for line in lhe_file:
             if line.startswith("<wgt id=\'"):
 
                 name = 'wt_'+parts[1].split('\'')[1]
+                
                 if 'Mass' in name and 'Width' in name:
                     masswidth = name[name.find("Mass"):]
                     name = name[0:name.find("Mass")-1]
                 else: masswidth = 'nominal' 
-                wt = float(parts[2])
-                weights_map[masswidth][name][0] = wt
-
-###            if line.startswith("<wgt id=\'box\'>"):
-###                wt_box=float(parts[2])
-###                #print 'wt_box = ', wt_box
-###            elif line.startswith("<wgt id=\'box_and_schannel_h_1\'>"):
-###                wt_box_and_schannel_h_1=float(parts[2])
-###                #print 'wt_box_and_schannel_h_1 = ', wt_box_and_schannel_h_1
-###            elif line.startswith("<wgt id=\'box_and_schannel_h_2\'>"):
-###                wt_box_and_schannel_h_2=float(parts[2])
-###                #print 'wt_box_and_schannel_h_2 = ', wt_box_and_schannel_h_2
-###            elif line.startswith("<wgt id=\'box_and_schannel_H_1\'>"):
-###                wt_box_and_schannel_H_1=float(parts[2])
-###                #print 'wt_box_and_schannel_H_1 = ', wt_box_and_schannel_H_1
-###            elif line.startswith("<wgt id=\'box_and_schannel_H_2\'>"):
-###                wt_box_and_schannel_H_2=float(parts[2])
-###                #print 'wt_box_and_schannel_H_2 = ', wt_box_and_schannel_H_2
-###            elif line.startswith("<wgt id=\'all\'>"):
-###                wt_all=float(parts[2])
-###                #print 'wt_all = ', wt_all
-###            elif line.startswith("<wgt id=\'schannel_H\'>"):
-###                wt_schannel_H=float(parts[2])
-###                #print 'wt_schannel_H = ', wt_schannel_H
+                if masswidth in weights_map and name in weights_map[masswidth]:
+                  wt = float(parts[2])
+                  weights_map[masswidth][name][0] = wt
 
     if count>args.n_events and args.n_events>=0: break
 
