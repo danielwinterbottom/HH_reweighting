@@ -1,0 +1,99 @@
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c      written by the UFO converter
+ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+loop 1 MU_R
+
+bsm 6 mdl_a12
+
+bsm 7 mdl_a13
+
+bsm 8 mdl_a23
+
+bsm 15 mdl_kap111
+
+bsm 16 mdl_kap112
+
+bsm 17 mdl_kap122
+
+bsm 18 mdl_kap222
+
+bsm 24 mdl_kap133
+
+bsm 25 mdl_kap113
+
+bsm 26 mdl_kap123
+
+bsm 27 mdl_kap333
+
+bsm 28 mdl_kap233
+
+bsm 29 mdl_kap223
+
+bsm 19 mdl_kap1111
+
+bsm 20 mdl_kap1112
+
+bsm 21 mdl_kap1122
+
+bsm 22 mdl_kap1222
+
+bsm 23 mdl_kap2222
+
+bsm 30 mdl_kap1113
+
+bsm 31 mdl_kap1133
+
+bsm 32 mdl_kap1333
+
+bsm 33 mdl_kap3333
+
+bsm 34 mdl_kap2223
+
+bsm 35 mdl_kap2333
+
+bsm 36 mdl_kap2233
+
+bsm 37 mdl_kap1233
+
+bsm 38 mdl_kap1223
+
+bsm 39 mdl_kap1123
+
+sminputs 1 aEWM1
+
+sminputs 2 mdl_Gf
+
+sminputs 3 aS
+
+yukawa 5 mdl_ymb
+
+yukawa 6 mdl_ymt
+
+yukawa 15 mdl_ymtau
+
+mass 6 mdl_MT
+
+mass 5 mdl_MB
+
+mass 23 mdl_MZ
+
+mass 25 mdl_MH
+
+mass 99925 mdl_Meta
+
+decay 99925 mdl_Weta
+
+mass 99926 mdl_Miota
+
+decay 99926 mdl_Wiota
+
+mass 15 mdl_MTA
+
+decay 6 mdl_WT
+
+decay 23 mdl_WZ
+
+decay 24 mdl_WW
+
+decay 25 mdl_WH
