@@ -418,7 +418,7 @@ for bm_name in benchmarks:
       h_BSM_reweighted.Add(h_nonres_reweighted)
 
       plotting.CompareHists(hists=[h_BM.Clone(), h_BSM_total.Clone(), h_BSM_reweighted.Clone()],
-                   legend_titles=['Directly generated', 'Seperatly generated','Reweighted', '#Chi^{2}/ndf = %.1f/%i' % (h_BM.Chi2Test(h_BSM_total,'Chi2 WW'), int((h_BM.Chi2Test(h_BSM_total,'Chi2 WW')/h_BM.Chi2Test(h_BSM_total,'CHI2/NDF WW')))), '#Chi^{2}/ndf = %.1f/%i' % (h_BM.Chi2Test(h_BSM_reweighted,'Chi2 WW'), int((h_BM.Chi2Test(h_BSM_reweighted,'Chi2 WW')/h_BM.Chi2Test(h_BSM_reweighted,'CHI2/NDF WW'))))],
+                   legend_titles=['Directly generated', 'Separately generated','Reweighted', '#Chi^{2}/ndf = %.1f/%i' % (h_BM.Chi2Test(h_BSM_total,'Chi2 WW'), int((h_BM.Chi2Test(h_BSM_total,'Chi2 WW')/h_BM.Chi2Test(h_BSM_total,'CHI2/NDF WW')))), '#Chi^{2}/ndf = %.1f/%i' % (h_BM.Chi2Test(h_BSM_reweighted,'Chi2 WW'), int((h_BM.Chi2Test(h_BSM_reweighted,'Chi2 WW')/h_BM.Chi2Test(h_BSM_reweighted,'CHI2/NDF WW'))))],
                    title="m_{H} = %(mass)g GeV,  #Gamma_{H} = %(width).1f GeV" % vars(),
                    ratio=True,
                    log_y=False,
