@@ -68,11 +68,11 @@ benchmarks['KappasEq1'] = {
 }
 
 benchmarks['singlet_M600'] = {
-  'kappa_h_t' : 0.985449105658, 
-  'kappa_H_t' : 0.169970762658,
-  'kappa_h_lam' : 0.949122612054, 
-  'kappa_H_lam' : 5.26673818434, 
-  'width' : 4.97918,
+  'kappa_h_t' : 0.9854491056576354, 
+  'kappa_H_t' : 0.16997076265807162,
+  'kappa_h_lam' : 0.9491226120544515, 
+  'kappa_H_lam' : 5.266738184342865, 
+  'width' : 4.98,
   'width_name' : '0p0083',
   'mass': 600.,
 } 
@@ -329,6 +329,25 @@ for bm_name in benchmarks:
   h_BSM_total.Add(h_schannel_h_mod)
   h_BSM_total.Add(h_box_and_schannel_h_i_mod)
 
+
+  if mass == 600:
+      k_sH_sh_int = k_sH_sh_int_M600
+      k_sH_box_int = k_sH_box_int_M600
+      k_sH = k_sH_M600
+  else:
+      k_sH_sh_int = k_sH_sh_int_M650
+      k_sH_box_int = k_sH_box_int_M650
+      k_sH = k_sH_M650
+
+
+  h_BSM_kfacts = h_schannel_H.Clone()
+  h_BSM_kfacts.Scale(k_sH)
+  h_BSM_kfacts.Add(h_schannel_H_and_schannel_h_i, k_sH_sh_int)
+  h_BSM_kfacts.Add(h_box_and_schannel_H_i, k_sH_box_int)
+  h_BSM_kfacts.Add(h_box_mod, k_box)
+  h_BSM_kfacts.Add(h_schannel_h_mod, k_sh)
+  h_BSM_kfacts.Add(h_box_and_schannel_h_i_mod, k_box_sh_int)
+
   h_BSM_NWA = h_schannel_H_NWA.Clone()
   h_BSM_NWA.Add(h_schannel_H_and_schannel_h_i_NWA)
   h_BSM_NWA.Add(h_box_and_schannel_H_i_NWA)
@@ -349,7 +368,9 @@ for bm_name in benchmarks:
  
   if bm_name == 'singlet_M600':
       # produce a plot for validation
-      f12 = ROOT.TFile('outputs_new/output_HH_loop_sm_twoscalar_Full_M_600_BM_Ntot_200000_Njob_10000.root')
+      #f12 = ROOT.TFile('outputs_new/output_HH_loop_sm_twoscalar_Full_M_600_BM_Ntot_200000_Njob_10000.root')
+      f12 = ROOT.TFile('outputs_new/output_HH_loop_sm_twoscalar_Full_M_600_BM_Ntot_1000000_Njob_10000.root')
+      #f12 = ROOT.TFile('outputs_new/output_HH_loop_sm_twoscalar_Full_M_600_BM_v2_Ntot_200000_Njob_10000.root')
       h_BM = ROOT.TH1D('h_BM','',200,200,1000)
       h_BM = DrawHist(f12,h_BM,var)
 
@@ -373,6 +394,10 @@ for bm_name in benchmarks:
       h_box_and_schannel_H_i_reweighted = DrawHist(f14,h_box_and_schannel_H_i_reweighted,var,'wt_box_and_schannel_H_i_Mass_600_RelWidth_0p0083')
       h_schannel_H_and_schannel_h_i_reweighted = DrawHist(f14,h_schannel_H_and_schannel_h_i_reweighted,var,'wt_schannel_H_and_schannel_h_i_Mass_600_RelWidth_0p0083')
 
+      h_nonres_reweighted = ROOT.TH1D('h_nonres_reweighted','',200,200,1000)
+      wt_str = '(%(box_SF)g*wt_box + %(schannel_h_SF)g*wt_schannel_h + %(box_and_schannel_h_i_SF)g*wt_box_and_schannel_h_i + %(box_and_schannel_H_i_SF)g*wt_box_and_schannel_H_i_Mass_600_RelWidth_0p0083 + %(schannel_H_and_schannel_h_i_SF)g*wt_schannel_H_and_schannel_h_i_Mass_600_RelWidth_0p0083)' % vars()
+      h_nonres_reweighted = DrawHist(f14,h_nonres_reweighted,var,wt_str)
+
       # scale non-res
       h_box_mod_reweighted.Scale(box_SF)
       h_schannel_h_mod_reweighted.Scale(schannel_h_SF)
@@ -384,15 +409,15 @@ for bm_name in benchmarks:
       h_box_and_schannel_H_i_reweighted.Scale(box_and_schannel_H_i_SF)
 
       h_BSM_reweighted = h_schannel_H_reweighted.Clone()
-      h_BSM_reweighted.Add(h_schannel_H_and_schannel_h_i_reweighted)
-      h_BSM_reweighted.Add(h_box_and_schannel_H_i_reweighted)
-      h_BSM_reweighted.Add(h_box_mod_reweighted)
-      h_BSM_reweighted.Add(h_schannel_h_mod_reweighted)
-      h_BSM_reweighted.Add(h_box_and_schannel_h_i_mod_reweighted)
+      #h_BSM_reweighted.Add(h_schannel_H_and_schannel_h_i_reweighted)
+      #h_BSM_reweighted.Add(h_box_and_schannel_H_i_reweighted)
+      #h_BSM_reweighted.Add(h_box_mod_reweighted)
+      #h_BSM_reweighted.Add(h_schannel_h_mod_reweighted)
+      #h_BSM_reweighted.Add(h_box_and_schannel_h_i_mod_reweighted)
 
-      DrawHist(f12,h_BM,var)
+      h_BSM_reweighted.Add(h_nonres_reweighted)
 
-      plotting.CompareHists(hists=[h_BM, h_BSM_total, h_BSM_reweighted],
+      plotting.CompareHists(hists=[h_BM.Clone(), h_BSM_total.Clone(), h_BSM_reweighted.Clone()],
                    legend_titles=['Directly generated', 'Seperatly generated','Reweighted', '#Chi^{2}/ndf = %.1f/%i' % (h_BM.Chi2Test(h_BSM_total,'Chi2 WW'), int((h_BM.Chi2Test(h_BSM_total,'Chi2 WW')/h_BM.Chi2Test(h_BSM_total,'CHI2/NDF WW')))), '#Chi^{2}/ndf = %.1f/%i' % (h_BM.Chi2Test(h_BSM_reweighted,'Chi2 WW'), int((h_BM.Chi2Test(h_BSM_reweighted,'Chi2 WW')/h_BM.Chi2Test(h_BSM_reweighted,'CHI2/NDF WW'))))],
                    title="m_{H} = %(mass)g GeV,  #Gamma_{H} = %(width).1f GeV" % vars(),
                    ratio=True,
@@ -414,10 +439,11 @@ for bm_name in benchmarks:
                    norm_bins=True,
                    IncErrors=True)
 
-
+  print '\n*************************'
   print 'cross-section Full, S_channel_only, SM = ', h_BSM_total.Integral(-1,-1), h_schannel_H.Integral(-1,-1), h_SM.Integral(-1,-1)    
-  print 'cross-section * BR(bbgamgam) Full, S_channel_only, SM = ', h_BSM_total.Integral(-1,-1)*0.001716, h_schannel_H.Integral(-1,-1)*0.001716, h_SM.Integral(-1,-1)*0.001716    
-  print 'cross-section * BR(bbgamgam) * kfactor Full, S_channel_only, SM = ', h_BSM_total.Integral(-1,-1)*0.001716*2.4, h_schannel_H.Integral(-1,-1)*0.001716*2.4, h_SM.Integral(-1,-1)*0.001716*2.4    
+  print 'cross-section times k-factors Full, S_channel_only, SM = ', h_BSM_kfacts.Integral(-1,-1), h_schannel_H.Integral(-1,-1)*k_sH, xs_box_nnlo+xs_Sh_nnlo+xs_box_Sh_int_nnlo 
+  print '*************************\n'
+
 
   # make plot comparing HH SM to HH BSM
   plotting.CompareHists(hists=[h_BSM_total.Clone(), h_schannel_H.Clone(),h_BSM_approx.Clone()],
@@ -438,6 +464,28 @@ for bm_name in benchmarks:
                extra_pad=0,
                norm_hists=False,
                plot_name="plots_v2/dihiggs_total_%(bm_name)s_Mass%(mass)g_Width%(width_name)s%(name_extra)s" % vars(),
+               label="",
+               norm_bins=True)
+
+
+  plotting.CompareHists(hists=[h_BSM_total.Clone(), h_BSM_kfacts.Clone()],
+               legend_titles=['LO', 'LO #times k-factors', ],
+               title="m_{H} = %(mass)g GeV,  #Gamma_{H} = %(width).1f GeV" % vars(),
+               ratio=True,
+               log_y=False,
+               log_x=False,
+               ratio_range="0.,4.0",
+               custom_x_range=True,
+               x_axis_max=1000,
+               x_axis_min=250,
+               custom_y_range=False,
+               y_axis_max=4000,
+               y_axis_min=0,
+               x_title="m_{hh} (GeV)",
+               y_title="d#sigma/dm_{hh} (fb/GeV)",
+               extra_pad=0,
+               norm_hists=False,
+               plot_name="plots_v2/dihiggs_kfacts_%(bm_name)s_Mass%(mass)g_Width%(width_name)s%(name_extra)s" % vars(),
                label="",
                norm_bins=True)
 
@@ -510,7 +558,7 @@ for bm_name in benchmarks:
 
   if width_name != '0p105': continue
 
-  plotting.CompareHists(hists=[h_box_and_schannel_H_i_NWA, h_box_and_schannel_H_i, h_box_and_schannel_H_i_NWA_v2],
+  plotting.CompareHists(hists=[h_box_and_schannel_H_i_NWA.Clone(), h_box_and_schannel_H_i.Clone(), h_box_and_schannel_H_i_NWA_v2.Clone()],
                legend_titles=['#Gamma_{H}/m_{H} = 0.01', '#Gamma_{H}/m_{H} = %.2f' % (width/mass), '#Gamma_{H}/m_{H} = 0.2'],
                title="m_{H} = %(mass)g GeV,  S_{H}-#Box" % vars(),
                ratio=True,
