@@ -454,6 +454,9 @@ def CompareHists(hists=[],
     tot = len(hists)
     if tot < 4 and False: legend = PositionedLegend(0.2,0.3,3,0.05)
     else: legend = PositionedLegend(0.27,0.3,3,0.02)
+    max_len = max([len(x) for x in legend_titles])
+    if max_len>20: legend = PositionedLegend(0.37,0.3,3,0.02)
+
     legend.SetFillStyle(0)
     legend.SetTextFont(42)
     legend.SetTextSize(0.032)
@@ -462,6 +465,10 @@ def CompareHists(hists=[],
 
     for legi,hist in enumerate(legend_hists):
         legend.AddEntry(hist,legend_titles[legi],"l")
+    col_count=1
+    for i in range (legi+1,len(legend_titles)):
+        legend.AddEntry(hist,legend_titles[i],"").SetTextColor(colourlist[col_count])
+        col_count+=1 
    
     legend.Draw()
  
