@@ -3,7 +3,7 @@ A repository to develope a ME-based reweighting tool for di-Higgs processes
 
 ## Setup 
 
-Download and install Madgraph5 and MadAnalysis5 and download the TRSM files
+Download and install Madgraph5 and download the TRSM files
 
 	./setup_2p6.sh
 
@@ -45,13 +45,6 @@ python scripts/convert_lhe_to_root.py -i MG5_aMC_v2_6_7/BSM_hh_M300_W0p5406704/E
 
 This script also produce reco-like di-Higgs masses implementing some realistic smearing
 
-## Using Madanalysis5
-
-Run MadAnalysis5 on an already produced LHE file
-
-	python2 MG5_aMC_v2_6_7/HEPTools/madanalysis5/madanalysis5/bin/ma5 -s scripts/ma5_sm_script 
-
-
 # make a gridpack for running b atch jobs
 
 Open run_card.dat and change nevents to small number e.g 100 and change gridpack option to True
@@ -75,3 +68,21 @@ the individual files can then be removed:
 	
 	rm batch_job_outputs/BSM_hh_M600_W6_Ntot_1000000_Njob_10000/job_output_*/events_*.lhe
 
+
+# running parton shower
+
+Download and install Pythia8 from here: https://www.pythia.org/.
+You should use option to install LHAPDF and PYTHON packages as well
+
+To use Pythia8 in python you need to set the PYTHONPATH environment variable appropiatly, e.g:
+    export PYTHONPATH=/vols/cms/dw515/HH_reweighting/HH_powheg/pythia8310/lib:$PYTHONPATH 
+
+The script `shower_events.py` will run pythia8 using the CMS CP5 tune. Higgs bosons are decayed into taus. The inputs to the script are the lhe file and a pythia8 command file. The command file depends on whether you are showering events produced by POWHEG or MadGraph
+
+To shower POWHEG events use `scripts/pythia_cmnd_file_powheg`, e.g:
+
+    python scripts/shower_events.py -c scripts/pythia_cmnd_file_powheg -i /vols/cms/dw515/HH_reweighting/HH_powheg/POWHEG-BOX-V2/ggHH_v6/run_nnpdf_sm_v3/cmsgrid_final_all_reweighted_full.lhe -o output_powheg_pythia.root
+
+To shower Madgraph events use `scripts/pythia_cmnd_file`, e.g
+
+    python scripts/shower_events.py -c scripts/pythia_cmnd_file_powheg -i batch_job_outputs/HH_loop_sm_twoscalar_SM_Ntot_200000_Njob_10000/cmsgrid_final_all_reweighted_full.lhe -n 1000 -o output_mg_pythia.root
