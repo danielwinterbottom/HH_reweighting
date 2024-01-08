@@ -85,4 +85,4 @@ To shower POWHEG events use `scripts/pythia_cmnd_file_powheg`, e.g:
 
 To shower Madgraph events use `scripts/pythia_cmnd_file`, e.g
 
-    python scripts/shower_events.py -c scripts/pythia_cmnd_file_powheg -i batch_job_outputs/HH_loop_sm_twoscalar_SM_Ntot_200000_Njob_10000/cmsgrid_final_all_reweighted_full.lhe -n 1000 -o output_mg_pythia.root
+    python scripts/shower_events.py -c scripts/pythia_cmnd_file -i batch_job_outputs/HH_loop_sm_twoscalar_SM_Ntot_200000_Njob_10000/cmsgrid_final_all_reweighted_full.lhe -n 1000 -o output_mg_pythia.root
