@@ -2,6 +2,7 @@ import pythia8
 import argparse
 import ROOT
 from array import array
+from python.reweight import *
 
 class SmearHHbbgamgam():
     def __init__(self):
@@ -28,6 +29,7 @@ parser.add_argument('--input', '-i', help= 'LHE file to be converted')
 parser.add_argument('--output', '-o', help= 'Name of output file',default='pythia_output.root')
 parser.add_argument('--cmnd_file', '-c', help= 'Pythia8 command file')
 parser.add_argument('--n_events', '-n', help= 'Maximum number of events to process', default=-1, type=int)
+parser.add_argument('--ref_width', help= 'Width of S-channel process reference sample')
 args = parser.parse_args()
 
 # Create a ROOT TTree to store the event information
@@ -74,6 +76,16 @@ for wt in weight_names:
         weights_map[wt] = array('f',[0])
         tree.Branch("wt_%(wt)s" % vars(), weights_map[wt], 'wt_%(wt)s/F' % vars())
 
+# initialise reweighting
+
+rw = HHReweight([600],[0.008333,0.01,0.02],ReweightSChan=True,RefMassRelWidth=(600,float(args.ref_width)))
+rw_names = rw.GetWeightNames()
+
+for wt in rw_names:
+    if wt not in weights_map:
+        weights_map[wt] = array('f',[0])
+        tree.Branch("wt_%(wt)s" % vars(), weights_map[wt], 'wt_%(wt)s/F' % vars())
+
 # initialise smearing
 
 smear = SmearHHbbgamgam()
@@ -83,7 +95,7 @@ count = 0
 while not stopGenerating:
 
     stopGenerating = pythia.infoPython().atEndOfFile()
-    if args.n_events>0 and count >= args.n_events: stopGenerating = True
+    if args.n_events>0 and count+1 >= args.n_events: stopGenerating = True
 
     wt_nom[0] = pythia.infoPython().weight()
 
@@ -97,6 +109,14 @@ while not stopGenerating:
     higgs_bosons = []
     for part in pythia.event:
         pdgid = part.id()
+
+        #if pdgid == 35:
+        #    print part.id(), part.status(), part.px()
+        #    print 'mothers:'
+        #    print [pythia.event[p].id() for p in part.motherList()]
+        #    print 'daughters:'
+        #    print [pythia.event[d].id() for d in part.daughterList()]
+
         if pdgid != 25: continue
 
         firstCopy = True not in [pythia.event[p].id() == 25 for p in part.motherList()]
@@ -109,6 +129,8 @@ while not stopGenerating:
 
         if firstCopy: higgs_bosons_first.append(lvec)
         elif lastCopy: higgs_bosons.append(lvec)
+
+        if firstCopy and lastCopy: higgs_bosons.append(lvec)
 
     if len(higgs_bosons_first) == 2:
         hh_mass_first[0] = (higgs_bosons_first[0]+higgs_bosons_first[1]).M()
@@ -131,6 +153,22 @@ while not stopGenerating:
         hh_pT[0] = -9999
         hh_mass_smear[0] = -9999
         hh_pT_smear[0] = -9999
+
+    if len(higgs_bosons_first) == 2:
+        # need to shift masses to 125 GeV, otherwise we get lots of errors
+        higgs_bosons_first[0].SetE((higgs_bosons_first[0].P()**2+125.**2)**.5)
+        higgs_bosons_first[1].SetE((higgs_bosons_first[1].P()**2+125.**2)**.5)
+        parts = [
+          [25, higgs_bosons_first[0].E(), higgs_bosons_first[0].Px(), higgs_bosons_first[0].Py(), higgs_bosons_first[0].Pz()],
+          [25, higgs_bosons_first[1].E(), higgs_bosons_first[1].Px(), higgs_bosons_first[1].Py(), higgs_bosons_first[1].Pz()],
+        ]
+
+        alphas = pythia.infoPython().alphaS()
+        rweights = rw.ReweightEvent(parts,alphas)
+
+        for key in rweights: 
+            weights_map[key][0] = rweights[key]
+        
 
     if hh_mass[0] >0:
         tree.Fill()
