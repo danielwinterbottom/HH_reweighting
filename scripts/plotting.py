@@ -321,6 +321,7 @@ def DrawTitle(pad, text, align, scale=1):
 
 def CompareHists(hists=[],
              legend_titles=[],
+             scale_factors=None,
              title="",
              ratio=True,
              log_y=False,
@@ -352,9 +353,10 @@ def CompareHists(hists=[],
     hist_count=0
     legend_hists=[]
 
-    for hist in hists:
+    for i, hist in enumerate(hists):
         if norm_hists: hist.Scale(1.0/hist.Integral(0, hist.GetNbinsX()+1))
         if norm_bins: hist.Scale(1.0,"width")
+        if scale_factors and len(scale_factors) == len (hists): hist.Scale(scale_factors[i])
         h = hist.Clone()
         objects.append(h)
         h.SetFillColor(0)

@@ -99,9 +99,11 @@ while not stopGenerating:
         pdgid = part.id()
         if pdgid != 25: continue
 
+
         firstCopy = True not in [pythia.event[p].id() == 25 for p in part.motherList()]
  
         lastCopy = len(part.daughterList()) == 2 and abs(pythia.event[part.daughterList()[0]].id()) == 5 and abs(pythia.event[part.daughterList()[1]].id()) == 5 
+        
 
         if not (firstCopy or lastCopy): continue
 
@@ -109,6 +111,8 @@ while not stopGenerating:
 
         if firstCopy: higgs_bosons_first.append(lvec)
         elif lastCopy: higgs_bosons.append(lvec)
+
+        if firstCopy and lastCopy: higgs_bosons.append(lvec)
 
     if len(higgs_bosons_first) == 2:
         hh_mass_first[0] = (higgs_bosons_first[0]+higgs_bosons_first[1]).M()

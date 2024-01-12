@@ -48,12 +48,16 @@ weights_map = {}
 hh_dphi  = array('f',[0])
 hh_deta  = array('f',[0])
 hh_dR  = array('f',[0])
+hh_pT  = array('f',[0])
 hh_pt1  = array('f',[0])
 hh_pt2  = array('f',[0])
 hh_eta1  = array('f',[0])
 hh_eta2  = array('f',[0])
 hh_phi1  = array('f',[0])
 hh_phi2  = array('f',[0])
+jet_pdgid = array('i',[0])
+part1_pdgid = array('i',[0])
+part2_pdgid = array('i',[0])
 
 # mbb resolution taken from Figure 5 here: https://arxiv.org/pdf/1912.06046.pdf
 func1 = ROOT.TF1("func1","TMath::Gaus(x,0,0.12)",-5*0.12,5*0.12)
@@ -73,6 +77,7 @@ tree.Branch("hh_mass_smear_4b_improved",  hh_mass_smear_4b_improved,  'hh_mass_s
 tree.Branch("hh_dphi",  hh_dphi,  'hh_dphi/F')
 tree.Branch("hh_deta",  hh_deta,  'hh_deta/F')
 tree.Branch("hh_dR",  hh_dR,  'hh_dR/F')
+tree.Branch("hh_pT",  hh_pT,  'hh_pT/F')
 tree.Branch("hh_pt1",  hh_pt1,  'hh_pt1/F')
 tree.Branch("hh_pt2",  hh_pt2,  'hh_pt2/F')
 tree.Branch("hh_eta1",  hh_eta1,  'hh_eta1/F')
@@ -80,6 +85,9 @@ tree.Branch("hh_eta2",  hh_eta2,  'hh_eta2/F')
 tree.Branch("hh_phi1",  hh_phi1,  'hh_phi1/F')
 tree.Branch("hh_phi2",  hh_phi2,  'hh_phi2/F')
 tree.Branch("wt_nom",  wt_nom_out,  'wt_nom/F')
+tree.Branch("jet_pdgid",  jet_pdgid,  'jet_pdgid/I')
+tree.Branch("part1_pdgid",  part1_pdgid,  'part1_pdgid/I')
+tree.Branch("part2_pdgid",  part2_pdgid,  'part2_pdgid/I')
 
 for wt in weights:
     if wt not in weights_map: 
@@ -101,11 +109,19 @@ for line in lhe_file:
         count+=1
 
         higgs_bosons=[]
+        jets=[]
+        initial_partons=[]
 
     elif line.startswith("</event>"):
         # end of event
         # compute weights and store variables
         event_started = False
+
+        if len(jets)>0:
+            jet_pdgid[0] = jets[0][0]
+        if len(initial_partons)>1:
+            part1_pdgid[0] = initial_partons[0][0]
+            part2_pdgid[0] = initial_partons[1][0]
 
         # store di-Higgs mass
         if len(higgs_bosons)==2: 
@@ -127,11 +143,11 @@ for line in lhe_file:
 
             hh_mass_smear_2b2ta[0] = hh_mass[0]*rand4
 
-            #print rand1, rand2, higgs_smeared_1.M(), higgs_smeared_2.M(), hh_mass[0], hh_mass_smear[0], hh_mass_smear_improved[0]
 
             hh_dphi[0] = abs(higgs_bosons[0].DeltaPhi(higgs_bosons[1]))
             hh_deta[0] = abs(higgs_bosons[0].Eta() - higgs_bosons[1].Eta())
             hh_dR[0] = higgs_bosons[0].DeltaR(higgs_bosons[1])
+            hh_pT[0] = (higgs_bosons[0]+higgs_bosons[1]).Pt()
             hh_phi1[0] = higgs_bosons[0].Phi()
             hh_phi2[0] = higgs_bosons[1].Phi()
             hh_eta1[0] = higgs_bosons[0].Eta()
@@ -148,12 +164,16 @@ for line in lhe_file:
             hh_dphi[0] = -1 
             hh_deta[0] = -1
             hh_dR[0] = -1
+            hh_pT[0] = -1
             hh_phi1[0] = -1
             hh_phi2[0] = -1
             hh_eta1[0] = -1
             hh_eta2[0] = -1
             hh_pt1[0] = -1
             hh_pt2[0] = -1
+            jet_pdgid[0] = -9999
+            part1_pdgid[0] = -9999
+            part2_pdgid[0] = -9999
 
         tree.Fill()
 
@@ -162,12 +182,17 @@ for line in lhe_file:
         if len(parts) == 6 and not line.startswith("<"):
             # read in nominal event weight
             wt_nom_out[0] = float(parts[2])
-            #print 'wt_nom = ', wt_nom
         elif len(parts) == 13:
             # read in particle information
             if int(parts[0])==25:
                 lvec=ROOT.TLorentzVector(float(parts[6]),float(parts[7]),float(parts[8]),float(parts[9]))
                 higgs_bosons.append(lvec)
+            if int(parts[0]) in [21,1,2,3,4,5,-1,-2,-3,-4,-5] and int(parts[1]) == -1:
+                lvec=ROOT.TLorentzVector(float(parts[6]),float(parts[7]),float(parts[8]),float(parts[9]))
+                initial_partons.append([int(parts[0]), lvec])
+            if int(parts[0]) in [21,1,2,3,4,5,-1,-2,-3,-4,-5] and int(parts[1]) == 1:
+                lvec=ROOT.TLorentzVector(float(parts[6]),float(parts[7]),float(parts[8]),float(parts[9]))
+                jets.append([int(parts[0]), lvec])
         elif line.startswith("<wgt id="):
             # read in weights for reweighting
             if line.startswith("<wgt id=\'"):
