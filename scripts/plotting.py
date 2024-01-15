@@ -295,7 +295,7 @@ def DrawTitle(pad, text, align, scale=1):
         pad_ratio = 1.
 
     textSize = 0.6
-    textOffset = 0.2
+    textOffset = 0.3
 
     latex = R.TLatex()
     latex.SetNDC()
@@ -340,7 +340,8 @@ def CompareHists(hists=[],
              plot_name="plot",
              label="",
              norm_bins=False,
-             IncErrors=False):
+             IncErrors=False,
+             skipCols=0):
 
     objects=[]
     R.gROOT.SetBatch(R.kTRUE)
@@ -348,6 +349,8 @@ def CompareHists(hists=[],
     ModTDRStyle(r=0.04, l=0.14)
 
     colourlist=[R.kBlack,R.kBlue,R.kRed,R.kGreen+2,R.kMagenta,R.kCyan+1,R.kYellow+2,R.kViolet-5,R.kOrange,R.kCyan+3,R.kGray]
+
+    colourlist = colourlist[skipCols:]
 
     hs = R.THStack("hs","")
     hist_count=0
@@ -454,8 +457,8 @@ def CompareHists(hists=[],
     
     #Setup legend
     tot = len(hists)
-    if tot < 4 and False: legend = PositionedLegend(0.2,0.3,3,0.05)
-    else: legend = PositionedLegend(0.27,0.3,3,0.02)
+    if tot < 4 and False: legend = PositionedLegend(0.20,0.3,3,0.05)
+    else: legend = PositionedLegend(0.27,0.3,3,0.04)
     max_len = max([len(x) for x in legend_titles])
     if max_len>20: legend = PositionedLegend(0.37,0.3,3,0.02)
 
@@ -508,9 +511,10 @@ def CompareHists(hists=[],
             h.SetMarkerColor(colourlist[hist_count])
             h.SetMarkerSize(0)
 
+            for i in range(1,div_hist.GetNbinsX()+1): div_hist.SetBinError(i,0.0)
             h.Divide(div_hist)
-            if first_hist and not IncErrors:
-                for i in range(1,h.GetNbinsX()+1): h.SetBinError(i,0.00001)
+            #if first_hist and not IncErrors:
+            #    for i in range(1,h.GetNbinsX()+1): h.SetBinError(i,0.00001)
             #    first_hist=False
             o = h.Clone()
             objects.append(o)

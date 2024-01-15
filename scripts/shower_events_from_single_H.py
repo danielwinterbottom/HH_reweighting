@@ -110,12 +110,14 @@ while not stopGenerating:
     for part in pythia.event:
         pdgid = part.id()
 
-        #if pdgid == 35:
-        #    print part.id(), part.status(), part.px()
-        #    print 'mothers:'
-        #    print [pythia.event[p].id() for p in part.motherList()]
-        #    print 'daughters:'
-        #    print [pythia.event[d].id() for d in part.daughterList()]
+        #####if pdgid == 35:
+        #####    print part.id(), part.status(), part.px()
+        #####    print 'mothers:'
+        #####    print [pythia.event[p].id() for p in part.motherList()]
+        #####    print 'daughters:'
+        #####    print [pythia.event[d].id() for d in part.daughterList()] 
+
+       
 
         if pdgid != 25: continue
 
@@ -153,6 +155,7 @@ while not stopGenerating:
         hh_pT[0] = -9999
         hh_mass_smear[0] = -9999
         hh_pT_smear[0] = -9999
+
 
     if len(higgs_bosons_first) == 2:
         # need to shift masses to 125 GeV, otherwise we get lots of errors

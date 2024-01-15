@@ -9,9 +9,26 @@ f3 = ROOT.TFile('outputs_new/output_powheg_chhh10_v2.root')
 f4 = ROOT.TFile('outputs_new/output_powheg_pythia_from_single_H_width_5GeV.root')
 f5 = ROOT.TFile('outputs_new/output_powheg_pythia_from_single_H_width_12GeV.root')
 f6 = ROOT.TFile('outputs_new/output_mg_pythia_sm.root')
-f7 = ROOT.TFile('outputs_new/output_mg_pythia_width_6GeV_temp.root')
+f7 = ROOT.TFile('outputs_new/output_mg_pythia_width_5GeV.root')
 
 
+benchmarks = {}
+benchmarks['singlet_M600'] = {
+  'kappa_h_t' : 0.9854491056576354,
+  'kappa_H_t' : 0.16997076265807162,
+  'kappa_h_lam' : 0.9491226120544515,
+  'kappa_H_lam' : 5.266738184342865,
+  'width' : 4.98,
+  'width_name' : '0p0083',
+  'mass': 600.,
+}
+
+bm = benchmarks['singlet_M600']
+
+kappa_h_t = bm['kappa_h_t']
+kappa_H_t = bm['kappa_H_t']
+kappa_h_lam = bm['kappa_h_lam']
+kappa_H_lam = bm['kappa_H_lam']
 
 norm_hists=False
 
@@ -105,7 +122,7 @@ def DrawHist(f, h, plot,wt_extra='1'):
   h.Scale(1000./N) # units from pb to fb
   return h
 
-plots = ['hh_mass(75,250,1000)', 'hh_pT(75,0,300)']
+plots = ['hh_mass(75,250,1000)', 'hh_pT(75,0,300)', 'hh_mass_smear_improved(75,250,1000)']
 
 for plot in plots:
 
@@ -143,24 +160,45 @@ for plot in plots:
   h_sh_lo.SetName('sh_lo')
   h_int_lo = ROOT.TH1D()
   h_int_lo.SetName('int_lo')
+  h_sH_box_lo = ROOT.TH1D()
+  h_sH_box_lo.SetName('sH_box_lo')
+  h_sH_sh_lo = ROOT.TH1D()
+  h_sH_sh_lo.SetName('sH_sh_lo')
 
   h_sH_lo = ROOT.TH1D()
   h_sH_lo.SetName('sH_lo')
+  h_sH_lo_v2 = ROOT.TH1D()
+  h_sH_lo_v2.SetName('sH_lo_v2')
   h_sH = ROOT.TH1D()
   h_sH.SetName('sH')
   h_sH_weighted = ROOT.TH1D()
   h_sH_weighted.SetName('sH_weighted')
-
+  h_sH_weighted_v2 = ROOT.TH1D()
+  h_sH_weighted_v2.SetName('sH_weighted_v2')
+  h_sH_box_weighted = ROOT.TH1D()
+  h_sH_box_weighted.SetName('sH_box_weighted')
+  h_sH_sh_weighted = ROOT.TH1D()
+  h_sH_sh_weighted.SetName('sH_sh_weighted')
 
   h_sm = DrawHist(f1,h_sm,plot)
   h_box = DrawHist(f2,h_box,plot)
   h_chhh10 = DrawHist(f3,h_chhh10,plot)
 
-  h_sH = DrawHist(f4,h_sH,plot)
+  plot_mod = plot
+  if 'hh_mass' in plot and 'hh_mass_smear_improved' not in plot: plot_mod = 'hh_mass(50,500,700)'
+
+  h_sH = DrawHist(f4,h_sH,plot_mod)
   h_sH.Scale(partial_width/5.)
 
-  h_sH_weighted = DrawHist(f5,h_sH_weighted,plot,'(wt_schannel_H_Mass_600_RelWidth_0p008333)')
+  h_sH_weighted = DrawHist(f5,h_sH_weighted,plot_mod,'(wt_schannel_H_Mass_600_RelWidth_0p008333)')
   h_sH_weighted.Scale(partial_width/12.)
+  h_sH_lo = DrawHist(f7,h_sH_lo,plot_mod)
+
+  h_sH_box_weighted = DrawHist(f1,h_sH_box_weighted,plot,'(wt_box_and_schannel_H_i_Mass_600_RelWidth_0p0083)')
+  h_sH_box_lo = DrawHist(f6,h_sH_box_lo,plot,'(wt_box_and_schannel_H_i_Mass_600_RelWidth_0p0083)')
+
+  h_sH_sh_weighted = DrawHist(f1,h_sH_sh_weighted,plot,'(wt_schannel_H_and_schannel_h_i_Mass_600_RelWidth_0p0083)')
+  h_sH_sh_lo = DrawHist(f6,h_sH_sh_lo,plot,'(wt_schannel_H_and_schannel_h_i_Mass_600_RelWidth_0p0083)')
 
   #= h_chhh10 - h_box - 10*h_sm + 10*h_box
   #= h_chhh10 + 9*h_box - 10 *h_sm
@@ -193,18 +231,27 @@ for plot in plots:
   h_box_lo = DrawHist(f6, h_box_lo, plot, box_wt)
   h_sh_lo = DrawHist(f6, h_sh_lo, plot, sh_wt)
   h_int_lo = DrawHist(f6, h_int_lo, plot, int_wt)
-  h_sH_lo = DrawHist(f7,h_sH_lo,plot)
 
 
-  if 'hh_mass' in plot: 
+  if 'hh_mass(' in plot: 
     x_title="m_{hh} (GeV)"
     y_title="d#sigma/dm_{hh} (fb/GeV)"
     plot_name = 'plots_NLO/dihiggs_NLO_Validation_hh_mass'
 
-  if 'hh_pT' in plot:
+  if 'hh_mass_smear_improved(' in plot:
+    x_title="m_{hh} (GeV)"
+    y_title="d#sigma/dm_{hh} (fb/GeV)"
+    plot_name = 'plots_NLO/dihiggs_NLO_Validation_hh_mass_smear_improved'
+
+  if 'hh_pT(' in plot:
     x_title="p_{T}^{hh} (GeV)"
     y_title="d#sigma/dp_{T}^{hh} (fb/GeV)"
     plot_name = 'plots_NLO/dihiggs_NLO_Validation_hh_pT'
+
+  if 'hh_pT_smear(' in plot:
+    x_title="p_{T}^{hh} (GeV)"
+    y_title="d#sigma/dp_{T}^{hh} (fb/GeV)"
+    plot_name = 'plots_NLO/dihiggs_NLO_Validation_hh_pT_smear'
 
 
   plotting.CompareHists(hists=[h_box.Clone(), h_box_weighted.Clone()],
@@ -295,24 +342,16 @@ for plot in plots:
                norm_bins=True,
                IncErrors=True)
 
-  # make plots comparing H s-channels with different widths
 
-  # make plots comparing LO to NLO to NLO-approx
+  # make plots comparing LO to NLO to NLO-approx+PS
 
   for x in ['','_inc_kfactors']:
 
-#k_box_nlo_rw = xs_box_nnlo/xs_box_nlo_rw
-#k_sh_nlo_rw = xs_Sh_nnlo/xs_Sh_nlo_rw
-#k_box_sh_int_nlo_rw = xs_box_Sh_int_nnlo/xs_box_Sh_int_nlo_rw
-#k_sH_nlo_rw = xs_SH_nnlo/xs_SH_nlo_rw
-#k_sH_box_int_nlo_rw = (k_box_nlo_rw*k_sH_nlo_rw)**.5
-#k_sH_sh_int_nlo_rw = (k_sh_nlo_rw*k_sH_nlo_rw)**.5
-
     # first make plots without k-factor scaling
     plotting.CompareHists(hists=[h_box.Clone(), h_box_weighted.Clone(), h_box_lo.Clone()],
-               legend_titles=['NLO','NLO-approx','LO'],
+               legend_titles=['NLO+PS','NLO-approx+PS','LO+PS'],
                scale_factors = [k_box_nlo, k_box_nlo_rw, k_box_lo] if x == '_inc_kfactors' else None,
-               title="",
+               title="#Box",
                ratio=True,
                log_y=False,
                log_x=False,
@@ -333,9 +372,9 @@ for plot in plots:
                IncErrors=True)
 
     plotting.CompareHists(hists=[h_sh.Clone(), h_sh_weighted.Clone(), h_sh_lo.Clone()],
-                 legend_titles=['NLO','NLO-approx','LO'],
+                 legend_titles=['NLO+PS','NLO-approx+PS','LO+PS'],
                  scale_factors = [k_sh_nlo, k_sh_nlo_rw, k_sh_lo] if x == '_inc_kfactors' else None,
-                 title="",
+                 title="S_{h}",
                  ratio=True,
                  log_y=False,
                  log_x=False,
@@ -356,9 +395,9 @@ for plot in plots:
                  IncErrors=True)
 
     plotting.CompareHists(hists=[h_int.Clone(), h_int_weighted.Clone(), h_int_lo.Clone()],
-                 legend_titles=['NLO','NLO-approx','LO'],
+                 legend_titles=['NLO+PS','NLO-approx+PS','LO+PS'],
                  scale_factors = [k_box_sh_int_nlo, k_box_sh_int_nlo_rw, k_box_sh_int_lo] if x == '_inc_kfactors' else None,
-                 title="",
+                 title="S_{h}-#Box",
                  ratio=True,
                  log_y=False,
                  log_x=False,
@@ -380,8 +419,125 @@ for plot in plots:
 
     # do same for H in s-channel
     plotting.CompareHists(hists=[h_sH.Clone(), h_sH_weighted.Clone(), h_sH_lo.Clone()],
-                 legend_titles=['NLO','NLO-approx','LO'],
+                 legend_titles=['NLO+PS','NLO-approx+PS','LO+PS'],
                  scale_factors = [k_sH_nlo, k_sH_nlo_rw, k_sH_lo] if x == '_inc_kfactors' else None,
+                 title="S_{H}",
+                 ratio=True,
+                 log_y=False,
+                 log_x=False,
+                 ratio_range="0.,2.",
+                 custom_x_range=False,
+                 x_axis_max=1000,
+                 x_axis_min=250,
+                 custom_y_range=False,
+                 y_axis_max=4000,
+                 y_axis_min=0,
+                 x_title=x_title,
+                 y_title=y_title,
+                 extra_pad=0,
+                 norm_hists=norm_hists,
+                 plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_SP',
+                 label='',
+                 norm_bins=True,
+                 IncErrors=True)
+
+   # now makes plots of inteferences without the NLO exact (as it does not exist)
+
+    plotting.CompareHists(hists=[h_sH_box_weighted.Clone(), h_sH_box_lo.Clone()],
+                 legend_titles=['NLO-approx+PS','LO+PS'],
+                 scale_factors = [k_sH_box_int_nlo_rw, k_sH_box_int_lo] if x == '_inc_kfactors' else None,
+                 title="S_{H}-#Box",
+                 ratio=True,
+                 log_y=False,
+                 log_x=False,
+                 ratio_range="0.,2.",
+                 custom_x_range=False,
+                 x_axis_max=1000,
+                 x_axis_min=250,
+                 custom_y_range=False,
+                 y_axis_max=4000,
+                 y_axis_min=0,
+                 x_title=x_title,
+                 y_title=y_title,
+                 extra_pad=0,
+                 norm_hists=norm_hists,
+                 plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_box_SP',
+                 label='',
+                 norm_bins=True,
+                 IncErrors=True,
+                 skipCols=1)
+
+    plotting.CompareHists(hists=[h_sH_sh_weighted.Clone(), h_sH_sh_lo.Clone()],
+                 legend_titles=['NLO-approx+PS','LO+PS'],
+                 scale_factors = [k_sH_sh_int_nlo_rw, k_sH_sh_int_lo] if x == '_inc_kfactors' else None,
+                 title="S_{H}-S_{h}",
+                 ratio=True,
+                 log_y=False,
+                 log_x=False,
+                 ratio_range="0.,2.",
+                 custom_x_range=False,
+                 x_axis_max=1000,
+                 x_axis_min=250,
+                 custom_y_range=False,
+                 y_axis_max=4000,
+                 y_axis_min=0,
+                 x_title=x_title,
+                 y_title=y_title,
+                 extra_pad=0,
+                 norm_hists=norm_hists,
+                 plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_SP_Sh',
+                 label='',
+                 norm_bins=True,
+                 IncErrors=True,
+                 skipCols=1)
+
+    # make plots comparing benchmarks
+
+
+    box_SF                         = kappa_h_t**4
+    schannel_H_SF                  = kappa_H_t**2*kappa_H_lam**2
+    schannel_h_SF                  = kappa_h_t**2*kappa_h_lam**2
+    box_and_schannel_h_i_SF        = kappa_h_t**3*kappa_h_lam
+    box_and_schannel_H_i_SF        = kappa_h_t**2*kappa_H_t*kappa_H_lam
+    schannel_H_and_schannel_h_i_SF = kappa_H_t*kappa_H_lam*kappa_h_t*kappa_h_lam
+
+    # make sH histograms again so that they do not include the zoomed binning for mass, and so that 5 GeV width samples are used for both NLO and LO
+    h_sH_weighted_v2 = DrawHist(f4,h_sH_weighted_v2,plot)
+    h_sH_weighted_v2.Scale(partial_width/5.)
+    h_sH_lo_v2 = DrawHist(f7,h_sH_lo_v2,plot)
+
+    wt_BM = '(wt_box*%(box_SF)g + wt_schannel_h*%(schannel_h_SF)g + wt_box_and_schannel_h_i*%(box_and_schannel_h_i_SF)g + wt_box_and_schannel_H_i_Mass_600_RelWidth_0p0083*%(box_and_schannel_H_i_SF)g + wt_schannel_H_and_schannel_h_i_Mass_600_RelWidth_0p0083*%(schannel_H_and_schannel_h_i_SF)g)' % vars()
+
+    wt_BM_kfacts_nlo_rw = '(wt_box*%(box_SF)g*%(k_box_nlo_rw)g + wt_schannel_h*%(schannel_h_SF)g*%(k_sh_nlo_rw)g + wt_box_and_schannel_h_i*%(box_and_schannel_h_i_SF)g*%(k_box_sh_int_nlo_rw)g + wt_box_and_schannel_H_i_Mass_600_RelWidth_0p0083*%(box_and_schannel_H_i_SF)g*%(k_sH_box_int_nlo_rw)g + wt_schannel_H_and_schannel_h_i_Mass_600_RelWidth_0p0083*%(schannel_H_and_schannel_h_i_SF)g*%(k_sH_sh_int_nlo_rw)g)' % vars()
+
+    wt_BM_kfacts_lo = '(wt_box*%(box_SF)g*%(k_box_lo)g + wt_schannel_h*%(schannel_h_SF)g*%(k_sh_lo)g + wt_box_and_schannel_h_i*%(box_and_schannel_h_i_SF)g*%(k_box_sh_int_lo)g + wt_box_and_schannel_H_i_Mass_600_RelWidth_0p0083*%(box_and_schannel_H_i_SF)g*%(k_sH_box_int_lo)g + wt_schannel_H_and_schannel_h_i_Mass_600_RelWidth_0p0083*%(schannel_H_and_schannel_h_i_SF)g*%(k_sH_sh_int_lo)g)' % vars()
+    
+
+    h_BM_weighted = ROOT.TH1D()
+    h_BM_weighted.SetName('BM_weighted')
+    h_BM_weighted = DrawHist(f1,h_BM_weighted,plot, wt_BM)
+    h_BM_weighted.Add(h_sH_weighted_v2,schannel_H_SF)
+
+    h_BM_weighted_kfacts = ROOT.TH1D()
+    h_BM_weighted_kfacts.SetName('BM_weighted_kfacts')
+    h_BM_weighted_kfacts = DrawHist(f1,h_BM_weighted_kfacts,plot, wt_BM_kfacts_nlo_rw)
+    h_BM_weighted_kfacts.Add(h_sH_weighted_v2,schannel_H_SF*k_sH_nlo_rw)
+
+    h_BM_lo = ROOT.TH1D()
+    h_BM_lo.SetName('BM_lo')
+    h_BM_lo = DrawHist(f6,h_BM_lo,plot, wt_BM)
+    h_BM_lo.Add(h_sH_lo_v2,schannel_H_SF)
+
+    h_BM_lo_kfacts = ROOT.TH1D()
+    h_BM_lo_kfacts.SetName('BM_lo_kfacts')
+    h_BM_lo_kfacts = DrawHist(f6,h_BM_lo_kfacts,plot, wt_BM_kfacts_lo)
+    h_BM_lo_kfacts.Add(h_sH_lo_v2,schannel_H_SF*k_sH_lo)
+
+    print  h_BM_weighted_kfacts.Integral(-1,-1), h_BM_weighted.Integral(-1,-1)
+    print  h_BM_lo_kfacts.Integral(-1,-1), h_BM_lo.Integral(-1,-1)
+
+    plotting.CompareHists(hists=[h_BM_weighted.Clone() if x != '_inc_kfactors' else h_BM_weighted_kfacts.Clone(), h_BM_lo.Clone() if x != '_inc_kfactors' else h_BM_lo_kfacts.Clone()],
+                 legend_titles=['NLO-approx+PS','LO+PS'],
                  title="",
                  ratio=True,
                  log_y=False,
@@ -397,7 +553,9 @@ for plot in plots:
                  y_title=y_title,
                  extra_pad=0,
                  norm_hists=norm_hists,
-                 plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_SH',
+                 plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_BM',
                  label='',
                  norm_bins=True,
-                 IncErrors=True)
+                 IncErrors=True,
+                 skipCols=1)
+
