@@ -2,9 +2,9 @@ import ROOT
 import plotting
 
 
-f1 = ROOT.TFile('outputs_new/output_powheg_sm_v3.root')
-f2 = ROOT.TFile('outputs_new/output_powheg_box.root')
-f3 = ROOT.TFile('outputs_new/output_powheg_chhh10_v2.root')
+f1 = ROOT.TFile('outputs_new/output_powheg_pythia_sm_v3.root')
+f2 = ROOT.TFile('outputs_new/output_powheg_pythia_box.root')
+f3 = ROOT.TFile('outputs_new/output_powheg_pythia_chhh10_v2.root')
 
 f4 = ROOT.TFile('outputs_new/output_powheg_pythia_from_single_H_width_5GeV.root')
 f5 = ROOT.TFile('outputs_new/output_powheg_pythia_from_single_H_width_12GeV.root')

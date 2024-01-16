@@ -3,6 +3,7 @@ import argparse
 import ROOT
 from array import array
 from python.reweight import *
+import random
 
 class SmearHHbbgamgam():
     def __init__(self):
@@ -18,8 +19,12 @@ class SmearHHbbgamgam():
       rand1 = 1.+smear.func1.GetRandom()
       rand2 = 1.+smear.func2.GetRandom()
 
-      h1_smeared = h1*rand1
-      h2_smeared = h2*rand2
+      if random.random() > 0.5:
+          h1_smeared = h1*rand1
+          h2_smeared = h2*rand2
+      else: 
+          h1_smeared = h1*rand2
+          h2_smeared = h2*rand1
 
       return h1_smeared, h2_smeared
 
@@ -47,20 +52,31 @@ pythia.init()
 wt_nom  = array('f',[0])
 hh_mass  = array('f',[0])
 hh_pT  = array('f',[0])
+h1_pT = array('f',[0])
+h2_pT = array('f',[0])
 hh_mass_first  = array('f',[0])
 hh_pT_first  = array('f',[0])
+H_pT_first  = array('f',[0])
 hh_mass_smear  = array('f',[0])
 hh_pT_smear  = array('f',[0])
+h1_pT_smear = array('f',[0])
+h2_pT_smear = array('f',[0])
 hh_mass_smear_improved  = array('f',[0])
+
 
 tree.Branch("wt_nom",  wt_nom,  'wt_nom/F')
 tree.Branch("hh_mass",  hh_mass,  'hh_mass/F')
 tree.Branch("hh_mass_first",  hh_mass_first,  'hh_mass_first/F')
 tree.Branch("hh_pT",  hh_pT,  'hh_pT/F')
+tree.Branch("h1_pT",  h1_pT,  'h1_pT/F')
+tree.Branch("h2_pT",  h2_pT,  'h2_pT/F')
 tree.Branch("hh_pT_first",  hh_pT_first,  'hh_pT_first/F')
+tree.Branch("H_pT_first",  H_pT_first,  'H_pT_first/F')
 tree.Branch("hh_mass_smear",  hh_mass_smear,  'hh_mass_smear/F')
 tree.Branch("hh_pT_smear",  hh_pT_smear,  'hh_pT_smear/F')
 tree.Branch("hh_mass_smear_improved",  hh_mass_smear_improved,  'hh_mass_smear_improved/F')
+tree.Branch("h1_pT_smear",  h1_pT_smear,  'h1_pT_smear/F')
+tree.Branch("h2_pT_smear",  h2_pT_smear,  'h2_pT_smear/F')
 
 weights_map = {}
 weight_names = []
@@ -107,17 +123,19 @@ while not stopGenerating:
 
     higgs_bosons_first = []
     higgs_bosons = []
+    H_pT_first[0] = -9999
     for part in pythia.event:
         pdgid = part.id()
 
-        #####if pdgid == 35:
-        #####    print part.id(), part.status(), part.px()
-        #####    print 'mothers:'
-        #####    print [pythia.event[p].id() for p in part.motherList()]
-        #####    print 'daughters:'
-        #####    print [pythia.event[d].id() for d in part.daughterList()] 
-
-       
+        if pdgid == 35:
+            #print part.id(), part.status(), part.px(), part.py()
+            #print 'mothers:'
+            #print [pythia.event[p].id() for p in part.motherList()]
+            #print 'daughters:'
+            #print [pythia.event[d].id() for d in part.daughterList()] 
+            #print part.pT()
+            firstCopyH = True not in [pythia.event[p].id() == 35 for p in part.motherList()] 
+            if firstCopyH: H_pT_first[0] = part.pT()
 
         if pdgid != 25: continue
 
@@ -144,18 +162,26 @@ while not stopGenerating:
     if len(higgs_bosons) == 2:
         hh_mass[0] = (higgs_bosons[0]+higgs_bosons[1]).M()
         hh_pT[0] = (higgs_bosons[0]+higgs_bosons[1]).Pt()
+        h1_pT[0] = max(higgs_bosons[0].Pt(), higgs_bosons[1].Pt())
+        h2_pT[0] = min(higgs_bosons[0].Pt(), higgs_bosons[1].Pt())
 
         h1_smeared, h2_smeared = smear.Smear(higgs_bosons[0],higgs_bosons[1])
 
         hh_mass_smear[0] = (h1_smeared+h2_smeared).M()
         hh_mass_smear_improved[0] = hh_mass_smear[0] - (h1_smeared.M()-125.) - (h2_smeared.M()-125.)
         hh_pT_smear[0] = (h1_smeared+h2_smeared).Pt()
+
+        h1_pT_smear[0] = max(h1_smeared.Pt(), h2_smeared.Pt())
+        h2_pT_smear[0] = min(h1_smeared.Pt(), h2_smeared.Pt())
     else:
         hh_mass[0] = -9999
         hh_pT[0] = -9999
         hh_mass_smear[0] = -9999
         hh_pT_smear[0] = -9999
-
+        h1_pT[0] = -9999
+        h2_pT[0] = -9999
+        h1_pT_smear[0] = -9999
+        h2_pT_smear[0] = -9999
 
     if len(higgs_bosons_first) == 2:
         # need to shift masses to 125 GeV, otherwise we get lots of errors
