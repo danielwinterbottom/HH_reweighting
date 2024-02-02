@@ -4,6 +4,7 @@ import ROOT
 from array import array
 from python.reweight import *
 import random
+import math
 
 
 class SmearBJet():
@@ -15,17 +16,37 @@ class SmearBJet():
         #self.min_pt = x_vals[0]
         #self.max_pt = x_vals[-1]
         #self.func = ROOT.TF1("func","TMath::Gaus(x,0,[0])",-0.5,0.5)
+        # for pT resolution
         # take resolution from H mass resolution from Figure 5 here: https://arxiv.org/pdf/1912.06046.pdf (using DNN)
         # since we smear jets seperatly we need to scale this resolution up by sqrt(2) [assuming energy is split 50-50 by 2 jets from Higgs decay]
         # = 15.4/124.6*sqrt(2) = 0.18
-        self.func = ROOT.TF1("func","TMath::Gaus(x,0,0.18)",-1,1)
+        # but smearing of jet eta and phi below also affects mass resolution
+        # so we smear first by phi and eta and then adjust jet E smearing to give correct "width" for h125 mass peaks (~15.4 GeV)
+        # approximatly 15% smearing required
+        self.func = ROOT.TF1("func","TMath::Gaus(x,0,0.15)",-1,1)
+        # for phi resolution
+        self.func_phi = ROOT.TF1("func_phi","TMath::Gaus(x,0,0.05)",-1,1)
+        # for eta resolution
+        self.func_eta = ROOT.TF1("func_eta","TMath::Gaus(x,0,0.05)",-1,1)
 
     def Smear(self,j):
         #pt = max(min(j.Pt(),self.max_pt), self.min_pt)
         #sigma = self.res_graph.Eval(pt)
         #self.func.SetParameter(0,sigma)
         rand = 1.+self.func.GetRandom()
-        j_smeared = j*rand
+        rand_dphi = self.func_phi.GetRandom()
+        rand_deta = self.func_eta.GetRandom()
+
+
+        j_smeared = j
+
+        phi = j_smeared.Phi()
+        new_phi = ROOT.TVector2.Phi_mpi_pi(phi + rand_dphi)
+        new_eta = j_smeared.Eta() + rand_deta
+        new_theta = 2 * math.atan(math.exp(-new_eta))
+        j_smeared.SetPhi(new_phi)
+        j_smeared.SetTheta(new_theta)
+        j_smeared *= rand
 
         return j_smeared   
 
@@ -70,6 +91,7 @@ hh_dR_smear = array('f',[0])
 hh_dphi_smear = array('f',[0])
 hh_eta_smear = array('f',[0])
 h1_mass_smear = array('f',[0])
+h2_mass_smear = array('f',[0])
 
 hh_mass_smear_improved  = array('f',[0])
 hh_pT_smear_improved  = array('f',[0])
@@ -97,6 +119,7 @@ tree.Branch("hh_dR_smear",  hh_dR_smear,  'hh_dR_smear/F')
 tree.Branch("hh_dphi_smear",  hh_dphi_smear,  'hh_dphi_smear/F')
 tree.Branch("hh_eta_smear",  hh_eta_smear,  'hh_eta_smear/F')
 tree.Branch("h1_mass_smear",  h1_mass_smear,  'h1_mass_smear/F')
+tree.Branch("h2_mass_smear",  h2_mass_smear,  'h2_mass_smear/F')
 
 tree.Branch("hh_mass_smear_improved",  hh_mass_smear_improved,  'hh_mass_smear_improved/F')
 tree.Branch("hh_pT_smear_improved",  hh_pT_smear_improved,  'hh_pT_smear_improved/F')
@@ -222,6 +245,7 @@ while not stopGenerating:
 
         if h1_smear.Pt() >= h2_smear.Pt():
             h1_mass_smear[0] = h1_smear.M()
+            h2_mass_smear[0] = h2_smear.M()
             h1_pT_smear[0] = h1_smear.Pt()
             h2_pT_smear[0] = h2_smear.Pt()
             h1_eta_smear[0] = h1_smear.Rapidity()
@@ -231,6 +255,7 @@ while not stopGenerating:
             h2_pT_smear_improved[0] = h2_smear_imp.Pt()
         else:  
             h1_mass_smear[0] = h2_smear.M()  
+            h2_mass_smear[0] = h1_smear.M()  
             h1_pT_smear[0] = h2_smear.Pt()
             h2_pT_smear[0] = h1_smear.Pt()
             h1_eta_smear[0] = h2_smear.Rapidity()
