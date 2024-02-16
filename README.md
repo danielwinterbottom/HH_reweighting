@@ -58,6 +58,10 @@ An example command to run 100 jobs each producing 10000 events:
 
 	python scripts/submit_ic_batch_jobs.py -i MG5_aMC_v2_6_7/BSM_hh_M600_6 --events_per_job 10000 --total_events 1000000
 
+Or to run jobs from CMS-style gridpacks do e.g:
+
+        for x in gridpacks/*0p007183*; do i=${x//gridpacks\//""}; python scripts/submit_ic_gridpack_batch_jobs.py -i $i; done
+
 # merging LHE files
 
 You can merge all lhe files into one large on using:

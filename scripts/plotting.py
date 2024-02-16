@@ -457,8 +457,9 @@ def CompareHists(hists=[],
     
     #Setup legend
     tot = len(hists)
-    if tot < 4 and False: legend = PositionedLegend(0.20,0.3,3,0.05)
-    else: legend = PositionedLegend(0.27,0.3,3,0.04)
+    #if tot < 4 and False: legend = PositionedLegend(0.20,0.3,3,0.05)
+    #else: legend = PositionedLegend(0.27,0.3,3,0.04)
+    legend = PositionedLegend(0.33,0.3,3,0.04)
     max_len = max([len(x) for x in legend_titles])
     if max_len>20: legend = PositionedLegend(0.37,0.3,3,0.02)
 
