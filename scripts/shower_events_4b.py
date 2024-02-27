@@ -56,6 +56,7 @@ parser.add_argument('--output', '-o', help= 'Name of output file',default='pythi
 parser.add_argument('--cmnd_file', '-c', help= 'Pythia8 command file')
 parser.add_argument('--n_events', '-n', help= 'Maximum number of events to process', default=-1, type=int)
 parser.add_argument('--ref_width', help= 'Width of S-channel process reference sample', default=None)
+parser.add_argument('--ref_mass', help= 'Mass of the H in the reference sample', default=600, type=float)
 args = parser.parse_args()
 
 # Create a ROOT TTree to store the event information
@@ -142,8 +143,16 @@ for wt in weight_names:
 
 # initialise reweighting
 
-if args.ref_width: rw = HHReweight([600],[0.008333,0.01,0.02],ReweightSChan=True,RefMassRelWidth=(600,float(args.ref_width)))
-else: rw = HHReweight([600],[0.008333,0.01,0.02])
+mass_widths_dict = {
+  600: [0.008333,0.01,0.02,0.05,0.10],
+  260: [0.0008519, 0.002199, 0.0004948],
+  380: [0.002737, 0.0006079],
+  500: [0.001164, 0.0049212],
+  800: [0.00297, 0.01226],
+}
+
+if args.ref_width: rw = HHReweight(ReweightSChan=True,RefMassRelWidth=(args.ref_mass,float(args.ref_width)),mass_widths_dict=mass_widths_dict)
+else: rw = HHReweight(mass_widths_dict=mass_widths_dict)
 rw_names = rw.GetWeightNames()
 
 for wt in rw_names:
