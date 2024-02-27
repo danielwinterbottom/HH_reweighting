@@ -2,9 +2,9 @@ import pythia8
 import argparse
 import ROOT
 from array import array
-from python.reweight import *
 import random
 import math
+import numpy as np
 
 
 class SmearBJet():
@@ -38,7 +38,7 @@ class SmearBJet():
         rand_deta = self.func_eta.GetRandom()
 
 
-        j_smeared = j
+        j_smeared = ROOT.TLorentzVector(j)
 
         phi = j_smeared.Phi()
         new_phi = ROOT.TVector2.Phi_mpi_pi(phi + rand_dphi)
@@ -50,13 +50,40 @@ class SmearBJet():
 
         return j_smeared   
 
+class SmearGamma():
+    def __init__(self):
+        # energy resolution from https://arxiv.org/pdf/2012.06888.pdf Fig 11
+        self.func = ROOT.TF1("func","TMath::Gaus(x,0,0.02)",-1,1)
+        # eta and phi resolutions from https://cds.cern.ch/record/349375/files/ECAL_TDR.pdf page 7 assuming E ~60 GeV
+        # also page 3 here: https://www.physics.smu.edu/web/research/preprints/SMU-HEP-09-16.pdf
+        # for phi resolution
+        self.func_phi = ROOT.TF1("func_phi","TMath::Gaus(x,0,0.005)",-1,1)
+        # for eta resolution
+        self.func_eta = ROOT.TF1("func_eta","TMath::Gaus(x,0,0.005)",-1,1)
+
+    def Smear(self,g):
+        rand = 1.+self.func.GetRandom()
+        rand_dphi = self.func_phi.GetRandom()
+        rand_deta = self.func_eta.GetRandom()
+
+        g_smeared = ROOT.TLorentzVector(g)
+
+        phi = g_smeared.Phi()
+        new_phi = ROOT.TVector2.Phi_mpi_pi(phi + rand_dphi)
+        new_eta = g_smeared.Eta() + rand_deta
+        new_theta = 2 * math.atan(math.exp(-new_eta))
+        g_smeared.SetPhi(new_phi)
+        g_smeared.SetTheta(new_theta)
+        g_smeared *= rand
+
+        return g_smeared         
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--input', '-i', help= 'LHE file to be converted')
 parser.add_argument('--output', '-o', help= 'Name of output file',default='pythia_output.root')
 parser.add_argument('--cmnd_file', '-c', help= 'Pythia8 command file')
 parser.add_argument('--n_events', '-n', help= 'Maximum number of events to process', default=-1, type=int)
-parser.add_argument('--ref_width', help= 'Width of S-channel process reference sample', default=None)
-parser.add_argument('--ref_mass', help= 'Mass of the H in the reference sample', default=600, type=float)
+
 args = parser.parse_args()
 
 # Create a ROOT TTree to store the event information
@@ -99,6 +126,18 @@ hh_pT_smear_improved  = array('f',[0])
 h1_pT_smear_improved  = array('f',[0])
 h2_pT_smear_improved  = array('f',[0])
 
+hh_mass_smear_bbgg = array('f',[0])
+hh_mass_smear_bbgg_improved = array('f',[0])
+
+hh_mass_smear_improved_MX = array('f',[0])
+hh_mass_smear_bbgg_improved_MX = array('f',[0])
+
+alphas_out = array('f',[0])
+
+higgs_1 = ROOT.std.vector('float')([0.0]*5)
+higgs_2 = ROOT.std.vector('float')([0.0]*5)
+
+
 tree.Branch("wt_nom",  wt_nom,  'wt_nom/F')
 tree.Branch("hh_mass",  hh_mass,  'hh_mass/F')
 tree.Branch("hh_pT",  hh_pT,  'hh_pT/F')
@@ -127,6 +166,16 @@ tree.Branch("hh_pT_smear_improved",  hh_pT_smear_improved,  'hh_pT_smear_improve
 tree.Branch("h1_pT_smear_improved",  h1_pT_smear_improved,  'h1_pT_smear_improved/F')
 tree.Branch("h2_pT_smear_improved",  h2_pT_smear_improved,  'h2_pT_smear_improved/F')
 
+tree.Branch("hh_mass_smear_bbgg_improved",  hh_mass_smear_bbgg_improved,  'hh_mass_smear_bbgg_improved/F')
+tree.Branch("hh_mass_smear_bbgg",  hh_mass_smear_bbgg,  'hh_mass_smear_bbgg/F') 
+
+tree.Branch("hh_mass_smear_improved_MX",  hh_mass_smear_improved_MX,  'hh_mass_smear_improved_MX/F')
+tree.Branch("hh_mass_smear_bbgg_improved_MX",  hh_mass_smear_bbgg_improved_MX,  'hh_mass_smear_bbgg_improved_MX/F')
+
+tree.Branch("alphas",  alphas_out,  'alphas/F')  
+tree.Branch("higgs_1",  higgs_1)
+tree.Branch("higgs_2",  higgs_2)
+
 weights_map = {}
 weight_names = []
 # first get names of all weights from the first event to define tree branches
@@ -139,41 +188,13 @@ for i in range (pythia.infoPython().numberOfWeights()):
 for wt in weight_names:
     if wt not in weights_map:
         weights_map[wt] = array('f',[0])
-        tree.Branch("wt_%(wt)s" % vars(), weights_map[wt], 'wt_%(wt)s/F' % vars())
+        tree.Branch("wt_LHE_%(wt)s" % vars(), weights_map[wt], 'wt_LHE_%(wt)s/F' % vars())    
 
-# initialise reweighting
-
-mass_widths_dict = {
-  600: [0.008333,0.01,0.02,0.05,0.10],
-  260: [0.0008519, 0.002199, 0.0004948],
-  380: [0.002737, 0.0006079],
-  500: [0.001164, 0.0049212],
-  800: [0.00297, 0.01226],
-}
-
-if args.ref_width: rw = HHReweight(ReweightSChan=True,RefMassRelWidth=(args.ref_mass,float(args.ref_width)),mass_widths_dict=mass_widths_dict)
-else: rw = HHReweight(mass_widths_dict=mass_widths_dict)
-rw_names = rw.GetWeightNames()
-
-for wt in rw_names:
-    if wt not in weights_map:
-        weights_map[wt] = array('f',[0])
-        tree.Branch("wt_%(wt)s" % vars(), weights_map[wt], 'wt_%(wt)s/F' % vars())
-
-# this doesnt work for now because it misses additional gluon radiation!
-def SearchRecursive(part_i, all_parts, out_list):
-    part = all_parts[part_i]
-    lastCopy = True not in [abs(pythia.event[p].id()) == 5 for p in part.daughterList()] 
-    if lastCopy and abs(part.id())==5: 
-        out_list.append(part_i)
-    else:
-        for daught_i in part.daughterList():
-            if abs(all_parts[daught_i].id())==5:
-                SearchRecursive(daught_i, all_parts, out_list)     
 
 # initialise smearing
 
 smear = SmearBJet()
+smear_gam = SmearGamma()
 
 stopGenerating = False
 count = 0
@@ -191,6 +212,7 @@ while not stopGenerating:
         weights_map[name][0] = val
 
     higgs_bosons_first = []
+    higgs_bosons_last = []
     higgs_decay_prods = []
 
     for i, part in enumerate(pythia.event):
@@ -203,9 +225,9 @@ while not stopGenerating:
         lvec = ROOT.TLorentzVector(part.px(),part.py(),part.pz(),part.e())
         if firstCopy: higgs_bosons_first.append(lvec)
         if lastCopy:
+            lvec = ROOT.TLorentzVector(part.px(),part.py(),part.pz(),part.e())
+            higgs_bosons_last.append(lvec)
             decay_prods = part.daughterList()
-            #for daught_i in part.daughterList(): 
-            #    SearchRecursive(daught_i, pythia.event, decay_prods)
             decay_prods_lvec = []    
             for b_i in decay_prods:
                 b_jet = pythia.event[b_i] 
@@ -220,6 +242,10 @@ while not stopGenerating:
         j4 = higgs_decay_prods[1][1]  
 
         hh_mass[0] = (j1+j2+j3+j4).M()
+
+        #print '!!!!!!'
+        #print hh_mass[0], (higgs_bosons_last[0]+higgs_bosons_last[1]).M() 
+
         hh_pT[0] = (j1+j2+j3+j4).Pt()
         if (j1+j2).Pt() >= (j3+j4).Pt():
             h1_pT[0] = (j1+j2).Pt()
@@ -241,6 +267,11 @@ while not stopGenerating:
         j3_smear = smear.Smear(j3)
         j4_smear = smear.Smear(j4)
 
+        g1_smear = smear_gam.Smear(j1)
+        g2_smear = smear_gam.Smear(j2)
+        g3_smear = smear_gam.Smear(j3)
+        g4_smear = smear_gam.Smear(j4)
+
         h1_smear = j1_smear+j2_smear
         h2_smear = j3_smear+j4_smear
         h1_smear_imp = h1_smear*(125./h1_smear.M())
@@ -252,6 +283,26 @@ while not stopGenerating:
         hh_mass_smear_improved[0] = (h1_smear_imp+h2_smear_imp).M()
         hh_pT_smear_improved[0] = (h1_smear_imp+h2_smear_imp).Pt()
 
+        hh_mass_smear_improved_MX[0] = hh_mass_smear[0] - (h1_smear.M()-125.) - (h2_smear.M()-125.)
+
+
+        h1_smear_gg = g1_smear+g2_smear
+        h2_smear_gg = g3_smear+g4_smear
+
+
+        h1_smear_gg_imp = h1_smear_gg*(125./h1_smear_gg.M())
+        h2_smear_gg_imp = h2_smear_gg*(125./h2_smear_gg.M())
+
+        # for bbgg smearing, randomly choose which higgs decays to each final state
+        if random.random() < 0.5:
+            hh_mass_smear_bbgg[0] = (h1_smear+h2_smear_gg).M()
+            hh_mass_smear_bbgg_improved[0] = (h1_smear_imp+h2_smear_gg_imp).M()
+            hh_mass_smear_bbgg_improved_MX[0] = hh_mass_smear_bbgg[0] - (h1_smear.M()-125.) - (h2_smear_gg.M()-125.)
+        else:
+            hh_mass_smear_bbgg[0] = (h1_smear_gg+h2_smear).M()
+            hh_mass_smear_bbgg_improved[0] = (h1_smear_gg_imp+h2_smear_imp).M()
+            hh_mass_smear_bbgg_improved_MX[0] = hh_mass_smear_bbgg[0] - (h1_smear_gg.M()-125.) - (h2_smear.M()-125.)            
+
         if h1_smear.Pt() >= h2_smear.Pt():
             h1_mass_smear[0] = h1_smear.M()
             h2_mass_smear[0] = h2_smear.M()
@@ -262,6 +313,7 @@ while not stopGenerating:
 
             h1_pT_smear_improved[0] = h1_smear_imp.Pt()
             h2_pT_smear_improved[0] = h2_smear_imp.Pt()
+   
         else:  
             h1_mass_smear[0] = h2_smear.M()  
             h2_mass_smear[0] = h1_smear.M()  
@@ -284,15 +336,19 @@ while not stopGenerating:
         if higgs_bosons_first[0].M() != 125.: higgs_bosons_first[0].SetE((higgs_bosons_first[0].P()**2+125.**2)**.5)
         if higgs_bosons_first[1].M() != 125.: higgs_bosons_first[1].SetE((higgs_bosons_first[1].P()**2+125.**2)**.5)
         parts = [
-          [25, higgs_bosons_first[0].E(), higgs_bosons_first[0].Px(), higgs_bosons_first[0].Py(), higgs_bosons_first[0].Pz()],
-          [25, higgs_bosons_first[1].E(), higgs_bosons_first[1].Px(), higgs_bosons_first[1].Py(), higgs_bosons_first[1].Pz()],
+          [25., higgs_bosons_first[0].E(), higgs_bosons_first[0].Px(), higgs_bosons_first[0].Py(), higgs_bosons_first[0].Pz()],
+          [25., higgs_bosons_first[1].E(), higgs_bosons_first[1].Px(), higgs_bosons_first[1].Py(), higgs_bosons_first[1].Pz()],
         ]
 
         alphas = pythia.infoPython().alphaS()
-        rweights = rw.ReweightEvent(parts,alphas)
+        higgs_1.assign(parts[0])
+        higgs_2.assign(parts[1])
+        alphas_out[0] = alphas 
 
-        for key in rweights: 
-            weights_map[key][0] = rweights[key]
+    else:
+        higgs_1.assign([0.0]*5)
+        higgs_2.assign([0.0]*5)
+        alphas_out[0] = 0.118
         
 
     if hh_mass[0] >0:
