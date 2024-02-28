@@ -1,4 +1,5 @@
 import ROOT as R
+import math
 
 def GetRangeAroundMax(hist,frac=0.6):
   hist_scaled = hist.Clone()
@@ -295,7 +296,7 @@ def DrawTitle(pad, text, align, scale=1):
         pad_ratio = 1.
 
     textSize = 0.6
-    textOffset = 0.3
+    textOffset = 0.4
 
     latex = R.TLatex()
     latex.SetNDC()
@@ -341,7 +342,9 @@ def CompareHists(hists=[],
              label="",
              norm_bins=False,
              IncErrors=False,
-             skipCols=0):
+             skipCols=0,
+             lowerLeg=False,
+             wideLeg=False):
 
     objects=[]
     R.gROOT.SetBatch(R.kTRUE)
@@ -459,9 +462,13 @@ def CompareHists(hists=[],
     tot = len(hists)
     #if tot < 4 and False: legend = PositionedLegend(0.20,0.3,3,0.05)
     #else: legend = PositionedLegend(0.27,0.3,3,0.04)
-    legend = PositionedLegend(0.33,0.3,3,0.04)
-    max_len = max([len(x) for x in legend_titles])
-    if max_len>20: legend = PositionedLegend(0.37,0.3,3,0.02)
+    leg_pos=3
+    if lowerLeg: leg_pos = 6
+    if wideLeg: legend = PositionedLegend(0.33,0.3,leg_pos,0.04)
+    #else: legend = PositionedLegend(0.27,0.3,leg_pos,0.04)
+    else: legend = PositionedLegend(0.2,0.3,leg_pos,0.04)
+    #max_len = max([len(x) for x in legend_titles])
+    #if max_len>20: legend = PositionedLegend(0.37,0.3,leg_pos,0.02)
 
     legend.SetFillStyle(0)
     legend.SetTextFont(42)
@@ -473,7 +480,7 @@ def CompareHists(hists=[],
         legend.AddEntry(hist,legend_titles[legi],"l")
     col_count=1
     for i in range (legi+1,len(legend_titles)):
-        legend.AddEntry(hist,legend_titles[i],"").SetTextColor(colourlist[col_count])
+        legend.AddEntry(hist,legend_titles[i],"")#.SetTextColor(colourlist[col_count])
         col_count+=1 
    
     legend.Draw()
