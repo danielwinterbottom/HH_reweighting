@@ -134,8 +134,8 @@ hh_mass_smear_bbgg_improved_MX = array('f',[0])
 
 alphas_out = array('f',[0])
 
-higgs_1 = ROOT.std.vector('float')([0.0]*5)
-higgs_2 = ROOT.std.vector('float')([0.0]*5)
+higgs_1 = ROOT.std.vector('double')([0.0]*5)
+higgs_2 = ROOT.std.vector('double')([0.0]*5)
 
 
 tree.Branch("wt_nom",  wt_nom,  'wt_nom/F')
@@ -356,6 +356,7 @@ while not stopGenerating:
 
     count += 1
     if count % 10000 == 0: print 'Processed %i events' % count
+    
     pythia.next()
 
 root_file.Write()
