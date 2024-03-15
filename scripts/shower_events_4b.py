@@ -83,6 +83,7 @@ parser.add_argument('--input', '-i', help= 'LHE file to be converted')
 parser.add_argument('--output', '-o', help= 'Name of output file',default='pythia_output.root')
 parser.add_argument('--cmnd_file', '-c', help= 'Pythia8 command file')
 parser.add_argument('--n_events', '-n', help= 'Maximum number of events to process', default=-1, type=int)
+parser.add_argument('--n_skip', '-s', help= 'skip n_events*n_skip', default=0, type=int)
 
 args = parser.parse_args()
 
@@ -121,7 +122,26 @@ hh_eta_smear = array('f',[0])
 h1_mass_smear = array('f',[0])
 h2_mass_smear = array('f',[0])
 
+b1_pT = array('f',[0])
+b2_pT = array('f',[0])
+b3_pT = array('f',[0])
+b4_pT = array('f',[0])
+b1_pT_smear = array('f',[0])
+b2_pT_smear = array('f',[0])
+b3_pT_smear = array('f',[0])
+b4_pT_smear = array('f',[0])
+b1_eta = array('f',[0])
+b2_eta = array('f',[0])
+b3_eta = array('f',[0])
+b4_eta = array('f',[0])
+b1_eta_smear = array('f',[0])
+b2_eta_smear = array('f',[0])
+b3_eta_smear = array('f',[0])
+b4_eta_smear = array('f',[0])
+
+
 hh_mass_smear_improved  = array('f',[0])
+hh_mass_smear_improved_2  = array('f',[0])
 hh_pT_smear_improved  = array('f',[0])
 h1_pT_smear_improved  = array('f',[0])
 h2_pT_smear_improved  = array('f',[0])
@@ -162,9 +182,28 @@ tree.Branch("h1_mass_smear",  h1_mass_smear,  'h1_mass_smear/F')
 tree.Branch("h2_mass_smear",  h2_mass_smear,  'h2_mass_smear/F')
 
 tree.Branch("hh_mass_smear_improved",  hh_mass_smear_improved,  'hh_mass_smear_improved/F')
+tree.Branch("hh_mass_smear_improved_2",  hh_mass_smear_improved_2,  'hh_mass_smear_improved_2/F')
 tree.Branch("hh_pT_smear_improved",  hh_pT_smear_improved,  'hh_pT_smear_improved/F')
 tree.Branch("h1_pT_smear_improved",  h1_pT_smear_improved,  'h1_pT_smear_improved/F')
 tree.Branch("h2_pT_smear_improved",  h2_pT_smear_improved,  'h2_pT_smear_improved/F')
+
+
+tree.Branch("b1_pT", b1_pT, 'b1_pT/F')
+tree.Branch("b2_pT", b2_pT, 'b2_pT/F')
+tree.Branch("b3_pT", b3_pT, 'b3_pT/F')
+tree.Branch("b4_pT", b4_pT, 'b4_pT/F')
+tree.Branch("b1_pT_smear", b1_pT_smear, 'b1_pT_smear/F')
+tree.Branch("b2_pT_smear", b2_pT_smear, 'b2_pT_smear/F')
+tree.Branch("b3_pT_smear", b3_pT_smear, 'b3_pT_smear/F')
+tree.Branch("b4_pT_smear", b4_pT_smear, 'b4_pT_smear/F')
+tree.Branch("b1_eta", b1_eta, 'b1_eta/F')
+tree.Branch("b2_eta", b2_eta, 'b2_eta/F')
+tree.Branch("b3_eta", b3_eta, 'b3_eta/F')
+tree.Branch("b4_eta", b4_eta, 'b4_eta/F')
+tree.Branch("b1_eta_smear", b1_eta_smear, 'b1_eta_smear/F')
+tree.Branch("b2_eta_smear", b2_eta_smear, 'b2_eta_smear/F')
+tree.Branch("b3_eta_smear", b3_eta_smear, 'b3_eta_smear/F')
+tree.Branch("b4_eta_smear", b4_eta_smear, 'b4_eta_smear/F')
 
 tree.Branch("hh_mass_smear_bbgg_improved",  hh_mass_smear_bbgg_improved,  'hh_mass_smear_bbgg_improved/F')
 tree.Branch("hh_mass_smear_bbgg",  hh_mass_smear_bbgg,  'hh_mass_smear_bbgg/F') 
@@ -179,6 +218,7 @@ tree.Branch("higgs_2",  higgs_2)
 weights_map = {}
 weight_names = []
 # first get names of all weights from the first event to define tree branches
+pythia.LHAeventSkip(args.n_skip*args.n_events)
 pythia.next()
 for i in range (pythia.infoPython().numberOfWeights()):
     name = pythia.infoPython().weightNameByIndex(i).replace('AUX_','')
@@ -195,6 +235,9 @@ for wt in weight_names:
 
 smear = SmearBJet()
 smear_gam = SmearGamma()
+
+def sort_by_pt(vector):
+    return vector.Pt()
 
 stopGenerating = False
 count = 0
@@ -243,6 +286,19 @@ while not stopGenerating:
 
         hh_mass[0] = (j1+j2+j3+j4).M()
 
+        unsorted_jets = [j1,j2,j3,j4]
+        sorted_jets = sorted(unsorted_jets, key=sort_by_pt, reverse=True)
+
+        b1_pT[0] = sorted_jets[0].Pt()
+        b2_pT[0] = sorted_jets[1].Pt()
+        b3_pT[0] = sorted_jets[2].Pt()
+        b4_pT[0] = sorted_jets[3].Pt()
+
+        b1_eta[0] = sorted_jets[0].Rapidity()
+        b2_eta[0] = sorted_jets[1].Rapidity()
+        b3_eta[0] = sorted_jets[2].Rapidity()
+        b4_eta[0] = sorted_jets[3].Rapidity()
+
         #print '!!!!!!'
         #print hh_mass[0], (higgs_bosons_last[0]+higgs_bosons_last[1]).M() 
 
@@ -267,6 +323,19 @@ while not stopGenerating:
         j3_smear = smear.Smear(j3)
         j4_smear = smear.Smear(j4)
 
+        unsorted_smeared_jets = [j1_smear,j2_smear,j3_smear,j4_smear]
+        sorted_smeared_jets = sorted(unsorted_smeared_jets, key=sort_by_pt, reverse=True)        
+
+        b1_pT_smear[0] = sorted_smeared_jets[0].Pt()
+        b2_pT_smear[0] = sorted_smeared_jets[1].Pt()
+        b3_pT_smear[0] = sorted_smeared_jets[2].Pt()
+        b4_pT_smear[0] = sorted_smeared_jets[3].Pt()
+
+        b1_eta_smear[0] = sorted_smeared_jets[0].Rapidity()
+        b2_eta_smear[0] = sorted_smeared_jets[1].Rapidity()
+        b3_eta_smear[0] = sorted_smeared_jets[2].Rapidity()
+        b4_eta_smear[0] = sorted_smeared_jets[3].Rapidity()
+
         g1_smear = smear_gam.Smear(j1)
         g2_smear = smear_gam.Smear(j2)
         g3_smear = smear_gam.Smear(j3)
@@ -281,6 +350,34 @@ while not stopGenerating:
         hh_pT_smear[0] = (h1_smear+h2_smear).Pt()
 
         hh_mass_smear_improved[0] = (h1_smear_imp+h2_smear_imp).M()
+
+
+        def MassDiff(h1,h2):
+            return (h1.M()-125.)**2 + (h2.M()-125.)**2
+            #return abs(h1.M() - h2.M())
+
+        pairs = [
+            (j1_smear+j2_smear,j3_smear+j4_smear),    
+            (j1_smear+j3_smear,j2_smear+j4_smear),
+            (j1_smear+j4_smear,j2_smear+j3_smear)
+        ]
+
+        # realistic pairings:
+
+        min_mass_diff = None
+        best_pairs = None
+        for pair in pairs:
+            massdiff = MassDiff(pair[0], pair[1])
+            if (not min_mass_diff) or massdiff<min_mass_diff:
+                min_mass_diff = massdiff
+                best_pairs = pair 
+
+        h1_smear_imp_2 = best_pairs[0]*(125./best_pairs[0].M())
+        h2_smear_imp_2 = best_pairs[1]*(125./best_pairs[1].M())          
+
+        hh_mass_smear_improved_2[0] = (h1_smear_imp_2+h2_smear_imp_2).M()
+        
+
         hh_pT_smear_improved[0] = (h1_smear_imp+h2_smear_imp).Pt()
 
         hh_mass_smear_improved_MX[0] = hh_mass_smear[0] - (h1_smear.M()-125.) - (h2_smear.M()-125.)
@@ -355,8 +452,10 @@ while not stopGenerating:
         tree.Fill()
 
     count += 1
-    if count % 10000 == 0: print 'Processed %i events' % count
-    
+    if count % 10000 == 0: 
+        print 'Processed %i events' % count
+        root_file.Write() 
+
     pythia.next()
 
 root_file.Write()
