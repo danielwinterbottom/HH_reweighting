@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
+import matplotlib.style as style
+style.use('seaborn-colorblind')
 
 # Example data
 x = np.array([1, 2, 3, 4, 5])
@@ -66,8 +68,13 @@ for key in data_2:
   y2.append(tanb)
   z2.append(max_sina)
 
+cmap = 'Blues'
+#cmap = 'viridis'
+#cmap = 'cividis'
+#cmap = 'Purples'
+
 # plot sina vs mH
-plt.scatter(x1, y1, c=z1, cmap='Blues', marker='o',s=20)
+plt.scatter(x1, y1, c=z1, cmap=cmap, marker='o',s=20)
 ax = plt.gca()
 ax.tick_params(axis='both', which='both', direction='in',labelsize=12,length=8)
 ax.set_xlim([min(x1), max(x1)])
@@ -84,13 +91,15 @@ cb = plt.colorbar()
 cb.set_label(r'Max. $\tan\beta$')
 cb.ax.yaxis.label.set_fontsize(14)
 cb.ax.yaxis.set_tick_params(labelsize=12)
+#cb.set_clim(min(z1), max(z1))
+plt.clim(min(z1),max(z1))
 plt.ylabel(r'$\sin\alpha$', fontsize=14)
 plt.xlabel(r'$m_{\mathrm{H}}$ (GeV)', fontsize=14)
 plt.savefig('allowed_points_sina_vs_mH_maxtanb.pdf')
 plt.close()
 
 # plot tanb vs mH
-plt.scatter(x2, y2, c=z2, cmap='Blues', marker='o',s=20)
+plt.scatter(x2, y2, c=z2, cmap=cmap, marker='o',s=20)
 ax = plt.gca()
 ax.tick_params(axis='both', which='both', direction='in',labelsize=12, length=8)
 ax.set_xlim([min(x1), max(x1)])
@@ -104,6 +113,7 @@ cb = plt.colorbar()
 cb.set_label(r'Max. $|\sin\alpha|$')
 cb.ax.yaxis.label.set_fontsize(14)
 cb.ax.yaxis.set_tick_params(labelsize=12)
+plt.clim(min(z2),max(z2))
 plt.ylabel(r'$\tan\beta$', fontsize=14)
 plt.xlabel(r'$m_{\mathrm{H}}$ (GeV)', fontsize=14)
 plt.savefig('allowed_points_tanb_vs_mH_maxsina.pdf')
