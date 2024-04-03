@@ -4,11 +4,6 @@ from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
 import matplotlib.style as style
 style.use('seaborn-colorblind')
 
-# Example data
-x = np.array([1, 2, 3, 4, 5])
-y = np.array([2, 3, 4, 5, 6])
-z = np.array([10, 20, 30, 40, 50])  # Z values to represent colors
-
 points_files = ['oks_fullscan_ht_new.dat', 'oks_minus_ht_new.dat', 'oks_smallsa_ht_new.dat', 'oks_smallsam_ht_new.dat']
 
 data_1 = {}
