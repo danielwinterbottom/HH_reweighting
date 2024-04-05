@@ -4,6 +4,27 @@ import ROOT
 from array import array
 import random
 
+class SmearBJet():
+    def __init__(self):
+        # take resolutions vs pT from Fig 3 in https://arxiv.org/pdf/1912.06046.pdf (left plot for DNN)
+        x_vals = array('d',[30.,50.,70.,90.,125.,175.,224.,275.,350.])
+        y_vals = array('d',[0.111,0.106,0.094,0.087,0.082,0.076,0.073,0.068,0.064])
+        self.res_graph = ROOT.TGraph(len(x_vals), x_vals, y_vals)
+        self.min_pt = x_vals[0]
+        self.max_pt = x_vals[-1]
+        self.func = ROOT.TF1("func","TMath::Gaus(x,0,[0])",-0.5,0.5)
+
+    def Smear(self,j):
+        pt = max(min(j.Pt(),self.max_pt), self.min_pt)
+        sigma = self.res_graph.Eval()
+        print pt, sigma
+        self.res_graph.SetParameter(0,sigma)
+        rand = 1.+self.func.GetRandom()
+        print rand
+        j_smeared = j*rand
+
+        return j_smeared    
+
 class SmearHHbbgamgam():
     def __init__(self):
         # mgamgam resolutiosn taken from page 3 here: https://arxiv.org/pdf/2310.01643.pdf
@@ -15,8 +36,8 @@ class SmearHHbbgamgam():
         self.func2 = ROOT.TF1("func2","TMath::Gaus(x,0,%g)" % res_gamgam,-5*res_gamgam,5*res_gamgam)
 
     def Smear(self,h1,h2):
-      rand1 = 1.+smear.func1.GetRandom()
-      rand2 = 1.+smear.func2.GetRandom()
+      rand1 = 1.+self.func1.GetRandom()
+      rand2 = 1.+self.func2.GetRandom()
 
       if random.random() > 0.5:
           h1_smeared = h1*rand1
@@ -115,24 +136,26 @@ while not stopGenerating:
 
     higgs_bosons_first = []
     higgs_bosons = []
-    for part in pythia.event:
+
+
+    # loop over LHE particles
+    for part in pythia.process:
         pdgid = part.id()
         if pdgid != 25: continue
+        lvec = ROOT.TLorentzVector(part.px(),part.py(),part.pz(),part.e()) 
+        higgs_bosons_first.append(lvec)
 
+    for part in pythia.event:
+        pdgid = part.id()
 
-        firstCopy = True not in [pythia.event[p].id() == 25 for p in part.motherList()]
+        if pdgid != 25: continue
  
         lastCopy = len(part.daughterList()) == 2 and abs(pythia.event[part.daughterList()[0]].id()) == 5 and abs(pythia.event[part.daughterList()[1]].id()) == 5 
         
-
-        if not (firstCopy or lastCopy): continue
+        if not lastCopy: continue
 
         lvec = ROOT.TLorentzVector(part.px(),part.py(),part.pz(),part.e()) 
-
-        if firstCopy: higgs_bosons_first.append(lvec)
-        elif lastCopy: higgs_bosons.append(lvec)
-
-        if firstCopy and lastCopy: higgs_bosons.append(lvec)
+        higgs_bosons.append(lvec)
 
     if len(higgs_bosons_first) == 2:
         hh_mass_first[0] = (higgs_bosons_first[0]+higgs_bosons_first[1]).M()

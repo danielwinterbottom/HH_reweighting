@@ -32,20 +32,20 @@ weight_names = []
 mass_widths_dict = {
   260: [0.0008519, 0.002199, 0.0004948],
   380: [0.002737, 0.0006079, 0.002219],
-  440: [0.003323],
+  440: [0.003323,0.0008803],
   500: [0.001164, 0.0049212, 0.001115],
   560: [0.005333],
   600: [0.008333,0.01,0.02,0.05,0.10],
+  680: [0.008925],
   620: [0.007422],
   800: [0.00297, 0.01226],
+  870: [0.01097],
 }
 
 if args.ref_width:
     mass_widths_dict_new = {}
     mass_widths_dict_new[args.ref_mass] = mass_widths_dict[args.ref_mass] 
-    mass_widths_dict = mass_widths_dict_new
-
-print mass_widths_dict     
+    mass_widths_dict = mass_widths_dict_new   
 
 if args.ref_width: rw = HHReweight(ReweightSChan=True,RefMassRelWidth=(args.ref_mass,float(args.ref_width)),mass_widths_dict=mass_widths_dict)
 else: rw = HHReweight(mass_widths_dict=mass_widths_dict)
@@ -75,14 +75,16 @@ for i in range(intree.GetEntries()):
 
     parts = [p1,p2]
 
-    rweights = rw.ReweightEvent(parts,alphas)
+    if len(parts) == 2 and parts[0][0] == 25 and parts[1][0] == 25:
 
-    for key in rweights: 
-        weights_map[key][0] = rweights[key]
-    outtree.Fill()
+        rweights = rw.ReweightEvent(parts,alphas)
+
+        for key in rweights: 
+            weights_map[key][0] = rweights[key]
+        outtree.Fill()
         
 
-    if i+1 % 10000 == 0: print 'Processed %i events' % i+1
+    if i+1 % 1000 == 0: print 'Processed %i events' % i+1
 
 outfile.cd()
 outtree.Write()

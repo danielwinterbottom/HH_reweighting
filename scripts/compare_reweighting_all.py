@@ -3,7 +3,7 @@ import plotting
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--mass_cut', help= 'apply reco-mass cut for plots (500-700 GeV)', action='store_true')
+parser.add_argument('--reco_cuts', help= 'apply reco pT and eta cuts', action='store_true')
 parser.add_argument('--bm', help= 'benchmark to use for plots comparing w/o inteference', default='singlet_M600')
 args = parser.parse_args()
 
@@ -15,30 +15,50 @@ f3 = ROOT.TFile('outputs_4b_Feb13/output_powheg_pythia_chhh10.root')
 
 f4 = ROOT.TFile('outputs_4b_Feb13/output_powheg_pythia_from_single_H_width_5GeV.root')
 f5 = ROOT.TFile('outputs_4b_Feb13/output_powheg_pythia_from_single_H_width_12GeV.root')
-f6 = ROOT.TFile('outputs_4b_Feb27/output_mg_pythia_sm_10k_reweighted.root')
+#f6 = ROOT.TFile('outputs_4b_Feb27/output_mg_pythia_sm_new_reweighted.root')
+f6 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_sm_reweighted.root')
 #if bm_name == 'singlet_M600':
 #  f7 = ROOT.TFile('outputs_4b_Feb13/output_mg_pythia_width_5GeV.root')
 if 'M260' in bm_name:
-  f7 = ROOT.TFile('outputs_4b_Feb27/output_mg_pythia_mass_260GeV_relWidth0p001_10k_reweighted.root')  
+  f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_260GeV_relWidth0p001_reweighted.root')  
 elif 'M380' in bm_name:
-  f7 = ROOT.TFile('outputs_4b_Feb27/output_mg_pythia_mass_380GeV_relWidth0p002_10k_reweighted.root')
+  f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_380GeV_relWidth0p002_reweighted.root')
 elif 'M440' in bm_name:
-  f7 = ROOT.TFile('outputs_4b_Feb27/output_mg_pythia_mass_440GeV_relWidth0p003_10k_reweighted.root')  
+  f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_440GeV_relWidth0p003_reweighted.root')  
 elif 'M500' in bm_name:
-  f7 = ROOT.TFile('outputs_4b_Feb27/output_mg_pythia_mass_500GeV_relWidth0p003_10k_reweighted.root')
+  f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_500GeV_relWidth0p003_reweighted.root')
 elif 'M560' in bm_name:
-  f7 = ROOT.TFile('outputs_4b_Feb27/output_mg_pythia_mass_560GeV_relWidth0p005_10k_reweighted.root') 
+  f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_560GeV_relWidth0p005_reweighted.root') 
 elif 'M600' in bm_name:
-  f7 = ROOT.TFile('outputs_4b_Feb27/output_mg_pythia_mass_600GeV_relWidth0p008333_10k_reweighted.root')
+  #f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_600GeV_relWidth0p008333_reweighted.root')
+  f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_600GeV_relWidth0p02_reweighted.root')
 elif 'M620' in bm_name:
-  f7 = ROOT.TFile('outputs_4b_Feb27/output_mg_pythia_mass_620GeV_relWidth0p007_10k_reweighted.root')     
+  f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_620GeV_relWidth0p007_reweighted.root') 
+  #f7 = ROOT.TFile('outputs_4b_Mar11/output_mg_pythia_mass_620GeV_relWidth0p007_10k_reweighted.root')  
+elif 'M680' in bm_name:
+  f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_680GeV_relWidth0p009_reweighted.root')     
 elif 'M800' in bm_name:
-  f7 = ROOT.TFile('outputs_4b_Feb27/output_mg_pythia_mass_800GeV_relWidth0p01_10k_reweighted.root')
+  f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_800GeV_relWidth0p01_reweighted.root')
+elif 'M870' in bm_name:
+  f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_870GeV_relWidth0p01_reweighted.root')  
 else:
   f7 = ROOT.TFile('outputs_4b_Feb13/output_mg_pythia_width_5GeV.root')  
 f8 = ROOT.TFile('outputs_4b_Feb13/output_mg_pythia_BM.root')
 
 benchmarks = {}
+
+benchmarks['singlet_M600'] = {
+#  # sina=0.17, tanb=1.5, M=600
+  'kappa_h_t' : 0.9854491056576354,
+  'kappa_H_t' : 0.16997076265807162,
+  'kappa_h_lam' : 0.9491226120544515,
+  'kappa_H_lam' : 5.266738184342865,
+  'width' : 4.98,
+  'rel_width' : 0.008333,
+  'mass': 600.,
+  'label': 'sin#alpha=0.17, tan#beta=1.5, m_{H}=600 GeV, #Gamma_{H}=5.0 GeV'
+}
+
 benchmarks['singlet_M600_new'] = {
 #  # sina=0.17, tanb=1.5, M=600
   'kappa_h_t' : 0.9854491056576354,
@@ -73,7 +93,9 @@ benchmarks['singlet_M260'] = {
   'width' : 0.5718486648000001,
   'rel_width': 0.002199,
   'mass': 260,
-  'label': 'sin#alpha=0.24, tan#beta=3.5, m_{H}=260 GeV, #Gamma_{H}=0.6 GeV'
+  'label': 'sin#alpha=0.24, tan#beta=3.5, m_{H}=260 GeV, #Gamma_{H}=0.6 GeV',
+  #'xs_SH_nnlo' : 11.76,
+  #'xs_SH_lo':  3.8599
 }
 
 benchmarks['singlet_M380'] = {
@@ -86,7 +108,9 @@ benchmarks['singlet_M380'] = {
   'width' : 0.8433558311999999,
   'rel_width': 0.002219,
   'mass': 380.,
-  'label': 'sin#alpha=0.16, tan#beta=0.5, m_{H}=380 GeV, #Gamma_{H}=0.8 GeV'
+  'label': 'sin#alpha=0.16, tan#beta=0.5, m_{H}=380 GeV, #Gamma_{H}=0.8 GeV',
+  'xs_SH_nnlo' : 10.4,
+  'xs_SH_lo': 3.5208
 }
 
 benchmarks['singlet_M440'] = {
@@ -99,7 +123,9 @@ benchmarks['singlet_M440'] = {
   'width' : 1.4619768815999998,
   'rel_width': 0.003323,
   'mass': 440,
-  'label': 'sin#alpha=0.5, tan#beta=0.16, m_{H}=440 GeV, #Gamma_{H}=1.5 GeV'
+  'label': 'sin#alpha=0.16, tan#beta=0.5, m_{H}=440 GeV, #Gamma_{H}=1.5 GeV',
+  'xs_SH_nnlo' : 7.301,
+  'xs_SH_lo': 2.56210 
 }
 
 benchmarks['singlet_M500'] = {
@@ -112,7 +138,9 @@ benchmarks['singlet_M500'] = {
   'width' : 0.5576455704000001,
   'rel_width': 0.001115,
   'mass': 500.,
-  'label': 'sin#alpha=0.08, tan#beta=0.5, m_{H}=500 GeV, #Gamma_{H}=0.6 GeV'
+  'label': 'sin#alpha=0.08, tan#beta=0.5, m_{H}=500 GeV, #Gamma_{H}=0.6 GeV',
+  'xs_SH_nnlo' : 4.538,
+  'xs_SH_lo': 1.6224  
 }
 
 benchmarks['singlet_M560'] = {
@@ -125,7 +153,9 @@ benchmarks['singlet_M560'] = {
   'width' : 2.9865183695999997,
   'rel_width': 0.005333,
   'mass': 560.,
-  'label': 'sin#alpha=-0.16, tan#beta=0.5, m_{H}=560 GeV, #Gamma_{H}=3.0 GeV'
+  'label': 'sin#alpha=-0.16, tan#beta=0.5, m_{H}=560 GeV, #Gamma_{H}=3.0 GeV',
+  'xs_SH_nnlo' : 2.8076,
+  'xs_SH_lo': 1.0046 
 }
 
 benchmarks['singlet_M620'] = {
@@ -138,8 +168,53 @@ benchmarks['singlet_M620'] = {
   'width' : 4.6014512208000005,
   'rel_width': 0.007422,
   'mass': 620,
-  'label': 'sin#alpha=0.16, tan#beta=1.0, m_{H}=620 GeV, #Gamma_{H}=4.6 GeV'
+  'label': 'sin#alpha=0.16, tan#beta=1.0, m_{H}=620 GeV, #Gamma_{H}=4.6 GeV',
+  'xs_SH_nnlo' : 1.7444,
+  'xs_SH_lo': 0.62273, 
 }
+
+benchmarks['singlet_M680'] = {
+  # sina=0.16, tanb=1.0, M=680
+  # largest cross-section difference due to inteference
+  'kappa_h_t' : 0.987335676014,
+  'kappa_H_t' : 0.16,
+  'kappa_h_lam' : 0.957750818773,
+  'kappa_H_lam' : 5.72394506507,
+  'width' : 6.069265895999999,
+  'rel_width': 0.008925,
+  'mass': 680,
+  'label': 'sin#alpha=0.16, tan#beta=1.0, m_{H}=680 GeV, #Gamma_{H}=6.1 GeV',
+  'xs_SH_nnlo' : 1.0949,
+  'xs_SH_lo':  0.39366
+}
+
+benchmarks['singlet_M800'] = {
+  # sina=0.16, tanb=1.0, M=800
+  'kappa_h_t' : 0.987335676014,
+  'kappa_H_t' : 0.16,
+  'kappa_h_lam' : 0.957750818773,
+  'kappa_H_lam' : 7.78324344156,
+  'width' : 9.8111474352,
+  'rel_width': 0.01226,
+  'mass': 800.,
+  'label': 'sin#alpha=0.16, tan#beta=1.0, m_{H}=800 GeV, #Gamma_{H}=9.8 GeV'
+}
+#870.0 0.149999996647 1.10000001639
+benchmarks['singlet_M870'] = {
+  # sina=0.15, tanb=1.1, M=870
+  'kappa_h_t' : 0.98885488629,
+  'kappa_H_t' : 0.15,
+  'kappa_h_lam' : 0.962728061739,
+  'kappa_H_lam' : 8.63030446334,
+  'width' : 9.544587,
+  'rel_width': 0.01097,
+  'mass': 870.,
+  'label': 'sin#alpha=0.15, tan#beta=1.1, m_{H}=870 GeV, #Gamma_{H}=9.5 GeV',
+  'xs_SH_nnlo' : 0.28374,
+  'xs_SH_lo':  0.1027600000000024
+}
+
+
 
 
 ######### old BMs below #########
@@ -291,13 +366,6 @@ xs_SH_lo = 0.7309
 xs_SH_nlo = 1.5129402
 xs_SH_nlo_rw = 1.5395984 
 
-k_box_lo = xs_box_nnlo/xs_box_lo
-k_sh_lo = xs_Sh_nnlo/xs_Sh_lo
-k_box_sh_int_lo = xs_box_Sh_int_nnlo/xs_box_Sh_int_lo
-k_sH_lo = xs_SH_nnlo/xs_SH_lo
-k_sH_box_int_lo = (k_box_lo*k_sH_lo)**.5
-k_sH_sh_int_lo = (k_sh_lo*k_sH_lo)**.5
-
 k_box_nlo = xs_box_nnlo/xs_box_nlo
 k_sh_nlo = xs_Sh_nnlo/xs_Sh_nlo
 k_box_sh_int_nlo = xs_box_Sh_int_nnlo/xs_box_Sh_int_nlo
@@ -314,6 +382,21 @@ k_sH_sh_int_nlo_rw = (k_sh_nlo_rw*k_sH_nlo_rw)**.5
 
 print '\n***************'
 print 'K-factors (LO->NNLO):'
+
+k_box_lo = xs_box_nnlo/xs_box_lo
+k_sh_lo = xs_Sh_nnlo/xs_Sh_lo
+k_box_sh_int_lo = xs_box_Sh_int_nnlo/xs_box_Sh_int_lo
+# for BM have specific k-factor for each mass point if specified
+if 'xs_SH_nnlo' in bm and 'xs_SH_lo' in bm: 
+    xs_SH_nnlo_ = bm['xs_SH_nnlo']
+    xs_SH_lo_ = bm['xs_SH_lo']
+else: 
+    xs_SH_nnlo_ = xs_SH_nnlo
+    xs_SH_lo_ = xs_SH_lo    
+k_sH_lo = xs_SH_nnlo_/xs_SH_lo_
+k_sH_box_int_lo = (k_box_lo*k_sH_lo)**.5
+k_sH_sh_int_lo = (k_sh_lo*k_sH_lo)**.5
+
 
 print 'k_box =', k_box_lo
 print 'k_sh =', k_sh_lo
@@ -351,6 +434,9 @@ def DrawHist(f, h, plot,wt_extra='1',sep_file=False):
   if hh_mass_optimistic_str in plot: 
       var = '('+plot.split('(')[1]
       bins = '('+plot.split('(')[-1] 
+  elif 'b1_pT+' in plot or 'b1_pT_smear+' in plot:  
+      var = '('.join(plot.split('(')[0:2])
+      bins = '('+plot.split('(')[2]    
   elif 'abs(' not in plot: 
       var = plot.split('(')[0]
       bins = '('+plot.split('(')[1]      
@@ -358,7 +444,9 @@ def DrawHist(f, h, plot,wt_extra='1',sep_file=False):
       var = '('.join(plot.split('(')[0:2])
       bins = '('+plot.split('(')[2] 
 
-  if args.mass_cut: t.Draw('%(var)s>>%(h_name)s%(bins)s'  % vars(),'(hh_mass_smear_improved<700&&hh_mass_smear_improved>500)*(wt_nom)*'+wt_extra, 'goff')
+  if args.reco_cuts:
+    if 'b1_pT' in plot or 'b4_pT' in plot: t.Draw('%(var)s>>%(h_name)s%(bins)s'  % vars(),'(fabs(b4_eta_smear)<2.5&&fabs(b3_eta_smear)<2.5&&fabs(b2_eta_smear)<2.5&&fabs(b1_eta_smear)<2.5)*(wt_nom)*'+wt_extra, 'goff')
+    else: t.Draw('%(var)s>>%(h_name)s%(bins)s'  % vars(),'((b1_pT_smear+b2_pT_smear+b3_pT_smear+b4_pT_smear)>280&&b4_pT_smear>30&&fabs(b4_eta_smear)<2.5&&fabs(b3_eta_smear)<2.5&&fabs(b2_eta_smear)<2.5&&fabs(b1_eta_smear)<2.5)*(wt_nom)*'+wt_extra, 'goff')
   else: t.Draw('%(var)s>>%(h_name)s%(bins)s'  % vars(),'(wt_nom)*'+wt_extra, 'goff')
 
 
@@ -368,15 +456,20 @@ def DrawHist(f, h, plot,wt_extra='1',sep_file=False):
 
 #(hh_mass_smear_improved-hh_mass)/2 + hh_mass
 #= (hh_mass_smear_improved+hh_mass)/2
-hh_mass_optimistic_str = '(hh_mass_smear_improved+hh_mass)/2'
+hh_mass_optimistic_str = '(hh_mass_smear_improved_2+hh_mass)/2'
 
-
-if 'M260' in bm_name:
-   plots = ['hh_mass_fine(200,200,500)', 'hh_mass(100,200,500)', 'hh_mass_smear(100,200,500)', 'hh_mass_smear_improved(100,200,500)', 'hh_mass_smear_bbgg_improved(100,200,500)','%s(100,200,500)' % hh_mass_optimistic_str ]
+if bm_name == 'singlet_M600':
+   plots = ['hh_mass_fine(200,250,1000)', 'hh_mass(75,250,1000)', 'hh_mass_smear(75,250,1000)', 'hh_mass_smear_improved(75,250,1000)']   
+elif 'M260' in bm_name:
+   plots = ['hh_mass_fine(200,200,500)', 'hh_mass(100,200,500)', 'hh_mass_smear(100,200,500)', 'hh_mass_smear_improved(100,200,500)','hh_mass_smear_improved_2(100,200,500)', 'hh_mass_smear_bbgg_improved(100,200,500)','%s(100,200,500)' % hh_mass_optimistic_str ]
 elif 'M380' in bm_name:
-   plots = ['hh_mass_fine(100,250,750)', 'hh_mass(100,250,750)', 'hh_mass_smear(100,250,750)', 'hh_mass_smear_improved(100,250,750)', 'hh_mass_smear_bbgg_improved(100,250,750)','%s(100,250,750)' % hh_mass_optimistic_str]
+   plots = ['hh_mass_fine(100,250,750)', 'hh_mass(100,250,750)', 'hh_mass_smear(100,250,750)', 'hh_mass_smear_improved(100,250,750)','hh_mass_smear_improved_2(100,250,750)', 'hh_mass_smear_bbgg_improved(100,250,750)','%s(100,250,750)' % hh_mass_optimistic_str]
+elif 'M680' in bm_name:
+   plots = ['hh_mass_fine(200,250,1200)', 'hh_mass(75,250,1200)', 'hh_mass_smear(75,250,1200)', 'hh_mass_smear_improved(75,250,1200)','hh_mass_smear_improved_2(75,250,1200)', 'hh_mass_smear_bbgg_improved(75,250,1200)','%s(100,250,1200)' % hh_mass_optimistic_str]   
+elif 'M800' in bm_name or 'M870' in bm_name:
+   plots = ['hh_mass_fine(200,250,1300)', 'hh_mass(75,250,1300)', 'hh_mass_smear(75,250,1300)', 'hh_mass_smear_improved(75,250,1300)','hh_mass_smear_improved_2(75,250,1300)', 'hh_mass_smear_bbgg_improved(75,250,1300)','%s(100,250,1300)' % hh_mass_optimistic_str] 
 else:
-   plots = ['hh_mass_fine(200,250,1000)', 'hh_mass(75,250,1000)', 'hh_mass_smear(75,250,1000)', 'hh_mass_smear_improved(75,250,1000)', 'hh_mass_smear_bbgg_improved(75,250,1000)','%s(100,250,1000)' % hh_mass_optimistic_str]
+   plots = ['hh_mass_fine(200,250,1000)', 'hh_mass(75,250,1000)', 'hh_mass_smear(75,250,1000)', 'hh_mass_smear_improved(75,250,1000)','hh_mass_smear_improved_2(75,250,1000)', 'hh_mass_smear_bbgg_improved(75,250,1000)','%s(100,250,1000)' % hh_mass_optimistic_str]
 
 plots += ['hh_pT(75,0,300)', 'hh_pT_smear(75,0,300)', 'hh_pT_smear_improved(75,0,300)',
         'h1_pT(50,0,600)','h2_pT(50,0,600)','h1_pT_smear(50,0,600)','h2_pT_smear(50,0,600)', 'h1_pT_smear_improved(50,0,600)','h2_pT_smear_improved(50,0,600)',
@@ -384,10 +477,14 @@ plots += ['hh_pT(75,0,300)', 'hh_pT_smear(75,0,300)', 'hh_pT_smear_improved(75,0
         'hh_dR(100,0,10)', 'hh_dR_smear(100,0,10)',
         'hh_dphi(100,0,7)', 'hh_dphi_smear(100,0,7)',
         'fabs(h1_eta-h2_eta)(100,0,7)', 'fabs(h1_eta_smear-h2_eta_smear)(100,0,7)',
-        'hh_eta(100,-9,9)', 'hh_eta_smear(100,-9,9)'
+        'hh_eta(100,-9,9)', 'hh_eta_smear(100,-9,9)',
+        'b4_pT(50,0,300)', 'b4_pT_smear(50,0,300)',
+        'b1_pT(50,0,1000)', 'b1_pT_smear(50,0,1000)',
+        '(b1_pT+b2_pT+b3_pT+b4_pT)(50,0,1500)', '(b1_pT_smear+b2_pT_smear+b3_pT_smear+b4_pT_smear)(50,0,1500)',
         ]
 
-plots = plots[:6]
+plots = plots[:7]
+#plots = plots[-4:]
 
 for plot in plots:
 
@@ -457,9 +554,10 @@ for plot in plots:
   h_sH_sh_0p02_lo = ROOT.TH1D()
   h_sH_sh_0p02_lo.SetName('sH_sh_0p02_lo')
 
-  h_sm = DrawHist(f1,h_sm,plot)
-  h_box = DrawHist(f2,h_box,plot)
-  h_chhh10 = DrawHist(f3,h_chhh10,plot)
+  if bm_name == 'singlet_M600':
+      h_sm = DrawHist(f1,h_sm,plot)
+      h_box = DrawHist(f2,h_box,plot)
+      h_chhh10 = DrawHist(f3,h_chhh10,plot)
 
   plot_mod = plot
   if 'hh_mass' in plot and 'hh_mass_smear_improved' not in plot: plot_mod = 'hh_mass(50,500,700)'
@@ -526,6 +624,11 @@ for plot in plots:
     x_title="m_{hh} (GeV)"
     y_title="d#sigma/dm_{hh} (fb/GeV)"
     plot_name = 'plots_NLO/dihiggs_NLO_Validation_hh_mass_smear_improved'
+
+  elif 'hh_mass_smear_improved_2(' in plot:
+    x_title="m_{hh} (GeV)"
+    y_title="d#sigma/dm_{hh} (fb/GeV)"
+    plot_name = 'plots_NLO/dihiggs_NLO_Validation_hh_mass_smear_improved_paired'    
     
   elif 'hh_mass_smear_bbgg_improved(' in plot:
     x_title="m_{hh} (GeV)"
@@ -581,6 +684,27 @@ for plot in plots:
     x_title="p_{T}^{h_{2}} (GeV)"
     y_title="d#sigma/dp_{T}^{h_{2}} (fb/GeV)"
     plot_name = 'plots_NLO/dihiggs_NLO_Validation_h2_pT_smear_improved' 
+
+
+  elif 'b4_pT(' in plot:
+    x_title="p_{T}^{b_{4}} (GeV)"
+    y_title="d#sigma/dp_{T}^{b_{4}} (fb/GeV)"
+    plot_name = 'plots_NLO/dihiggs_NLO_Validation_b4_pT' 
+
+  elif 'b4_pT_smear(' in plot:
+    x_title="p_{T}^{b_{4}} (GeV)"
+    y_title="d#sigma/dp_{T}^{b_{4}} (fb/GeV)"
+    plot_name = 'plots_NLO/dihiggs_NLO_Validation_b4_pT_smear'  
+
+  elif 'b1_pT(' in plot:
+    x_title="p_{T}^{b_{1}} (GeV)"
+    y_title="d#sigma/dp_{T}^{b_{1}} (fb/GeV)"
+    plot_name = 'plots_NLO/dihiggs_NLO_Validation_b1_pT' 
+
+  elif 'b1_pT_smear(' in plot:
+    x_title="p_{T}^{b_{1}} (GeV)"
+    y_title="d#sigma/dp_{T}^{b_{1}} (fb/GeV)"
+    plot_name = 'plots_NLO/dihiggs_NLO_Validation_b1_pT_smear'    
 
   elif 'h1_eta(' in plot:
     x_title="#eta^{h_{1}}"
@@ -642,13 +766,64 @@ for plot in plots:
     y_title="d#sigma/d#Delta#eta(h_{1},h_{2}) (fb)"
     plot_name = 'plots_NLO/dihiggs_NLO_Validation_hh_deta_smear'
 
+  elif '(b1_pT+b2_pT+b3_pT+b4_pT)(' in plot:
+    x_title="H_{T} (GeV)"
+    y_title="d#sigma/dH_{T} (fb/GeV)"
+    plot_name = 'plots_NLO/dihiggs_NLO_Validation_HT'
+
+  elif '(b1_pT_smear+b2_pT_smear+b3_pT_smear+b4_pT_smear)(' in plot:
+    x_title="H_{T} (GeV)"
+    y_title="d#sigma/dH_{T} (fb/GeV)"
+    plot_name = 'plots_NLO/dihiggs_NLO_Validation_HT_smear'  
+
   else: 
       raise Exception('invalid plot: %s' % plot) 
 
   if fineBins: plot_name = plot_name+'_fineBins'     
 
 
-  if args.mass_cut: plot_name = plot_name.replace('plots_NLO', 'plots_NLO_masscut')
+  if args.reco_cuts: plot_name = plot_name.replace('plots_NLO', 'plots_NLO_recocuts')
+
+  if bm_name == 'singlet_M600_new':
+      # plot comparing inteference for different widths 
+
+      h_box_SH_lo_0p01 = ROOT.TH1D()
+      h_box_SH_lo_0p02 = ROOT.TH1D()
+      h_box_SH_lo_0p05 = ROOT.TH1D()
+      h_box_SH_lo_0p10 = ROOT.TH1D()
+
+      h_box_SH_lo_0p01.SetName('box_SH_lo_0p01')
+      h_box_SH_lo_0p02.SetName('box_SH_lo_0p02')
+      h_box_SH_lo_0p05.SetName('box_SH_lo_0p05')
+      h_box_SH_lo_0p10.SetName('box_SH_lo_0p10')
+
+      h_box_SH_lo_0p01 = DrawHist(f6,h_box_SH_lo_0p01,plot,'(wt_box_and_schannel_H_i_Mass_600_RelWidth_0p01)' % vars())
+      h_box_SH_lo_0p02 = DrawHist(f6,h_box_SH_lo_0p02,plot,'(wt_box_and_schannel_H_i_Mass_600_RelWidth_0p02)' % vars())
+      h_box_SH_lo_0p05 = DrawHist(f6,h_box_SH_lo_0p05,plot,'(wt_box_and_schannel_H_i_Mass_600_RelWidth_0p05)' % vars())
+      h_box_SH_lo_0p10 = DrawHist(f6,h_box_SH_lo_0p10,plot,'(wt_box_and_schannel_H_i_Mass_600_RelWidth_0p1)' % vars())
+
+
+      plotting.CompareHists(hists=[h_box_SH_lo_0p01.Clone(), h_box_SH_lo_0p02.Clone(), h_box_SH_lo_0p05.Clone(), h_box_SH_lo_0p10.Clone()],
+             legend_titles=['#Gamma_{H}=6 GeV', '#Gamma_{H}=12 GeV', '#Gamma_{H}=30 GeV', '#Gamma_{H}=60 GeV'],
+             title="S_{H}-#Box contribution, LO+PS",
+             ratio=True,
+             log_y=False,
+             log_x=False,
+             ratio_range="-0.2,1.2",
+             custom_x_range=False,
+             x_axis_max=1000,
+             x_axis_min=250,
+             custom_y_range=False,
+             y_axis_max=4000,
+             y_axis_min=0,
+             x_title=x_title,
+             y_title=y_title,
+             extra_pad=0,
+             norm_hists=norm_hists,
+             plot_name=plot_name.replace('NLO_Validation','LO_WidthComp_box_SH'),
+             label="m_{H} = 600 GeV",
+             norm_bins=True,
+             wideLeg=True) 
 
   if bm_name == 'singlet_M600':
 
@@ -776,7 +951,7 @@ for plot in plots:
         plotting.CompareHists(hists=[h_box.Clone(), h_box_weighted.Clone(), h_box_lo.Clone()],
                    legend_titles=['NLO+PS','NLO-approx+PS','LO+PS'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
                    scale_factors = [k_box_nlo, k_box_nlo_rw, k_box_lo] if x == '_inc_kfactors' else None,
-                   title="#Box: %(kaps_lab)s" % vars(),
+                   title="#Box contribution" % vars(),
                    ratio=True,
                    log_y=False,
                    log_x=False,
@@ -792,7 +967,7 @@ for plot in plots:
                    extra_pad=0,
                    norm_hists=norm_hists,
                    plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_box',
-                   label='',
+                   label=kaps_lab,
                    norm_bins=True,
                    IncErrors=True,
                    wideLeg=True)
@@ -874,6 +1049,10 @@ for plot in plots:
 
        # now makes plots of inteferences without the NLO exact (as it does not exist)
 
+
+        ##print h_sH_lo.Integral(-1,-1), h_sH_box_weighted.Integral(-1,-1), h_sH_box_lo.Integral(-1,-1)
+        ##exit() 
+
         plotting.CompareHists(hists=[h_sH_box_weighted.Clone(), h_sH_box_lo.Clone()],
                      legend_titles=['NLO-approx+PS','LO+PS'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
                      scale_factors = [k_sH_box_int_nlo_rw, k_sH_box_int_lo] if x == '_inc_kfactors' else None,
@@ -935,7 +1114,7 @@ for plot in plots:
     schannel_H_and_schannel_h_i_SF = kappa_H_t*kappa_H_lam*kappa_h_t*kappa_h_lam
 
     # make sH histograms again so that they do not include the zoomed binning for mass, and so that 5 GeV width samples are used for both NLO and LO
-    h_sH_weighted_v2 = DrawHist(f4,h_sH_weighted_v2,plot)
+    if bm_name == 'singlet_M600': h_sH_weighted_v2 = DrawHist(f4,h_sH_weighted_v2,plot)
     h_sH_weighted_v2.Scale(partial_width/5.)
     h_sH_lo_v2 = DrawHist(f7,h_sH_lo_v2,plot, '(wt_schannel_H_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s)' % vars())
 
@@ -948,7 +1127,13 @@ for plot in plots:
     wt_BM_kfacts_nlo_rw = '(wt_box*%(box_SF)g*%(k_box_nlo_rw)g + wt_schannel_h*%(schannel_h_SF)g*%(k_sh_nlo_rw)g + wt_box_and_schannel_h_i*%(box_and_schannel_h_i_SF)g*%(k_box_sh_int_nlo_rw)g + wt_box_and_schannel_H_i_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s*%(box_and_schannel_H_i_SF)g*%(k_sH_box_int_nlo_rw)g + wt_schannel_H_and_schannel_h_i_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s*%(schannel_H_and_schannel_h_i_SF)g*%(k_sH_sh_int_nlo_rw)g)' % vars()
 
     wt_BM_kfacts_lo = '(wt_box*%(box_SF)g*%(k_box_lo)g + wt_schannel_h*%(schannel_h_SF)g*%(k_sh_lo)g + wt_box_and_schannel_h_i*%(box_and_schannel_h_i_SF)g*%(k_box_sh_int_lo)g + wt_box_and_schannel_H_i_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s*%(box_and_schannel_H_i_SF)g*%(k_sH_box_int_lo)g + wt_schannel_H_and_schannel_h_i_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s*%(schannel_H_and_schannel_h_i_SF)g*%(k_sH_sh_int_lo)g)' % vars()
-    
+
+    wt_BM_nonres_lo = '(wt_box*%(box_SF)g + wt_schannel_h*%(schannel_h_SF)g + wt_box_and_schannel_h_i*%(box_and_schannel_h_i_SF)g)' % vars()
+    wt_BM_nonres_kfacts_lo = '(wt_box*%(box_SF)g*%(k_box_lo)g + wt_schannel_h*%(schannel_h_SF)g*%(k_sh_lo)g + wt_box_and_schannel_h_i*%(box_and_schannel_h_i_SF)g*%(k_box_sh_int_lo)g )' % vars()
+
+    wt_BM_kapt1_nonres_lo = '(wt_box + wt_schannel_h*%(kappa_h_lam)g*%(kappa_h_lam)g + wt_box_and_schannel_h_i*%(kappa_h_lam)g)' % vars()
+    wt_BM_kapt1_nonres_kfacts_lo = '(wt_box*%(k_box_lo)g + wt_schannel_h*%(kappa_h_lam)g*%(kappa_h_lam)g*%(k_sh_lo)g + wt_box_and_schannel_h_i*%(kappa_h_lam)g*%(k_box_sh_int_lo)g )' % vars()
+
     wt_BM_noint_kfacts_lo = '(wt_box*%(box_SF)g*%(k_box_lo)g + wt_schannel_h*%(schannel_h_SF)g*%(k_sh_lo)g + wt_box_and_schannel_h_i*%(box_and_schannel_h_i_SF)g*%(k_box_sh_int_lo)g)' % vars()
 
     wt_BM_noint = '(wt_box*%(box_SF)g + wt_schannel_h*%(schannel_h_SF)g + wt_box_and_schannel_h_i*%(box_and_schannel_h_i_SF)g)' % vars()
@@ -982,6 +1167,15 @@ for plot in plots:
     h_BM_lo.SetName('BM_lo')
     h_BM_lo = DrawHist(f6,h_BM_lo,plot, wt_BM)
     h_BM_lo.Add(h_sH_lo_v2,schannel_H_SF)
+
+    h_sH_before_lo = ROOT.TH1D()
+    h_sH_before_lo.SetName('sH_before_lo')
+
+    h_sH_before_lo = DrawHist(f7,h_sH_before_lo,plot, '1')
+    h_before_lo = ROOT.TH1D()
+    h_before_lo.SetName('BM_before_lo')
+    h_before_lo = DrawHist(f6,h_before_lo,plot, '1')
+    h_before_lo.Add(h_sH_before_lo)
 
     if bm_name == 'singlet_M600':
         # get seperatly generated hist here:
@@ -1018,6 +1212,22 @@ for plot in plots:
     h_BM_lo_noint = DrawHist(f6,h_BM_lo_noint,plot, wt_BM_noint)
     h_BM_lo_noint.Add(h_sH_lo_v2,schannel_H_SF)
 
+    #wt_BM_nonres_lo
+    h_BM_nonres_lo = ROOT.TH1D()
+    h_BM_nonres_lo.SetName('BM_nonres_lo')
+    h_BM_nonres_lo = DrawHist(f6,h_BM_nonres_lo,'hh_mass(100,200,800)', wt_BM_nonres_lo)
+
+    h_BM_nonres_kfacts_lo = ROOT.TH1D()
+    h_BM_nonres_kfacts_lo.SetName('BM_nonres_kfacts_lo')
+    h_BM_nonres_kfacts_lo = DrawHist(f6,h_BM_nonres_kfacts_lo,'hh_mass(100,200,800)', wt_BM_nonres_kfacts_lo)
+
+    h_BM_kapt1_nonres_lo = ROOT.TH1D()
+    h_BM_kapt1_nonres_lo.SetName('BM_nonres_lo')
+    h_BM_kapt1_nonres_lo = DrawHist(f6,h_BM_kapt1_nonres_lo,'hh_mass(100,200,800)', wt_BM_kapt1_nonres_lo)
+
+    h_BM_kapt1_nonres_kfacts_lo = ROOT.TH1D()
+    h_BM_kapt1_nonres_kfacts_lo.SetName('BM_nonres_kfacts_lo')
+    h_BM_kapt1_nonres_kfacts_lo = DrawHist(f6,h_BM_kapt1_nonres_kfacts_lo,'hh_mass(100,200,800)', wt_BM_kapt1_nonres_kfacts_lo)
 
     h_BM_lo_kfacts = ROOT.TH1D()
     h_BM_lo_kfacts.SetName('BM_lo_kfacts')
@@ -1045,6 +1255,14 @@ for plot in plots:
     h_SM_kfacts_lo.SetName('SM_kfacts')
     h_SM_kfacts_lo = DrawHist(f6,h_SM_kfacts_lo,plot, wt_SM_kfacts_lo)
 
+    h_SM_newbins_lo = ROOT.TH1D()
+    h_SM_newbins_lo.SetName('SM_newbins')
+    h_SM_newbins_lo = DrawHist(f6,h_SM_newbins_lo,'hh_mass(100,200,800)', wt_SM)  
+
+    h_SM_newbins_kfacts_lo = ROOT.TH1D()
+    h_SM_newbins_kfacts_lo.SetName('SM_newbins_kfacts')
+    h_SM_newbins_kfacts_lo = DrawHist(f6,h_SM_newbins_kfacts_lo,'hh_mass(100,200,800)', wt_SM_kfacts_lo)    
+
     h_BM_approx_lo = h_SM_lo.Clone()
     h_BM_approx_lo.Add(sH_lo)
 
@@ -1070,7 +1288,55 @@ for plot in plots:
                    y_title=y_title,
                    extra_pad=0,
                    norm_hists=False,
+                   plot_name=plot_name.replace('NLO_Validation','ReweightValidation_old'),
+                   label=bm['label'],
+                   norm_bins=True,
+                   IncErrors=True,
+                   wideLeg=True)
+
+
+        plotting.CompareHists(hists=[h_BM_lo_generated.Clone(), h_BM_lo.Clone(),h_before_lo.Clone()],
+                   legend_titles=['Directly generated', 'Reweighted', 'Before reweighting'],
+                   title="LO+PS" % vars(),
+                   ratio=True,
+                   log_y=False,
+                   log_x=False,
+                   ratio_range="0.,2.0",
+                   custom_x_range=True,
+                   x_axis_max=1000,
+                   x_axis_min=250,
+                   custom_y_range=False,
+                   y_axis_max=4000,
+                   y_axis_min=0,
+                   x_title=x_title,
+                   y_title=y_title,
+                   extra_pad=0,
+                   norm_hists=False,
                    plot_name=plot_name.replace('NLO_Validation','ReweightValidation'),
+                   label=bm['label'],
+                   norm_bins=True,
+                   IncErrors=True,
+                   wideLeg=True)
+
+
+        plotting.CompareHists(hists=[h_BM_lo_generated.Clone(), h_BM_lo.Clone()],
+                   legend_titles=['Directly generated', 'Reweighted'],
+                   title="LO+PS" % vars(),
+                   ratio=True,
+                   log_y=False,
+                   log_x=False,
+                   ratio_range="0.,2.0",
+                   custom_x_range=True,
+                   x_axis_max=1000,
+                   x_axis_min=250,
+                   custom_y_range=False,
+                   y_axis_max=4000,
+                   y_axis_min=0,
+                   x_title=x_title,
+                   y_title=y_title,
+                   extra_pad=0,
+                   norm_hists=False,
+                   plot_name=plot_name.replace('NLO_Validation','ReweightValidation_noBefore'),
                    label=bm['label'],
                    norm_bins=True,
                    IncErrors=True,
@@ -1133,6 +1399,7 @@ for plot in plots:
                    log_y=log_y,
                    log_x=False,
                    ratio_range="0.0,2.0",
+                   #ratio_range= "0.0,3.0" if 'h_mass(' in plot else "0.0,2.0",
                    custom_x_range=False,
                    x_axis_max=1000,
                    x_axis_min=250,
@@ -1149,7 +1416,36 @@ for plot in plots:
                    IncErrors=True,
                    wideLeg=True,     
                    skipCols=1)
-  
+
+    if  bm_name == 'singlet_M260' and 'hh_mass(' in plot and not fineBins:     
+      for log_y in [False, True]:
+          print '!!!!!!!'
+          print h_SM_newbins_lo.Integral(-1,-1), h_BM_nonres_lo.Integral(-1,-1), h_BM_kapt1_nonres_lo.Integral(-1,-1)
+          plotting.CompareHists(hists=[h_BM_nonres_lo.Clone() if x != '_inc_kfactors' else h_BM_nonres_kfacts_lo.Clone(), h_SM_newbins_lo.Clone() if x != '_inc_kfactors' else h_SM_newbins_kfacts_lo.Clone(), h_BM_kapt1_nonres_lo.Clone() if x != '_inc_kfactors' else h_BM_kapt1_nonres_kfacts_lo.Clone() ],
+                   legend_titles=['#kappa_{#lambda_{Hhh}}=0.87, #kappa_{t}^{h}=0.97','SM', '#kappa_{#lambda_{Hhh}}=0.87, #kappa_{t}^{h}=1.0'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
+                   title="LO+PS",
+                   ratio=True,
+                   log_y=log_y,
+                   log_x=False,
+                   ratio_range="0.2,1.8",
+                   #ratio_range= "0.0,6.0" if 'M260' in bm_name else "0.0,2.0",
+                   custom_x_range=False,
+                   x_axis_max=1000,
+                   x_axis_min=250,
+                   custom_y_range=False,
+                   y_axis_max=4000,
+                   y_axis_min=0,
+                   x_title=x_title,
+                   y_title=y_title,
+                   extra_pad=0,
+                   norm_hists=norm_hists,
+                   plot_name=plot_name.replace('plots_NLO','plots_CompWOInt').replace('NLO_Validation','LO_CompNonRes'+x)+'_BM_%(bm_name)s' % vars() + ('_logy' if log_y else ''),
+                   label=bm['label'],
+                   norm_bins=True,
+                   IncErrors=True,
+                   wideLeg=True,     
+                   skipCols=1)
+
     if bm_name == 'singlet_M600':
     
         plotting.CompareHists(hists=[h_BM_weighted.Clone() if x != '_inc_kfactors' else h_BM_weighted_kfacts.Clone(), h_BM_weighted_noint.Clone() if x != '_inc_kfactors' else h_BM_weighted_noint_kfacts.Clone()],
@@ -1176,4 +1472,7 @@ for plot in plots:
                      wideLeg=True,     
                      skipCols=1)                 
 
-print 'SH xs = ', sH_lo_kfacts.Integral(-1,-1)
+print 'SH xs (LO) = ', sH_lo.Integral(-1,-1)
+print 'SH xs (NNLO) = ', sH_lo_kfacts.Integral(-1,-1)
+print 'full xs (LO) = ', h_BM_lo.Integral(-1,-1)
+print 'full xs (NNLO) = ', h_BM_lo_kfacts.Integral(-1,-1)

@@ -7,6 +7,8 @@ import math
 mass = 600.
 rel_width = 0.01
 
+mass=260.
+
 # lo sample cross-sections
 # these are the numbers that I got out of the GenXSecAnalyzer under "xsec_before" after commenting these lines: https://github.com/cms-sw/cmssw/blob/402aaa8d730b384a986e3156044f22245d7ab229/GeneratorInterface/Core/plugins/GenXSecAnalyzer.cc#L194-L198 (to prevent it returning XS=0 when it is < 0)
 # note I only ran GenXSecAnalyzer for 1 file per sample, so it might be a good idea to run it for more events
@@ -88,3 +90,5 @@ print 'box_Sh_int =', k_box_Sh_int*xs_box_Sh_int_lo
 print 'SH =', k_SH*xs_SH_lo
 print 'box_SH_int =', k_box_SH_int*xs_box_SH_int_lo
 print 'SH_Sh_int =', k_SH_Sh_int*xs_SH_Sh_int_lo
+
+print 'partial_width = ', partial_width
