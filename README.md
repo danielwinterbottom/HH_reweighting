@@ -80,6 +80,7 @@ You should use option to install LHAPDF and PYTHON packages as well
 
 To use Pythia8 in python you need to set the PYTHONPATH environment variable appropiatly, e.g:
     export PYTHONPATH=/vols/cms/dw515/HH_reweighting/HH_powheg/pythia8310/lib:$PYTHONPATH 
+    export PYTHIA8DATA="/vols/cms/dw515/HH_reweighting/HH_powheg/pythia8310/share/Pythia8/xmldoc"
 
 The script `shower_events.py` will run pythia8 using the CMS CP5 tune. Higgs bosons are decayed into taus. The inputs to the script are the lhe file and a pythia8 command file. The command file depends on whether you are showering events produced by POWHEG or MadGraph
 
