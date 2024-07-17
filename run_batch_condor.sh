@@ -5,11 +5,12 @@ output=$2
 skip=$3
 rw_options=$4
 
-export PYTHONPATH=/vols/cms/dw515/HH_reweighting/HH_powheg/pythia8310/lib:$PYTHONPATH:/vols/cms/dw515/HH_reweighting/HHReweighter/:/vols/cms/dw515/HH_reweighting/HHReweighter/python
-export PYTHIA8DATA="/vols/cms/dw515/HH_reweighting/HH_powheg/pythia8310/share/Pythia8/xmldoc"
+export PYTHONPATH=/vols/cms/dw515/PYTHIA/pythia8310/lib/:$PYTHONPATH:/vols/cms/dw515/HH_reweighting/HHReweighter/:/vols/cms/dw515/HH_reweighting/HHReweighter/python
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/vols/cms/dw515/PYTHIA/pythia8310/lib/
+#export PYTHIA8DATA="/vols/cms/dw515/PYTHIA/pythia8310/share/Pythia8/xmldoc"
 
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate py2
+source /vols/cms/dw515/miniconda3/etc/profile.d/conda.sh
+conda activate hh_regression
 
 cd /vols/cms/dw515/HH_reweighting/HHReweighter
 

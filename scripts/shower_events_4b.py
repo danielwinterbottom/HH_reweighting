@@ -299,8 +299,6 @@ while not stopGenerating:
         b3_eta[0] = sorted_jets[2].Rapidity()
         b4_eta[0] = sorted_jets[3].Rapidity()
 
-        #print '!!!!!!'
-        #print hh_mass[0], (higgs_bosons_last[0]+higgs_bosons_last[1]).M() 
 
         hh_pT[0] = (j1+j2+j3+j4).Pt()
         if (j1+j2).Pt() >= (j3+j4).Pt():
@@ -426,7 +424,6 @@ while not stopGenerating:
         hh_eta_smear[0] = (h1_smear+h2_smear).Rapidity()
         
 
-        #print hh_mass[0], hh_mass_smear[0], hh_mass_smear_improved[0]  
 
     if len(higgs_bosons_first) == 2:
         # need to shift masses to 125 GeV, otherwise we get lots of errors
@@ -453,7 +450,7 @@ while not stopGenerating:
 
     count += 1
     if count % 10000 == 0: 
-        print 'Processed %i events' % count
+        print('Processed %i events' % count)
         root_file.Write() 
 
     pythia.next()

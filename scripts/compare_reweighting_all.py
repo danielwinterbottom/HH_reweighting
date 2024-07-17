@@ -380,8 +380,8 @@ k_sH_nlo_rw = xs_SH_nnlo/xs_SH_nlo_rw
 k_sH_box_int_nlo_rw = (k_box_nlo_rw*k_sH_nlo_rw)**.5
 k_sH_sh_int_nlo_rw = (k_sh_nlo_rw*k_sH_nlo_rw)**.5
 
-print '\n***************'
-print 'K-factors (LO->NNLO):'
+print('\n***************')
+print('K-factors (LO->NNLO):')
 
 k_box_lo = xs_box_nnlo/xs_box_lo
 k_sh_lo = xs_Sh_nnlo/xs_Sh_lo
@@ -398,32 +398,32 @@ k_sH_box_int_lo = (k_box_lo*k_sH_lo)**.5
 k_sH_sh_int_lo = (k_sh_lo*k_sH_lo)**.5
 
 
-print 'k_box =', k_box_lo
-print 'k_sh =', k_sh_lo
-print 'k_box_sh_int =', k_box_sh_int_lo
-print 'k_sH =', k_sH_lo
-print 'k_sH_box_int =', k_sH_box_int_lo
-print 'k_sH_sh_int =', k_sH_sh_int_lo
+print('k_box =', k_box_lo)
+print('k_sh =', k_sh_lo)
+print('k_box_sh_int =', k_box_sh_int_lo)
+print('k_sH =', k_sH_lo)
+print('k_sH_box_int =', k_sH_box_int_lo)
+print('k_sH_sh_int =', k_sH_sh_int_lo)
 
-print '\nK-factors (NLO->NNLO):'
+print('\nK-factors (NLO->NNLO):')
 
-print 'k_box =', k_box_nlo
-print 'k_sh =', k_sh_nlo
-print 'k_box_sh_int =', k_box_sh_int_nlo
-print 'k_sH =', k_sH_nlo
-print 'k_sH_box_int =', k_sH_box_int_nlo
-print 'k_sH_sh_int =', k_sH_sh_int_nlo
+print('k_box =', k_box_nlo)
+print('k_sh =', k_sh_nlo)
+print('k_box_sh_int =', k_box_sh_int_nlo)
+print('k_sH =', k_sH_nlo)
+print('k_sH_box_int =', k_sH_box_int_nlo)
+print('k_sH_sh_int =', k_sH_sh_int_nlo)
 
-print '\nK-factors (NLOApprox->NNLO):'
+print('\nK-factors (NLOApprox->NNLO):')
 
-print 'k_box =', k_box_nlo_rw
-print 'k_sh =', k_sh_nlo_rw
-print 'k_box_sh_int =', k_box_sh_int_nlo_rw
-print 'k_sH =', k_sH_nlo_rw
-print 'k_sH_box_int =', k_sH_box_int_nlo_rw
-print 'k_sH_sh_int =', k_sH_sh_int_nlo_rw
+print('k_box =', k_box_nlo_rw)
+print('k_sh =', k_sh_nlo_rw)
+print('k_box_sh_int =', k_box_sh_int_nlo_rw)
+print('k_sH =', k_sH_nlo_rw)
+print('k_sH_box_int =', k_sH_box_int_nlo_rw)
+print('k_sH_sh_int =', k_sH_sh_int_nlo_rw)
 
-print '***************\n'
+print('***************\n')
 
 def DrawHist(f, h, plot,wt_extra='1',sep_file=False):
   t = f.Get('ntuple')
@@ -1419,8 +1419,6 @@ for plot in plots:
 
     if  bm_name == 'singlet_M260' and 'hh_mass(' in plot and not fineBins:     
       for log_y in [False, True]:
-          print '!!!!!!!'
-          print h_SM_newbins_lo.Integral(-1,-1), h_BM_nonres_lo.Integral(-1,-1), h_BM_kapt1_nonres_lo.Integral(-1,-1)
           plotting.CompareHists(hists=[h_BM_nonres_lo.Clone() if x != '_inc_kfactors' else h_BM_nonres_kfacts_lo.Clone(), h_SM_newbins_lo.Clone() if x != '_inc_kfactors' else h_SM_newbins_kfacts_lo.Clone(), h_BM_kapt1_nonres_lo.Clone() if x != '_inc_kfactors' else h_BM_kapt1_nonres_kfacts_lo.Clone() ],
                    legend_titles=['#kappa_{#lambda_{Hhh}}=0.87, #kappa_{t}^{h}=0.97','SM', '#kappa_{#lambda_{Hhh}}=0.87, #kappa_{t}^{h}=1.0'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
                    title="LO+PS",
@@ -1472,7 +1470,7 @@ for plot in plots:
                      wideLeg=True,     
                      skipCols=1)                 
 
-print 'SH xs (LO) = ', sH_lo.Integral(-1,-1)
-print 'SH xs (NNLO) = ', sH_lo_kfacts.Integral(-1,-1)
-print 'full xs (LO) = ', h_BM_lo.Integral(-1,-1)
-print 'full xs (NNLO) = ', h_BM_lo_kfacts.Integral(-1,-1)
+print('SH xs (LO) = ', sH_lo.Integral(-1,-1))
+print('SH xs (NNLO) = ', sH_lo_kfacts.Integral(-1,-1))
+print('full xs (LO) = ', h_BM_lo.Integral(-1,-1))
+print('full xs (NNLO) = ', h_BM_lo_kfacts.Integral(-1,-1))
