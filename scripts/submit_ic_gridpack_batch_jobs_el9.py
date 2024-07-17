@@ -47,7 +47,7 @@ ls | grep -v ".lhe" | xargs rm -r' % vars()
 # make an output directory
 os.system('mkdir -p batch_job_outputs/%(name)s' % vars())
 
-for i in range(1,int(args.total_events/args.events_per_job)+1):
+for i in range(0,int(args.total_events/args.events_per_job)):
     # make an directory for each job where the gridpack will be untarred and the output will be stored
     os.system('mkdir -p %(current_dir)s/batch_job_outputs/%(name)s/job_output_%(i)i' % vars())
 
