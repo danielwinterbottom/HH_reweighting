@@ -349,7 +349,9 @@ def CompareHists(hists=[],
     objects=[]
     R.gROOT.SetBatch(R.kTRUE)
     R.TH1.AddDirectory(False)
-    ModTDRStyle(r=0.04, l=0.14)
+    widePlot=False
+    if widePlot: ModTDRStyle(width=900,r=0.04, l=0.14)
+    else:ModTDRStyle(r=0.04, l=0.14)
 
     colourlist=[R.kBlack,R.kBlue,R.kRed,R.kGreen+2,R.kMagenta,R.kCyan+1,R.kYellow+2,R.kViolet-5,R.kOrange,R.kCyan+3,R.kGray]
 
@@ -410,17 +412,27 @@ def CompareHists(hists=[],
           axish[1].GetYaxis().SetRangeUser(y_axis_min,y_axis_max)
     else:
         axish = createAxisHists(1,hists[0],hists[0].GetXaxis().GetXmin(),hists[0].GetXaxis().GetXmax()-0.005)
-        axish[0].GetXaxis().SetLabelSize(0.03)
         axish[0].GetXaxis().SetTitle(x_title)
-        axish[0].GetXaxis().SetTitleSize(0.04)
+        if widePlot: 
+            axish[0].GetXaxis().SetTitleSize(0.05)
+            axish[0].GetXaxis().SetTitleOffset(0.95)
+            axish[0].GetXaxis().SetLabelSize(0.04)
+        else: 
+            axish[0].GetXaxis().SetTitleSize(0.04)
+            axish[0].GetXaxis().SetLabelSize(0.03)
         if custom_x_range:
           axish[0].GetXaxis().SetRangeUser(x_axis_min,x_axis_max-0.01)
         if custom_y_range:                                                                
           axish[0].GetYaxis().SetRangeUser(y_axis_min,y_axis_max)
     axish[0].GetYaxis().SetTitle(y_title)
-    axish[0].GetYaxis().SetTitleOffset(1.6)
-    axish[0].GetYaxis().SetTitleSize(0.04)
-    axish[0].GetYaxis().SetLabelSize(0.03)
+    if widePlot: 
+      axish[0].GetYaxis().SetTitleOffset(0.9)
+      axish[0].GetYaxis().SetTitleSize(0.05)
+      axish[0].GetYaxis().SetLabelSize(0.04)          
+    else:      
+      axish[0].GetYaxis().SetTitleOffset(1.6)
+      axish[0].GetYaxis().SetTitleSize(0.04)
+      axish[0].GetYaxis().SetLabelSize(0.03)
 
     axish[0].SetLineStyle(2)
     axish[0].SetLineColor(R.kBlack)
@@ -472,7 +484,8 @@ def CompareHists(hists=[],
 
     legend.SetFillStyle(0)
     legend.SetTextFont(42)
-    legend.SetTextSize(0.032)
+    if widePlot: legend.SetTextSize(0.05)
+    else: legend.SetTextSize(0.032)
     legend.SetFillColor(0)
     
 

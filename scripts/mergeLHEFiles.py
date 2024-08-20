@@ -6,7 +6,7 @@ def combine_files(input_filenames, output_filename):
     with open(output_filename, 'w') as output_file:
 
         for filename in input_filenames:
-            print filename
+            print(filename)
             first = True
             with open(filename, 'r') as file:
                 lines = file.readlines()

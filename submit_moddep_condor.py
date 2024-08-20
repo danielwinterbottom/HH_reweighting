@@ -1,7 +1,7 @@
 import os
 
 os.system('mkdir -p condor_jobs')
-os.system('mkdir -p outputs_4b_BM_vals_17July')
+os.system('mkdir -p outputs_4b_BM_vals_23July')
 
 def Submit(input, output, options, N):
     for i in range(N):
@@ -24,10 +24,9 @@ def Submit(input, output, options, N):
     
         os.system('condor_submit %(job_file_name)s' % vars())
 
-#for bm in range(1,9):
-for bm in range(1,2):
+for bm in range(1,9):
 
     input = 'batch_job_outputs/HH_loop_sm_twoscalar_BM%i_Ntot_200000_Njob_10000/cmsgrid_final_all.lhe' % bm
-    output = 'outputs_4b_BM_vals_17July/output_mg_pythia_BM%i' % bm
+    output = 'outputs_4b_BM_vals_23July/output_mg_pythia_BM%i' % bm
     options = ''
     Submit(input, output, options, 100)

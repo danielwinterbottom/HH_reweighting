@@ -25,6 +25,10 @@ elif 'M380' in bm_name:
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_380GeV_relWidth0p002_reweighted.root')
 elif 'M440' in bm_name:
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_440GeV_relWidth0p003_reweighted.root')  
+elif '2HDM_BM1' in bm_name:
+  f7 = ROOT.TFile('outputs_4b_Aug09/output_mg_pythia_mass_450GeV_relWidth0p002_reweighted.root')  
+elif '2HDM_M500' in bm_name:
+  f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_500GeV_relWidth0p003_reweighted.root')  
 elif 'M500' in bm_name:
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_500GeV_relWidth0p003_reweighted.root')
 elif 'M560' in bm_name:
@@ -214,7 +218,73 @@ benchmarks['singlet_M870'] = {
   'xs_SH_lo':  0.1027600000000024
 }
 
+#cosbma = 0.05, yH = 0.299687, yh = 1.01125, kaplam111 = 0.943303, kaplam112 = 1.66424, width = 1.08077
+#bm_points from https://arxiv.org/pdf/2403.14776
+benchmarks['2HDM_BM1_tree'] = {
+  'kappa_h_t' : 1.01125,
+  'kappa_H_t' : -0.199687,
+  'kappa_h_lam' : 0.943303,
+  'kappa_H_lam' : 1.66424,
+  'width' : 0.644153,
+  'rel_width': 0.00143,
+  #2hdecay numbers:
+  #'width': 0.534554523,
+  #'rel_width': 0.00119,
+  'mass': 450.,
+  'label': 'tree',#'2HDM Type I: tan#beta=4, cos#beta-#alpha=0.05, m_{H}=450 GeV, #Gamma_{H}=1.1 GeV',
+  # note using numbers for 440 GeV for the below
+  'xs_SH_nnlo' : 7.301,
+  'xs_SH_lo': 2.56210
+}
 
+benchmarks['2HDM_BM1_1loop'] = {
+  'kappa_h_t' : 1.01125,
+  'kappa_H_t' : -0.199687,
+  'kappa_h_lam' : 5.01,
+  'kappa_H_lam' : 1.82274,
+  'width' : 0.685252,
+  'rel_width': 0.00152,
+  #2hdecay numbers:
+  #'width': 0.484193283317454,
+  #'rel_width': 0.001076,
+  'mass': 450.,
+  'label': '1-loop',#'2HDM Type I: tan#beta=4, cos#beta-#alpha=0.05, m_{H}=450 GeV, #Gamma_{H}=1.1 GeV',
+  # note using numbers for 440 GeV for the below
+  'xs_SH_nnlo' : 7.301,
+  'xs_SH_lo': 2.56210
+}
+
+benchmarks['2HDM_M500_tree'] = {
+  'kappa_h_t' : 0.999796,
+  'kappa_H_t' : 0.10202,
+  'kappa_h_lam' : 0.992035,
+  'kappa_H_lam' : -2.91728,
+  'width' : 2.77238,
+  'rel_width': 0.005545,
+  #2hdecay numbers:
+  #'width' : 3.0966670,
+  #'rel_width': 0.006193,
+  'mass': 500.,
+  'label': 'tree',
+  'xs_SH_nnlo' : 4.538,
+  'xs_SH_lo': 1.6224
+}
+
+benchmarks['2HDM_M500_1loop'] = {
+  'kappa_h_t' : 0.999796,
+  'kappa_H_t' : 0.10202,
+  'kappa_h_lam' : 3.61,
+  'kappa_H_lam' : -2.91728,
+  'width' : 2.35114,
+  'rel_width': 0.004702,
+  #2hdecay numbers:
+  #'width' : 2.0204585576326455,
+  #'rel_width': 0.004041,
+  'mass': 500.,
+  'label': '',
+  'xs_SH_nnlo' : 4.538,
+  'xs_SH_lo': 1.6224
+}
 
 
 ######### old BMs below #########
@@ -426,6 +496,7 @@ print('k_sH_sh_int =', k_sH_sh_int_nlo_rw)
 print('***************\n')
 
 def DrawHist(f, h, plot,wt_extra='1',sep_file=False):
+  print ('Drawing', f, h, plot, wt_extra)
   t = f.Get('ntuple')
   if sep_file:
       N = abs(t.GetEntries('wt_nom>0')-t.GetEntries('wt_nom<0'))
@@ -468,20 +539,22 @@ elif 'M680' in bm_name:
    plots = ['hh_mass_fine(200,250,1200)', 'hh_mass(75,250,1200)', 'hh_mass_smear(75,250,1200)', 'hh_mass_smear_improved(75,250,1200)','hh_mass_smear_improved_2(75,250,1200)', 'hh_mass_smear_bbgg_improved(75,250,1200)','%s(100,250,1200)' % hh_mass_optimistic_str]   
 elif 'M800' in bm_name or 'M870' in bm_name:
    plots = ['hh_mass_fine(200,250,1300)', 'hh_mass(75,250,1300)', 'hh_mass_smear(75,250,1300)', 'hh_mass_smear_improved(75,250,1300)','hh_mass_smear_improved_2(75,250,1300)', 'hh_mass_smear_bbgg_improved(75,250,1300)','%s(100,250,1300)' % hh_mass_optimistic_str] 
+elif '2HDM' in bm_name:
+    plots=['hh_mass(21,230,1280)', 'hh_mass_smear_improved(21,230,1280)']
 else:
    plots = ['hh_mass_fine(200,250,1000)', 'hh_mass(75,250,1000)', 'hh_mass_smear(75,250,1000)', 'hh_mass_smear_improved(75,250,1000)','hh_mass_smear_improved_2(75,250,1000)', 'hh_mass_smear_bbgg_improved(75,250,1000)','%s(100,250,1000)' % hh_mass_optimistic_str]
 
-plots += ['hh_pT(75,0,300)', 'hh_pT_smear(75,0,300)', 'hh_pT_smear_improved(75,0,300)',
-        'h1_pT(50,0,600)','h2_pT(50,0,600)','h1_pT_smear(50,0,600)','h2_pT_smear(50,0,600)', 'h1_pT_smear_improved(50,0,600)','h2_pT_smear_improved(50,0,600)',
-        'h1_eta(100,-7,7)','h2_eta(100,-7,7)','h1_eta_smear(100,-7,7)','h2_eta_smear(100,-7,7)',
-        'hh_dR(100,0,10)', 'hh_dR_smear(100,0,10)',
-        'hh_dphi(100,0,7)', 'hh_dphi_smear(100,0,7)',
-        'fabs(h1_eta-h2_eta)(100,0,7)', 'fabs(h1_eta_smear-h2_eta_smear)(100,0,7)',
-        'hh_eta(100,-9,9)', 'hh_eta_smear(100,-9,9)',
-        'b4_pT(50,0,300)', 'b4_pT_smear(50,0,300)',
-        'b1_pT(50,0,1000)', 'b1_pT_smear(50,0,1000)',
-        '(b1_pT+b2_pT+b3_pT+b4_pT)(50,0,1500)', '(b1_pT_smear+b2_pT_smear+b3_pT_smear+b4_pT_smear)(50,0,1500)',
-        ]
+#plots += ['hh_pT(75,0,300)', 'hh_pT_smear(75,0,300)', 'hh_pT_smear_improved(75,0,300)',
+#        'h1_pT(50,0,600)','h2_pT(50,0,600)','h1_pT_smear(50,0,600)','h2_pT_smear(50,0,600)', 'h1_pT_smear_improved(50,0,600)','h2_pT_smear_improved(50,0,600)',
+#        'h1_eta(100,-7,7)','h2_eta(100,-7,7)','h1_eta_smear(100,-7,7)','h2_eta_smear(100,-7,7)',
+#        'hh_dR(100,0,10)', 'hh_dR_smear(100,0,10)',
+#        'hh_dphi(100,0,7)', 'hh_dphi_smear(100,0,7)',
+#        'fabs(h1_eta-h2_eta)(100,0,7)', 'fabs(h1_eta_smear-h2_eta_smear)(100,0,7)',
+#        'hh_eta(100,-9,9)', 'hh_eta_smear(100,-9,9)',
+#        'b4_pT(50,0,300)', 'b4_pT_smear(50,0,300)',
+#        'b1_pT(50,0,1000)', 'b1_pT_smear(50,0,1000)',
+#        '(b1_pT+b2_pT+b3_pT+b4_pT)(50,0,1500)', '(b1_pT_smear+b2_pT_smear+b3_pT_smear+b4_pT_smear)(50,0,1500)',
+#        ]
 
 plots = plots[:7]
 #plots = plots[-4:]
@@ -1177,6 +1250,7 @@ for plot in plots:
     h_before_lo = DrawHist(f6,h_before_lo,plot, '1')
     h_before_lo.Add(h_sH_before_lo)
 
+
     if bm_name == 'singlet_M600':
         # get seperatly generated hist here:
 
@@ -1205,6 +1279,7 @@ for plot in plots:
 
         h_BM_lo_generated = ROOT.TH1D()
         h_BM_lo_generated.SetName('BM_generated')
+        print(f8, h_BM_lo_generated, plot)
         h_BM_lo_generated = DrawHist(f8,h_BM_lo_generated,plot)
 
     h_BM_lo_noint = ROOT.TH1D()
@@ -1225,9 +1300,21 @@ for plot in plots:
     h_BM_kapt1_nonres_lo.SetName('BM_nonres_lo')
     h_BM_kapt1_nonres_lo = DrawHist(f6,h_BM_kapt1_nonres_lo,'hh_mass(100,200,800)', wt_BM_kapt1_nonres_lo)
 
+
+    wt_BM_kapt1_nonres_kap4_lo = '(wt_box + wt_schannel_h*4.*4. + wt_box_and_schannel_h_i*4.)' % vars()
+    h_BM_kapt1_nonres_kap4_lo = ROOT.TH1D()
+    h_BM_kapt1_nonres_kap4_lo.SetName('BM_nonres_lo')
+    h_BM_kapt1_nonres_kap4_lo = DrawHist(f6,h_BM_kapt1_nonres_kap4_lo,'hh_mass(100,200,800)', wt_BM_kapt1_nonres_kap4_lo)
+
+    wt_BM_kapt1_nonres_kap3_lo = '(wt_box + wt_schannel_h*3.*3. + wt_box_and_schannel_h_i*3.)' % vars()
+    h_BM_kapt1_nonres_kap3_lo = ROOT.TH1D()
+    h_BM_kapt1_nonres_kap3_lo.SetName('BM_nonres_lo')
+    h_BM_kapt1_nonres_kap3_lo = DrawHist(f6,h_BM_kapt1_nonres_kap3_lo,'hh_mass(100,200,800)', wt_BM_kapt1_nonres_kap3_lo)
+
     h_BM_kapt1_nonres_kfacts_lo = ROOT.TH1D()
     h_BM_kapt1_nonres_kfacts_lo.SetName('BM_nonres_kfacts_lo')
     h_BM_kapt1_nonres_kfacts_lo = DrawHist(f6,h_BM_kapt1_nonres_kfacts_lo,'hh_mass(100,200,800)', wt_BM_kapt1_nonres_kfacts_lo)
+
 
     h_BM_lo_kfacts = ROOT.TH1D()
     h_BM_lo_kfacts.SetName('BM_lo_kfacts')
@@ -1268,6 +1355,8 @@ for plot in plots:
 
     h_BM_approx_kfacts_lo = h_SM_kfacts_lo.Clone()
     h_BM_approx_kfacts_lo.Add(sH_lo_kfacts)
+
+    
 
 
     if bm_name == 'singlet_M600':
@@ -1417,10 +1506,36 @@ for plot in plots:
                    wideLeg=True,     
                    skipCols=1)
 
+    if  bm_name == 'singlet_M620' and 'hh_mass' in plot and not fineBins:
+      plotting.CompareHists(hists=[h_SM_lo.Clone() if x != '_inc_kfactors' else h_SM_kfacts_lo.Clone(), h_BM_lo.Clone() if x != '_inc_kfactors' else h_BM_lo_kfacts.Clone(), h_BM_lo_noint.Clone() if x != '_inc_kfactors' else h_BM_lo_noint_kfacts.Clone(), sH_lo.Clone() if x != '_inc_kfactors' else sH_lo_kfacts.Clone()],
+                   legend_titles=['SM', 'BSM', 'BSM No intef.', 'BSM S#rightarrow HH only'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
+                   title="",#"LO+PS",
+                   ratio=False,#True,
+                   log_y=False,
+                   log_x=False,
+                   ratio_range="0.0,2.0",
+                   #ratio_range= "0.0,3.0" if 'h_mass(' in plot else "0.0,2.0",
+                   custom_x_range=False,
+                   x_axis_max=1000,
+                   x_axis_min=250,
+                   custom_y_range=False,
+                   y_axis_max=4000,
+                   y_axis_min=0,
+                   x_title=x_title.replace('hh','HH'),
+                   y_title=y_title.replace('hh','HH'),
+                   extra_pad=0,
+                   norm_hists=norm_hists,
+                   plot_name=plot_name.replace('plots_NLO','plots_CompWOInt').replace('NLO_Validation','LO_CompAllV2'+x)+'_BM_%(bm_name)s' % vars(),
+                   label="",#bm['label'],
+                   norm_bins=True,
+                   IncErrors=True,
+                   wideLeg=True,
+                   skipCols=1)
+
     if  bm_name == 'singlet_M260' and 'hh_mass(' in plot and not fineBins:     
       for log_y in [False, True]:
           plotting.CompareHists(hists=[h_BM_nonres_lo.Clone() if x != '_inc_kfactors' else h_BM_nonres_kfacts_lo.Clone(), h_SM_newbins_lo.Clone() if x != '_inc_kfactors' else h_SM_newbins_kfacts_lo.Clone(), h_BM_kapt1_nonres_lo.Clone() if x != '_inc_kfactors' else h_BM_kapt1_nonres_kfacts_lo.Clone() ],
-                   legend_titles=['#kappa_{#lambda_{Hhh}}=0.87, #kappa_{t}^{h}=0.97','SM', '#kappa_{#lambda_{Hhh}}=0.87, #kappa_{t}^{h}=1.0'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
+                   legend_titles=['#kappa_{#lambda_{hhh}}=0.87, #kappa_{t}^{h}=0.97','SM', '#kappa_{#lambda_{hhh}}=0.87, #kappa_{t}^{h}=1.0'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
                    title="LO+PS",
                    ratio=True,
                    log_y=log_y,
@@ -1442,6 +1557,31 @@ for plot in plots:
                    norm_bins=True,
                    IncErrors=True,
                    wideLeg=True,     
+                   skipCols=1)
+
+          plotting.CompareHists(hists=[h_SM_newbins_lo.Clone(), h_BM_kapt1_nonres_kap3_lo.Clone(), h_BM_kapt1_nonres_kap4_lo.Clone() ],
+                   legend_titles=['#kappa_{#lambda_{hhh}}=1 (SM)', '#kappa_{#lambda_{hhh}}=3', '#kappa_{#lambda_{hhh}}=4'],
+                   title="",#"LO+PS",
+                   ratio=False,
+                   log_y=log_y,
+                   log_x=False,
+                   ratio_range="0.2,1.8",
+                   #ratio_range= "0.0,6.0" if 'M260' in bm_name else "0.0,2.0",
+                   custom_x_range=False,
+                   x_axis_max=1000,
+                   x_axis_min=250,
+                   custom_y_range=False,
+                   y_axis_max=4000,
+                   y_axis_min=0,
+                   x_title=x_title,
+                   y_title=y_title,
+                   extra_pad=0,
+                   norm_hists=norm_hists,
+                   plot_name=plot_name.replace('plots_NLO','plots_CompWOInt').replace('NLO_Validation','LO_CompNonResV2'+x)+'_BM_%(bm_name)s' % vars() + ('_logy' if log_y else ''),
+                   label='',#bm['label'],
+                   norm_bins=True,
+                   IncErrors=True,
+                   wideLeg=True,
                    skipCols=1)
 
     if bm_name == 'singlet_M600':
