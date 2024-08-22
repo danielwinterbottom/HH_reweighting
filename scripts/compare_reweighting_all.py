@@ -1535,7 +1535,7 @@ for plot in plots:
     if  bm_name == 'singlet_M260' and 'hh_mass(' in plot and not fineBins:     
       for log_y in [False, True]:
           plotting.CompareHists(hists=[h_BM_nonres_lo.Clone() if x != '_inc_kfactors' else h_BM_nonres_kfacts_lo.Clone(), h_SM_newbins_lo.Clone() if x != '_inc_kfactors' else h_SM_newbins_kfacts_lo.Clone(), h_BM_kapt1_nonres_lo.Clone() if x != '_inc_kfactors' else h_BM_kapt1_nonres_kfacts_lo.Clone() ],
-                   legend_titles=['#kappa_{#lambda_{hhh}}=0.87, #kappa_{t}^{h}=0.97','SM', '#kappa_{#lambda_{hhh}}=0.87, #kappa_{t}^{h}=1.0'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
+                   legend_titles=['#kappa_{#lambda_{hhh}}=0.87, #kappa_{q}^{h}=0.97','SM', '#kappa_{#lambda_{hhh}}=0.87, #kappa_{q}^{h}=1.0'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
                    title="LO+PS",
                    ratio=True,
                    log_y=log_y,
