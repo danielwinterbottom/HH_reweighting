@@ -21,33 +21,38 @@ f6 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_sm_reweighted.root')
 #  f7 = ROOT.TFile('outputs_4b_Feb13/output_mg_pythia_width_5GeV.root')
 if 'M260' in bm_name:
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_260GeV_relWidth0p001_reweighted.root')  
+  f8 = ROOT.TFile('outputs_4b_BM_vals_23July/output_mg_pythia_BM8.root')
 elif 'M380' in bm_name:
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_380GeV_relWidth0p002_reweighted.root')
+  f8 = ROOT.TFile('outputs_4b_BM_vals_23July/output_mg_pythia_BM3.root')
 elif 'M440' in bm_name:
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_440GeV_relWidth0p003_reweighted.root')  
-elif '2HDM_BM1' in bm_name:
-  f7 = ROOT.TFile('outputs_4b_Aug09/output_mg_pythia_mass_450GeV_relWidth0p002_reweighted.root')  
-elif '2HDM_M500' in bm_name:
-  f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_500GeV_relWidth0p003_reweighted.root')  
+  f8 = ROOT.TFile('outputs_4b_BM_vals_23July/output_mg_pythia_BM2.root')
 elif 'M500' in bm_name:
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_500GeV_relWidth0p003_reweighted.root')
+  f8 = ROOT.TFile('outputs_4b_BM_vals_23July/output_mg_pythia_BM5.root')
 elif 'M560' in bm_name:
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_560GeV_relWidth0p005_reweighted.root') 
+  f8 = ROOT.TFile('outputs_4b_BM_vals_23July/output_mg_pythia_BM4.root')
 elif 'M600' in bm_name:
   #f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_600GeV_relWidth0p008333_reweighted.root')
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_600GeV_relWidth0p02_reweighted.root')
+  f8 = ROOT.TFile('outputs_4b_Feb13/output_mg_pythia_BM.root')
 elif 'M620' in bm_name:
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_620GeV_relWidth0p007_reweighted.root') 
   #f7 = ROOT.TFile('outputs_4b_Mar11/output_mg_pythia_mass_620GeV_relWidth0p007_10k_reweighted.root')  
+  f8 = ROOT.TFile('outputs_4b_BM_vals_23July/output_mg_pythia_BM1.root')
 elif 'M680' in bm_name:
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_680GeV_relWidth0p009_reweighted.root')     
+  f8 = ROOT.TFile('outputs_4b_BM_vals_23July/output_mg_pythia_BM6.root')
 elif 'M800' in bm_name:
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_800GeV_relWidth0p01_reweighted.root')
 elif 'M870' in bm_name:
   f7 = ROOT.TFile('outputs_4b_Mar12_v2/output_mg_pythia_mass_870GeV_relWidth0p01_reweighted.root')  
+  f8 = ROOT.TFile('outputs_4b_BM_vals_23July/output_mg_pythia_BM7.root')
 else:
   f7 = ROOT.TFile('outputs_4b_Feb13/output_mg_pythia_width_5GeV.root')  
-f8 = ROOT.TFile('outputs_4b_Feb13/output_mg_pythia_BM.root')
+  f8 = ROOT.TFile('outputs_4b_Feb13/output_mg_pythia_BM.root')
 
 benchmarks = {}
 
@@ -218,73 +223,7 @@ benchmarks['singlet_M870'] = {
   'xs_SH_lo':  0.1027600000000024
 }
 
-#cosbma = 0.05, yH = 0.299687, yh = 1.01125, kaplam111 = 0.943303, kaplam112 = 1.66424, width = 1.08077
-#bm_points from https://arxiv.org/pdf/2403.14776
-benchmarks['2HDM_BM1_tree'] = {
-  'kappa_h_t' : 1.01125,
-  'kappa_H_t' : -0.199687,
-  'kappa_h_lam' : 0.943303,
-  'kappa_H_lam' : 1.66424,
-  'width' : 0.644153,
-  'rel_width': 0.00143,
-  #2hdecay numbers:
-  #'width': 0.534554523,
-  #'rel_width': 0.00119,
-  'mass': 450.,
-  'label': 'tree',#'2HDM Type I: tan#beta=4, cos#beta-#alpha=0.05, m_{H}=450 GeV, #Gamma_{H}=1.1 GeV',
-  # note using numbers for 440 GeV for the below
-  'xs_SH_nnlo' : 7.301,
-  'xs_SH_lo': 2.56210
-}
 
-benchmarks['2HDM_BM1_1loop'] = {
-  'kappa_h_t' : 1.01125,
-  'kappa_H_t' : -0.199687,
-  'kappa_h_lam' : 5.01,
-  'kappa_H_lam' : 1.82274,
-  'width' : 0.685252,
-  'rel_width': 0.00152,
-  #2hdecay numbers:
-  #'width': 0.484193283317454,
-  #'rel_width': 0.001076,
-  'mass': 450.,
-  'label': '1-loop',#'2HDM Type I: tan#beta=4, cos#beta-#alpha=0.05, m_{H}=450 GeV, #Gamma_{H}=1.1 GeV',
-  # note using numbers for 440 GeV for the below
-  'xs_SH_nnlo' : 7.301,
-  'xs_SH_lo': 2.56210
-}
-
-benchmarks['2HDM_M500_tree'] = {
-  'kappa_h_t' : 0.999796,
-  'kappa_H_t' : 0.10202,
-  'kappa_h_lam' : 0.992035,
-  'kappa_H_lam' : -2.91728,
-  'width' : 2.77238,
-  'rel_width': 0.005545,
-  #2hdecay numbers:
-  #'width' : 3.0966670,
-  #'rel_width': 0.006193,
-  'mass': 500.,
-  'label': 'tree',
-  'xs_SH_nnlo' : 4.538,
-  'xs_SH_lo': 1.6224
-}
-
-benchmarks['2HDM_M500_1loop'] = {
-  'kappa_h_t' : 0.999796,
-  'kappa_H_t' : 0.10202,
-  'kappa_h_lam' : 3.61,
-  'kappa_H_lam' : -2.91728,
-  'width' : 2.35114,
-  'rel_width': 0.004702,
-  #2hdecay numbers:
-  #'width' : 2.0204585576326455,
-  #'rel_width': 0.004041,
-  'mass': 500.,
-  'label': '',
-  'xs_SH_nnlo' : 4.538,
-  'xs_SH_lo': 1.6224
-}
 
 
 ######### old BMs below #########
@@ -496,7 +435,6 @@ print('k_sH_sh_int =', k_sH_sh_int_nlo_rw)
 print('***************\n')
 
 def DrawHist(f, h, plot,wt_extra='1',sep_file=False):
-  print ('Drawing', f, h, plot, wt_extra)
   t = f.Get('ntuple')
   if sep_file:
       N = abs(t.GetEntries('wt_nom>0')-t.GetEntries('wt_nom<0'))
@@ -539,27 +477,15 @@ elif 'M680' in bm_name:
    plots = ['hh_mass_fine(200,250,1200)', 'hh_mass(75,250,1200)', 'hh_mass_smear(75,250,1200)', 'hh_mass_smear_improved(75,250,1200)','hh_mass_smear_improved_2(75,250,1200)', 'hh_mass_smear_bbgg_improved(75,250,1200)','%s(100,250,1200)' % hh_mass_optimistic_str]   
 elif 'M800' in bm_name or 'M870' in bm_name:
    plots = ['hh_mass_fine(200,250,1300)', 'hh_mass(75,250,1300)', 'hh_mass_smear(75,250,1300)', 'hh_mass_smear_improved(75,250,1300)','hh_mass_smear_improved_2(75,250,1300)', 'hh_mass_smear_bbgg_improved(75,250,1300)','%s(100,250,1300)' % hh_mass_optimistic_str] 
-elif '2HDM' in bm_name:
-    plots=['hh_mass(21,230,1280)', 'hh_mass_smear_improved(21,230,1280)']
 else:
    plots = ['hh_mass_fine(200,250,1000)', 'hh_mass(75,250,1000)', 'hh_mass_smear(75,250,1000)', 'hh_mass_smear_improved(75,250,1000)','hh_mass_smear_improved_2(75,250,1000)', 'hh_mass_smear_bbgg_improved(75,250,1000)','%s(100,250,1000)' % hh_mass_optimistic_str]
 
-if  bm_name == 'singlet_M620':
+plots = plots[:1]
 
-    plots += ['hh_pT(75,0,300)', 'hh_pT_smear(75,0,300)', 'hh_pT_smear_improved(75,0,300)',
-            'h1_pT(50,0,600)','h2_pT(50,0,600)','h1_pT_smear(50,0,600)','h2_pT_smear(50,0,600)', 'h1_pT_smear_improved(50,0,600)','h2_pT_smear_improved(50,0,600)',
-            'h1_eta(100,-7,7)','h2_eta(100,-7,7)','h1_eta_smear(100,-7,7)','h2_eta_smear(100,-7,7)',
-            'hh_dR(100,0,10)', 'hh_dR_smear(100,0,10)',
-            'hh_dphi(100,0,7)', 'hh_dphi_smear(100,0,7)',
-            'fabs(h1_eta-h2_eta)(100,0,7)', 'fabs(h1_eta_smear-h2_eta_smear)(100,0,7)',
-            'hh_eta(100,-9,9)', 'hh_eta_smear(100,-9,9)',
-            'b4_pT(50,0,300)', 'b4_pT_smear(50,0,300)',
-            'b1_pT(50,0,1000)', 'b1_pT_smear(50,0,1000)',
-            '(b1_pT+b2_pT+b3_pT+b4_pT)(50,0,1500)', '(b1_pT_smear+b2_pT_smear+b3_pT_smear+b4_pT_smear)(50,0,1500)',
-            ]
+plots += ['hh_pT(75,0,300)', 'h1_pT(50,0,600)','h2_pT(50,0,600)', 'hh_dR(100,0,10)', 'hh_dphi(100,0,7)', 'fabs(h1_eta-h2_eta)(100,0,7)' 
+        ]
 
-#plots = plots[:7]
-#plots = plots[-4:]
+
 
 for plot in plots:
 
@@ -640,19 +566,11 @@ for plot in plots:
   if bm_name == 'singlet_M600':
 
       h_sH = DrawHist(f4,h_sH,plot_mod)
-      print('zzzzz ',h_sH.Integral(-1,-1))
       h_sH.Scale(partial_width/5.)
-      print('BR = ', partial_width/5.)
     
       h_sH_weighted = DrawHist(f5,h_sH_weighted,plot_mod,'(wt_schannel_H_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s)' % vars())
       h_sH_weighted.Scale(partial_width/12.)
-      #h_sH_weighted.Scale(partial_width/5.)
-   
-      print('aaaaaaaaaa')
-      print('(wt_schannel_H_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s)' % vars())
-      print(h_sH_weighted.Integral(-1,-1))
-      print(partial_width)
-
+    
       h_sH_box_weighted = DrawHist(f1,h_sH_box_weighted,plot,'(wt_box_and_schannel_H_i_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s)' % vars())
     
       h_sH_sh_weighted = DrawHist(f1,h_sH_sh_weighted,plot,'(wt_schannel_H_and_schannel_h_i_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s)' % vars())
@@ -678,10 +596,6 @@ for plot in plots:
   # get LO distributions
 
   h_sH_lo = DrawHist(f7,h_sH_lo,plot_mod, '(wt_schannel_H_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s)' % vars())
-  print('!!!---!!!---')
-  print(f7)
-  print('(wt_schannel_H_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s)' % vars())
-  print(h_sH_lo.Integral(-1,-1))
   if bm_name == 'singlet_M600':
       h_sH_box_lo = DrawHist(f6,h_sH_box_lo,plot,'(wt_box_and_schannel_H_i_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s)' % vars())
       h_sH_sh_lo = DrawHist(f6,h_sH_sh_lo,plot,'(wt_schannel_H_and_schannel_h_i_Mass_%(mass_str)s_RelWidth_%(rel_width_str)s)' % vars())
@@ -868,162 +782,9 @@ for plot in plots:
 
   if fineBins: plot_name = plot_name+'_fineBins'     
 
+  plot_name += '_'+args.bm
 
   if args.reco_cuts: plot_name = plot_name.replace('plots_NLO', 'plots_NLO_recocuts')
-
-  if bm_name == 'singlet_M600_new' or bm_name == 'singlet_M600':
-      # plot comparing inteference for different widths 
-
-      h_box_SH_lo_0p01 = ROOT.TH1D()
-      h_box_SH_lo_0p02 = ROOT.TH1D()
-      h_box_SH_lo_0p05 = ROOT.TH1D()
-      h_box_SH_lo_0p10 = ROOT.TH1D()
-
-      h_box_SH_lo_0p01.SetName('box_SH_lo_0p01')
-      h_box_SH_lo_0p02.SetName('box_SH_lo_0p02')
-      h_box_SH_lo_0p05.SetName('box_SH_lo_0p05')
-      h_box_SH_lo_0p10.SetName('box_SH_lo_0p10')
-
-      h_box_SH_lo_0p01 = DrawHist(f6,h_box_SH_lo_0p01,plot,'(wt_box_and_schannel_H_i_Mass_600_RelWidth_0p01)' % vars())
-      h_box_SH_lo_0p02 = DrawHist(f6,h_box_SH_lo_0p02,plot,'(wt_box_and_schannel_H_i_Mass_600_RelWidth_0p02)' % vars())
-      h_box_SH_lo_0p05 = DrawHist(f6,h_box_SH_lo_0p05,plot,'(wt_box_and_schannel_H_i_Mass_600_RelWidth_0p05)' % vars())
-      h_box_SH_lo_0p10 = DrawHist(f6,h_box_SH_lo_0p10,plot,'(wt_box_and_schannel_H_i_Mass_600_RelWidth_0p1)' % vars())
-
-
-      plotting.CompareHists(hists=[h_box_SH_lo_0p01.Clone(), h_box_SH_lo_0p02.Clone(), h_box_SH_lo_0p05.Clone(), h_box_SH_lo_0p10.Clone()],
-             legend_titles=['#Gamma_{H}=6 GeV', '#Gamma_{H}=12 GeV', '#Gamma_{H}=30 GeV', '#Gamma_{H}=60 GeV'],
-             title="S_{H}-#Box contribution, LO+PS",
-             ratio=True,
-             log_y=False,
-             log_x=False,
-             ratio_range="-0.2,1.2",
-             custom_x_range=False,
-             x_axis_max=1000,
-             x_axis_min=250,
-             custom_y_range=False,
-             y_axis_max=4000,
-             y_axis_min=0,
-             x_title=x_title,
-             y_title=y_title,
-             extra_pad=0,
-             norm_hists=norm_hists,
-             plot_name=plot_name.replace('NLO_Validation','LO_WidthComp_box_SH'),
-             label="m_{H} = 600 GeV",
-             norm_bins=True,
-             wideLeg=True) 
-
-  if bm_name == 'singlet_M600':
-
-      plotting.CompareHists(
-                   hists=[h_sh_lo.Clone(), h_box_lo.Clone(), h_int_lo.Clone(), h_sH_0p02_lo.Clone(), h_sH_box_0p02_lo.Clone(), h_sH_sh_0p02_lo.Clone()],
-                   legend_titles=['S_{h}', '#Box', 'S_{h}-#Box', 'S_{H}', 'S_{H}-#Box', 'S_{H}-S_{h}'],
-                   title="LO+PS" % vars(),
-                   ratio=False,
-                   log_y=False,
-                   log_x=False,
-                   ratio_range="0.,2.0",
-                   custom_x_range=True,
-                   x_axis_max=1000,
-                   x_axis_min=250,
-                   custom_y_range=False,
-                   y_axis_max=4000,
-                   y_axis_min=0,
-                   x_title=x_title,
-                   y_title=y_title,
-                   extra_pad=0,
-                   norm_hists=False,
-                   plot_name=plot_name.replace('NLO_Validation','LO_contributions'),
-                   label="m_{H} = 600 GeV,  #Gamma_{H} = 12 GeV",
-                   norm_bins=True)  
-
-    
-      plotting.CompareHists(hists=[h_box.Clone(), h_box_weighted.Clone()],
-                   legend_titles=['Generated','Reweighted'],
-                   title="",
-                   ratio=True,
-                   log_y=False,
-                   log_x=False,
-                   ratio_range="0.5,1.5",
-                   custom_x_range=False,
-                   x_axis_max=1000,
-                   x_axis_min=250,
-                   custom_y_range=False,
-                   y_axis_max=4000,
-                   y_axis_min=0,
-                   x_title=x_title,
-                   y_title=y_title,
-                   extra_pad=0,
-                   norm_hists=norm_hists,
-                   plot_name=plot_name+'_box',
-                   label='',
-                   norm_bins=True,
-                   IncErrors=True)
-
-      plotting.CompareHists(hists=[h_chhh10.Clone(), h_chhh10_weighted.Clone()],
-                   legend_titles=['Generated','Reweighted'],
-                   title="",
-                   ratio=True,
-                   log_y=False,
-                   log_x=False,
-                   ratio_range="0.5,1.5",
-                   custom_x_range=False,
-                   x_axis_max=1000,
-                   x_axis_min=250,
-                   custom_y_range=False,
-                   y_axis_max=4000,
-                   y_axis_min=0,
-                   x_title=x_title,
-                   y_title=y_title,
-                   extra_pad=0,
-                   norm_hists=norm_hists,
-                   plot_name=plot_name+'_chhh10',
-                   label='',
-                   norm_bins=True,
-                   IncErrors=True)
-
-      plotting.CompareHists(hists=[h_sh.Clone(), h_sh_weighted.Clone()],
-                   legend_titles=['Generated','Reweighted'],
-                   title="",
-                   ratio=True,
-                   log_y=False,
-                   log_x=False,
-                   ratio_range="0.5,1.5",
-                   custom_x_range=False,
-                   x_axis_max=1000,
-                   x_axis_min=250,
-                   custom_y_range=False,
-                   y_axis_max=4000,
-                   y_axis_min=0,
-                   x_title=x_title,
-                   y_title=y_title,
-                   extra_pad=0,
-                   norm_hists=norm_hists,
-                   plot_name=plot_name+'_Sh',
-                   label='',
-                   norm_bins=True,
-                   IncErrors=True)
-
-      plotting.CompareHists(hists=[h_int.Clone(), h_int_weighted.Clone()],
-                   legend_titles=['Generated','Reweighted'],
-                   title="",
-                   ratio=True,
-                   log_y=False,
-                   log_x=False,
-                   ratio_range="0.5,1.5",
-                   custom_x_range=False,
-                   x_axis_max=1000,
-                   x_axis_min=250,
-                   custom_y_range=False,
-                   y_axis_max=4000,
-                   y_axis_min=0,
-                   x_title=x_title,
-                   y_title=y_title,
-                   extra_pad=0,
-                   norm_hists=norm_hists,
-                   plot_name=plot_name+'_box_Sh_int',
-                   label='',
-                   norm_bins=True,
-                   IncErrors=True)
 
 
     # make plots comparing LO to NLO to NLO-approx+PS
@@ -1032,169 +793,6 @@ for plot in plots:
   kaps_lab = 'm_{H} = 600 GeV, #Gamma_{H} = 5 GeV'
 
   for x in ['','_inc_kfactors']:
-
-    if bm_name == 'singlet_M600':
-
-        plotting.CompareHists(hists=[h_box.Clone(), h_box_weighted.Clone(), h_box_lo.Clone()],
-                   legend_titles=['NLO+PS','NLO-approx+PS','LO+PS'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
-                   scale_factors = [k_box_nlo, k_box_nlo_rw, k_box_lo] if x == '_inc_kfactors' else None,
-                   title="#Box contribution" % vars(),
-                   ratio=True,
-                   log_y=False,
-                   log_x=False,
-                   ratio_range="0.,2.0",
-                   custom_x_range=False,
-                   x_axis_max=1000,
-                   x_axis_min=250,
-                   custom_y_range=False,
-                   y_axis_max=4000,
-                   y_axis_min=0,
-                   x_title=x_title,
-                   y_title=y_title,
-                   extra_pad=0,
-                   norm_hists=norm_hists,
-                   plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_box',
-                   label=kaps_lab,
-                   norm_bins=True,
-                   IncErrors=True,
-                   wideLeg=True)
-
-        plotting.CompareHists(hists=[h_sh.Clone(), h_sh_weighted.Clone(), h_sh_lo.Clone()],
-                     legend_titles=['NLO+PS','NLO-approx+PS','LO+PS'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
-                     scale_factors = [k_sh_nlo, k_sh_nlo_rw, k_sh_lo] if x == '_inc_kfactors' else None,
-                     title="S_{h} contribution" % vars(),
-                     ratio=True,
-                     log_y=False,
-                     log_x=False,
-                     ratio_range="0.,2.",
-                     custom_x_range=False,
-                     x_axis_max=1000,
-                     x_axis_min=250,
-                     custom_y_range=False,
-                     y_axis_max=4000,
-                     y_axis_min=0,
-                     x_title=x_title,
-                     y_title=y_title,
-                     extra_pad=0,
-                     norm_hists=norm_hists,
-                     plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_Sh',
-                     label=kaps_lab,
-                     norm_bins=True,
-                     IncErrors=True,
-                     wideLeg=True)
-
-        plotting.CompareHists(hists=[h_int.Clone(), h_int_weighted.Clone(), h_int_lo.Clone()],
-                     legend_titles=['NLO+PS','NLO-approx+PS','LO+PS'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
-                     scale_factors = [k_box_sh_int_nlo, k_box_sh_int_nlo_rw, k_box_sh_int_lo] if x == '_inc_kfactors' else None,
-                     title="S_{h}-#Box contribution" % vars(),
-                     ratio=True,
-                     log_y=False,
-                     log_x=False,
-                     ratio_range="0.,2.",
-                     custom_x_range=False,
-                     x_axis_max=1000,
-                     x_axis_min=250,
-                     custom_y_range=False,
-                     y_axis_max=4000,
-                     y_axis_min=0,
-                     x_title=x_title,
-                     y_title=y_title,
-                     extra_pad=0,
-                     norm_hists=norm_hists,
-                     plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_box_Sh_int',
-                     label=kaps_lab,
-                     norm_bins=True,
-                     IncErrors=True,
-                     lowerLeg=True,
-                     wideLeg=True)
-
-        # do same for H in s-channel
-
-        plotting.CompareHists(hists=[h_sH.Clone(), h_sH_weighted.Clone(), h_sH_lo.Clone()],
-                     legend_titles=['NLO+PS','NLO-approx+PS','LO+PS'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
-                     scale_factors = [k_sH_nlo, k_sH_nlo_rw, k_sH_lo] if x == '_inc_kfactors' else None,
-                     title="S_{H} contribution" % vars(),
-                     ratio=True,
-                     log_y=False,
-                     log_x=False,
-                     ratio_range="0.,2.",
-                     custom_x_range=False,
-                     x_axis_max=1000,
-                     x_axis_min=250,
-                     custom_y_range=False,
-                     y_axis_max=4000,
-                     y_axis_min=0,
-                     x_title=x_title,
-                     y_title=y_title,
-                     extra_pad=0,
-                     norm_hists=norm_hists,
-                     plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_SP',
-                     label=kaps_lab,
-                     norm_bins=True,
-                     IncErrors=True,
-                     wideLeg=True)
-
-       # now makes plots of inteferences without the NLO exact (as it does not exist)
-
-
-        ##print h_sH_lo.Integral(-1,-1), h_sH_box_weighted.Integral(-1,-1), h_sH_box_lo.Integral(-1,-1)
-        ##exit() 
-
-        plotting.CompareHists(hists=[h_sH_box_weighted.Clone(), h_sH_box_lo.Clone()],
-                     legend_titles=['NLO-approx+PS','LO+PS'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
-                     scale_factors = [k_sH_box_int_nlo_rw, k_sH_box_int_lo] if x == '_inc_kfactors' else None,
-                     title="S_{H}-#Box contribution" % vars(),
-                     ratio=True,
-                     log_y=False,
-                     log_x=False,
-                     ratio_range="0.,2.",
-                     custom_x_range=False,
-                     x_axis_max=1000,
-                     x_axis_min=250,
-                     custom_y_range=False,
-                     y_axis_max=4000,
-                     y_axis_min=0,
-                     x_title=x_title,
-                     y_title=y_title,
-                     extra_pad=0,
-                     norm_hists=norm_hists,
-                     plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_box_SP',
-                     label=kaps_lab,
-                     norm_bins=True,
-                     IncErrors=True,
-                     skipCols=1,
-                     wideLeg=True)
-
-        print('!!!!!!!!!')
-        print('SH-Sh NLO-approx, LO', h_sH_sh_weighted.Integral(-1,-1), h_sH_sh_lo.Integral(-1,-1))
-        print('SH-Box NLO-approx, LO', h_sH_box_weighted.Integral(-1,-1), h_sH_box_lo.Integral(-1,-1))
-        print('SH NLo, NLO-approx, LO', h_sH.Integral(-1,-1), h_sH_weighted.Integral(-1,-1), h_sH_lo.Integral(-1,-1))
-
-        plotting.CompareHists(hists=[h_sH_sh_weighted.Clone(), h_sH_sh_lo.Clone()],
-                     legend_titles= ['NLO-approx+PS','LO+PS'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
-                     scale_factors = [k_sH_sh_int_nlo_rw, k_sH_sh_int_lo] if x == '_inc_kfactors' else None,
-                     title="S_{H}-S_{h} contribution" % vars(),
-                     ratio=True,
-                     log_y=False,
-                     log_x=False,
-                     ratio_range="0.,2.",
-                     custom_x_range=False,
-                     x_axis_max=1000,
-                     x_axis_min=250,
-                     custom_y_range=False,
-                     y_axis_max=4000,
-                     y_axis_min=0,
-                     x_title=x_title,
-                     y_title=y_title,
-                     extra_pad=0,
-                     norm_hists=norm_hists,
-                     plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_SP_Sh',
-                     label=kaps_lab,
-                     norm_bins=True,
-                     IncErrors=True,
-                     skipCols=1,
-                     lowerLeg=True,
-                     wideLeg=True)
 
     # make plots comparing benchmarks
 
@@ -1269,33 +867,36 @@ for plot in plots:
     h_before_lo = DrawHist(f6,h_before_lo,plot, '1')
     h_before_lo.Add(h_sH_before_lo)
 
+    validation_bms = ['singlet_M620','singlet_M600']
 
-    if bm_name == 'singlet_M600':
-        # get seperatly generated hist here:
+#    if bm_name == 'singlet_M600':
+#        # get seperatly generated hist here:
+#
+#        h_BM_sep_generated = ROOT.TH1D()
+#        h_BM_sep_generated.SetName('BM_sep_lo')
+#
+#        sep_files = [
+#            (schannel_H_SF,'outputs_4b_Feb13/output_mg_pythia_width_5GeV.root'),
+#            (box_SF,'outputs_4b_Feb13/output_mg_pythia_box.root'),
+#            (schannel_h_SF,'outputs_4b_Feb13/output_mg_pythia_sh.root'),
+#            (box_and_schannel_H_i_SF*2.**1.5,'outputs_4b_Feb13/output_mg_pythia_width_5GeV_box_SH.root'),
+#            (box_and_schannel_h_i_SF,'outputs_4b_Feb13/output_mg_pythia_box_sh.root'),
+#            (schannel_H_and_schannel_h_i_SF*2.,'outputs_4b_Feb13/output_mg_pythia_width_5GeV_Sh_SH.root'),
+#          ]
+#        count = 0
+#        for sep_file in sep_files:
+#            f_sep = ROOT.TFile(sep_file[1])
+#            print(f_sep)
+#            if count == 0:
+#                h_BM_sep_generated = DrawHist(f_sep,h_BM_sep_generated,plot,'%g' % sep_file[0], True)
+#            else:
+#                h_temp = h_BM_sep_generated.Clone()
+#                h_temp = DrawHist(f_sep,h_temp,plot,'%g' % sep_file[0], True)
+#                h_BM_sep_generated.Add(h_temp)
+#            count+=1
 
-        h_BM_sep_generated = ROOT.TH1D()
-        h_BM_sep_generated.SetName('BM_sep_lo')
 
-        sep_files = [
-            (schannel_H_SF,'outputs_4b_Feb13/output_mg_pythia_width_5GeV.root'),
-            (box_SF,'outputs_4b_Feb13/output_mg_pythia_box.root'),
-            (schannel_h_SF,'outputs_4b_Feb13/output_mg_pythia_sh.root'),
-            (box_and_schannel_H_i_SF*2.**1.5,'outputs_4b_Feb13/output_mg_pythia_width_5GeV_box_SH.root'),
-            (box_and_schannel_h_i_SF,'outputs_4b_Feb13/output_mg_pythia_box_sh.root'),
-            (schannel_H_and_schannel_h_i_SF*2.,'outputs_4b_Feb13/output_mg_pythia_width_5GeV_Sh_SH.root'),
-          ]
-        count = 0
-        for sep_file in sep_files:
-            f_sep = ROOT.TFile(sep_file[1])
-            if count == 0:
-                h_BM_sep_generated = DrawHist(f_sep,h_BM_sep_generated,plot,'%g' % sep_file[0], True)
-            else:
-                h_temp = h_BM_sep_generated.Clone()
-                h_temp = DrawHist(f_sep,h_temp,plot,'%g' % sep_file[0], True)
-                h_BM_sep_generated.Add(h_temp)
-            count+=1
-
-
+    if bm_name in validation_bms or True:
         h_BM_lo_generated = ROOT.TH1D()
         h_BM_lo_generated.SetName('BM_generated')
         print(f8, h_BM_lo_generated, plot)
@@ -1319,21 +920,9 @@ for plot in plots:
     h_BM_kapt1_nonres_lo.SetName('BM_nonres_lo')
     h_BM_kapt1_nonres_lo = DrawHist(f6,h_BM_kapt1_nonres_lo,'hh_mass(100,200,800)', wt_BM_kapt1_nonres_lo)
 
-
-    wt_BM_kapt1_nonres_kap4_lo = '(wt_box + wt_schannel_h*4.*4. + wt_box_and_schannel_h_i*4.)' % vars()
-    h_BM_kapt1_nonres_kap4_lo = ROOT.TH1D()
-    h_BM_kapt1_nonres_kap4_lo.SetName('BM_nonres_lo')
-    h_BM_kapt1_nonres_kap4_lo = DrawHist(f6,h_BM_kapt1_nonres_kap4_lo,'hh_mass(100,200,800)', wt_BM_kapt1_nonres_kap4_lo)
-
-    wt_BM_kapt1_nonres_kap3_lo = '(wt_box + wt_schannel_h*3.*3. + wt_box_and_schannel_h_i*3.)' % vars()
-    h_BM_kapt1_nonres_kap3_lo = ROOT.TH1D()
-    h_BM_kapt1_nonres_kap3_lo.SetName('BM_nonres_lo')
-    h_BM_kapt1_nonres_kap3_lo = DrawHist(f6,h_BM_kapt1_nonres_kap3_lo,'hh_mass(100,200,800)', wt_BM_kapt1_nonres_kap3_lo)
-
     h_BM_kapt1_nonres_kfacts_lo = ROOT.TH1D()
     h_BM_kapt1_nonres_kfacts_lo.SetName('BM_nonres_kfacts_lo')
     h_BM_kapt1_nonres_kfacts_lo = DrawHist(f6,h_BM_kapt1_nonres_kfacts_lo,'hh_mass(100,200,800)', wt_BM_kapt1_nonres_kfacts_lo)
-
 
     h_BM_lo_kfacts = ROOT.TH1D()
     h_BM_lo_kfacts.SetName('BM_lo_kfacts')
@@ -1375,34 +964,33 @@ for plot in plots:
     h_BM_approx_kfacts_lo = h_SM_kfacts_lo.Clone()
     h_BM_approx_kfacts_lo.Add(sH_lo_kfacts)
 
-    
+
+#    if bm_name == 'singlet_M600':
+#        plotting.CompareHists(hists=[h_BM_lo_generated.Clone(), h_BM_sep_generated.Clone(), h_BM_lo.Clone()],
+#                   legend_titles=['Directly generated', 'Separately generated', 'Reweighted'],
+#                   title="LO+PS" % vars(),
+#                   ratio=True,
+#                   log_y=False,
+#                   log_x=False,
+#                   ratio_range="0.,2.0",
+#                   custom_x_range=False,
+#                   x_axis_max=1000,
+#                   x_axis_min=250,
+#                   custom_y_range=False,
+#                   y_axis_max=4000,
+#                   y_axis_min=0,
+#                   x_title=x_title,
+#                   y_title=y_title,
+#                   extra_pad=0,
+#                   norm_hists=False,
+#                   plot_name=plot_name.replace('NLO_Validation','ReweightValidation_old'),
+#                   label=bm['label'],
+#                   norm_bins=True,
+#                   IncErrors=True,
+#                   wideLeg=True)
 
 
-    if bm_name == 'singlet_M600':
-        plotting.CompareHists(hists=[h_BM_lo_generated.Clone(), h_BM_sep_generated.Clone(), h_BM_lo.Clone()],
-                   legend_titles=['Directly generated', 'Separately generated', 'Reweighted'],
-                   title="LO+PS" % vars(),
-                   ratio=True,
-                   log_y=False,
-                   log_x=False,
-                   ratio_range="0.,2.0",
-                   custom_x_range=True,
-                   x_axis_max=1000,
-                   x_axis_min=250,
-                   custom_y_range=False,
-                   y_axis_max=4000,
-                   y_axis_min=0,
-                   x_title=x_title,
-                   y_title=y_title,
-                   extra_pad=0,
-                   norm_hists=False,
-                   plot_name=plot_name.replace('NLO_Validation','ReweightValidation_old')+'_'+bm_name,
-                   label=bm['label'],
-                   norm_bins=True,
-                   IncErrors=True,
-                   wideLeg=True)
-
-
+    if bm_name in validation_bms or True:
         plotting.CompareHists(hists=[h_BM_lo_generated.Clone(), h_BM_lo.Clone(),h_before_lo.Clone()],
                    legend_titles=['Directly generated', 'Reweighted', 'Before reweighting'],
                    title="LO+PS" % vars(),
@@ -1410,7 +998,7 @@ for plot in plots:
                    log_y=False,
                    log_x=False,
                    ratio_range="0.,2.0",
-                   custom_x_range=True,
+                   custom_x_range=False,
                    x_axis_max=1000,
                    x_axis_min=250,
                    custom_y_range=False,
@@ -1420,7 +1008,7 @@ for plot in plots:
                    y_title=y_title,
                    extra_pad=0,
                    norm_hists=False,
-                   plot_name=plot_name.replace('NLO_Validation','ReweightValidation')+'_'+bm_name,
+                   plot_name=plot_name.replace('NLO_Validation','ReweightValidation'),
                    label=bm['label'],
                    norm_bins=True,
                    IncErrors=True,
@@ -1434,7 +1022,7 @@ for plot in plots:
                    log_y=False,
                    log_x=False,
                    ratio_range="0.,2.0",
-                   custom_x_range=True,
+                   custom_x_range=False,
                    x_axis_max=1000,
                    x_axis_min=250,
                    custom_y_range=False,
@@ -1442,194 +1030,11 @@ for plot in plots:
                    y_axis_min=0,
                    x_title=x_title,
                    y_title=y_title,
-                   extra_pad=0,
+                   extra_pad= 0.4 if 'M870' in bm_name and 'hh_mass' in plot else 0,
                    norm_hists=False,
-                   plot_name=plot_name.replace('NLO_Validation','ReweightValidation_noBefore')+'_'+bm_name,
+                   plot_name=plot_name.replace('NLO_Validation','ReweightValidation_noBefore'),
                    label=bm['label'],
                    norm_bins=True,
                    IncErrors=True,
                    wideLeg=True)
 
-
-        plotting.CompareHists(hists=[h_BM_weighted.Clone() if x != '_inc_kfactors' else h_BM_weighted_kfacts.Clone(), h_BM_lo.Clone() if x != '_inc_kfactors' else h_BM_lo_kfacts.Clone()],
-                     legend_titles=['NLO-approx+PS','LO+PS'],
-                     title="",
-                     ratio=True,
-                     log_y=False,
-                     log_x=False,
-                     ratio_range="0.,2.",
-                     custom_x_range=False,
-                     x_axis_max=1000,
-                     x_axis_min=250,
-                     custom_y_range=False,
-                     y_axis_max=4000,
-                     y_axis_min=0,
-                     x_title=x_title,
-                     y_title=y_title,
-                     extra_pad=0,
-                     norm_hists=norm_hists,
-                     plot_name=plot_name.replace('NLO_Validation','NLO_vsLO'+x)+'_BM_%(bm_name)s' % vars(),
-                     label=bm['label'],
-                     norm_bins=True,
-                     IncErrors=True,
-                     skipCols=1)
-
-
-    plotting.CompareHists(hists=[h_BM_lo.Clone() if x != '_inc_kfactors' else h_BM_lo_kfacts.Clone(), h_BM_lo_noint.Clone() if x != '_inc_kfactors' else h_BM_lo_noint_kfacts.Clone() ],
-                 legend_titles=['Inc. interf.', 'No interf.'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
-                 title="LO+PS",
-                 ratio=True,
-                 log_y=False,
-                 log_x=False,
-                 ratio_range="0.0,2.0",
-                 custom_x_range=False,
-                 x_axis_max=1000,
-                 x_axis_min=250,
-                 custom_y_range=False,
-                 y_axis_max=4000,
-                 y_axis_min=0,
-                 x_title=x_title,
-                 y_title=y_title,
-                 extra_pad=0,
-                 norm_hists=norm_hists,
-                 plot_name=plot_name.replace('plots_NLO','plots_CompWOInt').replace('NLO_Validation','LO_CompWOInt'+x)+'_BM_%(bm_name)s' % vars(),
-                 label=bm['label'],
-                 norm_bins=True,
-                 IncErrors=True,
-                 wideLeg=True,     
-                 skipCols=1) 
- 
-    for log_y in [False, True]:
-      plotting.CompareHists(hists=[h_BM_lo.Clone() if x != '_inc_kfactors' else h_BM_lo_kfacts.Clone(), h_BM_lo_noint.Clone() if x != '_inc_kfactors' else h_BM_lo_noint_kfacts.Clone(), sH_lo.Clone() if x != '_inc_kfactors' else sH_lo_kfacts.Clone(), h_BM_approx_lo.Clone() if x != '_inc_kfactors' else h_BM_approx_kfacts_lo.Clone() ],
-                   legend_titles=['Inc. interf.', 'No interf.', 's-chan. only', 'hh (SM) + s-chan.'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
-                   title="LO+PS",
-                   ratio=True,
-                   log_y=log_y,
-                   log_x=False,
-                   ratio_range="0.0,2.0",
-                   #ratio_range= "0.0,3.0" if 'h_mass(' in plot else "0.0,2.0",
-                   custom_x_range=False,
-                   x_axis_max=1000,
-                   x_axis_min=250,
-                   custom_y_range=False,
-                   y_axis_max=4000,
-                   y_axis_min=0,
-                   x_title=x_title,
-                   y_title=y_title,
-                   extra_pad=0,
-                   norm_hists=norm_hists,
-                   plot_name=plot_name.replace('plots_NLO','plots_CompWOInt').replace('NLO_Validation','LO_CompAll'+x)+'_BM_%(bm_name)s' % vars() + ('_logy' if log_y else ''),
-                   label=bm['label'],
-                   norm_bins=True,
-                   IncErrors=True,
-                   wideLeg=True,     
-                   skipCols=1)
-
-    if  bm_name == 'singlet_M620' and 'hh_mass' in plot and not fineBins:
-      plotting.CompareHists(hists=[h_SM_lo.Clone() if x != '_inc_kfactors' else h_SM_kfacts_lo.Clone(), h_BM_lo.Clone() if x != '_inc_kfactors' else h_BM_lo_kfacts.Clone(), h_BM_lo_noint.Clone() if x != '_inc_kfactors' else h_BM_lo_noint_kfacts.Clone(), sH_lo.Clone() if x != '_inc_kfactors' else sH_lo_kfacts.Clone()],
-                   legend_titles=['SM', 'BSM', 'BSM No interf.', 'BSM S#rightarrow HH only'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
-                   title="",#"LO+PS",
-                   ratio=False,#True,
-                   log_y=False,
-                   log_x=False,
-                   ratio_range="0.0,2.0",
-                   #ratio_range= "0.0,3.0" if 'h_mass(' in plot else "0.0,2.0",
-                   custom_x_range=False,
-                   x_axis_max=1000,
-                   x_axis_min=250,
-                   custom_y_range=False,
-                   y_axis_max=4000,
-                   y_axis_min=0,
-                   x_title=x_title.replace('hh','HH'),
-                   y_title=y_title.replace('hh','HH'),
-                   extra_pad=0,
-                   norm_hists=norm_hists,
-                   plot_name=plot_name.replace('plots_NLO','plots_CompWOInt').replace('NLO_Validation','LO_CompAllV2'+x)+'_BM_%(bm_name)s' % vars(),
-                   label="",#bm['label'],
-                   norm_bins=True,
-                   IncErrors=True,
-                   wideLeg=True,
-                   skipCols=1)
-
-    if  bm_name == 'singlet_M260' and 'hh_mass(' in plot and not fineBins:     
-      for log_y in [False, True]:
-          plotting.CompareHists(hists=[h_BM_nonres_lo.Clone() if x != '_inc_kfactors' else h_BM_nonres_kfacts_lo.Clone(), h_SM_newbins_lo.Clone() if x != '_inc_kfactors' else h_SM_newbins_kfacts_lo.Clone(), h_BM_kapt1_nonres_lo.Clone() if x != '_inc_kfactors' else h_BM_kapt1_nonres_kfacts_lo.Clone() ],
-                   legend_titles=['#kappa_{#lambda_{hhh}}=0.87, #kappa_{q}^{h}=0.97','SM', '#kappa_{#lambda_{hhh}}=0.87, #kappa_{q}^{h}=1.0'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
-                   title="LO+PS",
-                   ratio=True,
-                   log_y=log_y,
-                   log_x=False,
-                   ratio_range="0.2,1.8",
-                   #ratio_range= "0.0,6.0" if 'M260' in bm_name else "0.0,2.0",
-                   custom_x_range=False,
-                   x_axis_max=1000,
-                   x_axis_min=250,
-                   custom_y_range=False,
-                   y_axis_max=4000,
-                   y_axis_min=0,
-                   x_title=x_title,
-                   y_title=y_title,
-                   extra_pad=0,
-                   norm_hists=norm_hists,
-                   plot_name=plot_name.replace('plots_NLO','plots_CompWOInt').replace('NLO_Validation','LO_CompNonRes'+x)+'_BM_%(bm_name)s' % vars() + ('_logy' if log_y else ''),
-                   label=bm['label'],
-                   norm_bins=True,
-                   IncErrors=True,
-                   wideLeg=True,     
-                   skipCols=1)
-
-          plotting.CompareHists(hists=[h_SM_newbins_lo.Clone(), h_BM_kapt1_nonres_kap3_lo.Clone(), h_BM_kapt1_nonres_kap4_lo.Clone() ],
-                   legend_titles=['#kappa_{#lambda_{hhh}}=1 (SM)', '#kappa_{#lambda_{hhh}}=3', '#kappa_{#lambda_{hhh}}=4'],
-                   title="",#"LO+PS",
-                   ratio=False,
-                   log_y=log_y,
-                   log_x=False,
-                   ratio_range="0.2,1.8",
-                   #ratio_range= "0.0,6.0" if 'M260' in bm_name else "0.0,2.0",
-                   custom_x_range=False,
-                   x_axis_max=1000,
-                   x_axis_min=250,
-                   custom_y_range=False,
-                   y_axis_max=4000,
-                   y_axis_min=0,
-                   x_title=x_title,
-                   y_title=y_title,
-                   extra_pad=0,
-                   norm_hists=norm_hists,
-                   plot_name=plot_name.replace('plots_NLO','plots_CompWOInt').replace('NLO_Validation','LO_CompNonResV2'+x)+'_BM_%(bm_name)s' % vars() + ('_logy' if log_y else ''),
-                   label='',#bm['label'],
-                   norm_bins=True,
-                   IncErrors=True,
-                   wideLeg=True,
-                   skipCols=1)
-
-    if bm_name == 'singlet_M600':
-    
-        plotting.CompareHists(hists=[h_BM_weighted.Clone() if x != '_inc_kfactors' else h_BM_weighted_kfacts.Clone(), h_BM_weighted_noint.Clone() if x != '_inc_kfactors' else h_BM_weighted_noint_kfacts.Clone()],
-                     legend_titles=['Inc. interf.', 'No interf.'] + (['Inc. K-factor scaling'] if x == '_inc_kfactors' else []),
-                     title="NLO-approx+PS",
-                     ratio=True,
-                     log_y=False,
-                     log_x=False,
-                     ratio_range="0.,1.5",
-                     custom_x_range=False,
-                     x_axis_max=1000,
-                     x_axis_min=250,
-                     custom_y_range=False,
-                     y_axis_max=4000,
-                     y_axis_min=0,
-                     x_title=x_title,
-                     y_title=y_title,
-                     extra_pad=0,
-                     norm_hists=norm_hists,
-                     plot_name=plot_name.replace('plots_NLO','plots_CompWOInt').replace('NLO_Validation','NLO_CompWOInt'+x)+'_BM_%(bm_name)s' % vars(),
-                     label=bm['label'],
-                     norm_bins=True,
-                     IncErrors=True,
-                     wideLeg=True,     
-                     skipCols=1)                 
-
-print('SH xs (LO) = ', sH_lo.Integral(-1,-1))
-print('SH xs (NNLO) = ', sH_lo_kfacts.Integral(-1,-1))
-print('full xs (LO) = ', h_BM_lo.Integral(-1,-1))
-print('full xs (NNLO) = ', h_BM_lo_kfacts.Integral(-1,-1))
