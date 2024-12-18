@@ -78,6 +78,13 @@ class SmearGamma():
 
         return g_smeared         
 
+class SmearMass():
+    def __init__(self):
+        self.func = ROOT.TF1("func","TMath::Gaus(x,0,0.15)",-1,1)
+    def Smear(self,m):    
+        rand = 1.+self.func.GetRandom()
+        return m*rand
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--input', '-i', help= 'LHE file to be converted')
 parser.add_argument('--output', '-o', help= 'Name of output file',default='pythia_output.root')
@@ -99,6 +106,7 @@ pythia.readString("Beams:frameType = 4")
 pythia.readString("Beams:LHEF = %s" % args.input)
 pythia.init()
 
+
 wt_nom  = array('f',[0])
 hh_mass  = array('f',[0])
 hh_pT  = array('f',[0])
@@ -111,6 +119,7 @@ hh_dphi = array('f',[0])
 hh_eta = array('f',[0])
 
 hh_mass_smear  = array('f',[0])
+hh_mass_smear_0p15  = array('f',[0])
 hh_pT_smear  = array('f',[0])
 h1_pT_smear = array('f',[0])
 h2_pT_smear = array('f',[0])
@@ -170,6 +179,7 @@ tree.Branch("hh_dphi",  hh_dphi,  'hh_dphi/F')
 tree.Branch("hh_eta",  hh_eta,  'hh_eta/F')
 
 tree.Branch("hh_mass_smear",  hh_mass_smear,  'hh_mass_smear/F')
+tree.Branch("hh_mass_smear_0p15",  hh_mass_smear_0p15,  'hh_mass_smear_0p15/F')
 tree.Branch("hh_pT_smear",  hh_pT_smear,  'hh_pT_smear/F')
 tree.Branch("h1_pT_smear",  h1_pT_smear,  'h1_pT_smear/F')
 tree.Branch("h2_pT_smear",  h2_pT_smear,  'h2_pT_smear/F')
@@ -235,6 +245,7 @@ for wt in weight_names:
 
 smear = SmearBJet()
 smear_gam = SmearGamma()
+smear_mass = SmearMass()
 
 def sort_by_pt(vector):
     return vector.Pt()
@@ -285,6 +296,8 @@ while not stopGenerating:
         j4 = higgs_decay_prods[1][1]  
 
         hh_mass[0] = (j1+j2+j3+j4).M()
+        hh_mass_smear_0p15[0] = smear_mass.Smear(hh_mass[0])
+        print('!!!!!', hh_mass[0], hh_mass_smear_0p15[0])
 
         unsorted_jets = [j1,j2,j3,j4]
         sorted_jets = sorted(unsorted_jets, key=sort_by_pt, reverse=True)
@@ -449,7 +462,7 @@ while not stopGenerating:
         tree.Fill()
 
     count += 1
-    if count % 10000 == 0: 
+    if count % 100 == 0: 
         print('Processed %i events' % count)
         root_file.Write() 
 
