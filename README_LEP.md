@@ -4,4 +4,13 @@ setup PYTHONPATH environment:
 
 process events:
 
-    python scripts/shower_events_lep_study.py -c scripts/pythia_cmnd_file_lep_study -i HHReweighter/MG5_aMC_v3_5_5/ee_To_tata_noA/test_pack/events_100k.lhe -n 10
+    python scripts/shower_events_lep_study.py -c scripts/pythia_cmnd_file_lep_study -i HHReweighter/MG5_aMC_v3_5_5/ee_To_tata_noA/test_pack/events_100k.lhe -n 1
+0
+
+To force tau decays into a1 3-prongs use:
+
+15:oneChannel = 1 1.0 0 211 -211 211 -16
+
+or to force decays into pions use:
+
+15:oneChannel = 1 1.0 0 211 -16
