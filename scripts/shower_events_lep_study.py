@@ -47,13 +47,13 @@ branches = [
 'taun_pi1_vz',
 ]
 
-branch_vals = {}
 
 if '.hepmc' in args.output: root_output = args.output.replace('.hepmc','.root')
 else: root_output=args.output+'.root'
 fout = ROOT.TFile(root_output,'RECREATE')
 tree = ROOT.TTree('tree','')
 
+branch_vals = {}
 for b in branches:
     branch_vals[b] = array('f',[0])
     tree.Branch(b,  branch_vals[b],  '%s/F' % b)

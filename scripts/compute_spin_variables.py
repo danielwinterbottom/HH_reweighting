@@ -1,6 +1,7 @@
 import ROOT
 import argparse
 import math
+from array import array
 
 # each LEP detector should have about 140000 Z->tautau events (not accounting for acceptance effects)
 
@@ -29,6 +30,16 @@ output_root = ROOT.TFile(args.output, "RECREATE")
 # Create a new tree to store the output
 new_tree = ROOT.TTree("new_tree","Event Tree")
 
+branches = [
+        'cosn_plus',
+        'cosr_plus',
+        'cosk_plus',
+]
+branch_vals = {}
+for b in branches:
+    branch_vals[b] = array('f',[0])
+    new_tree.Branch(b,  branch_vals[b],  '%s/F' % b)
+
 # Determine the range of entries to process
 n_entries = tree.GetEntries()
 start_entry = args.n_skip * args.n_events + 1 if args.n_events > 0 else 1
@@ -50,7 +61,7 @@ for i in range(start_entry, end_entry):
 
     # get tau 4-vectors
     taup = ROOT.TLorentzVector(tree.taup_px, tree.taup_py, tree.taup_pz, tree.taup_e)
-    taum = ROOT.TLorentzVector(tree.taun_px, tree.taun_py, tree.taun_pz, tree.taun_e)
+    taun = ROOT.TLorentzVector(tree.taun_px, tree.taun_py, tree.taun_pz, tree.taun_e)
 
     # compute coordinate vectors here (n,r,k)
     # p is direction of e+ beam
@@ -61,10 +72,23 @@ for i in range(start_entry, end_entry):
     cosTheta = p.Dot(k)
     r = (p - (k*cosTheta)).Unit() 
 
+    # get pion 4-vectors
+    taup_pi = ROOT.TLorentzVector(tree.taup_pi1_px, tree.taup_pi1_py, tree.taup_pi1_pz, tree.taup_pi1_e)
+    taun_pi = ROOT.TLorentzVector(tree.taun_pi1_px, tree.taun_pi1_py, tree.taun_pi1_pz, tree.taun_pi1_e)
+    # boost into tau rest frames
+    taup_pi.Boost(-taup.BoostVector())
+    taun_pi.Boost(-taun.BoostVector())
+
+    taup_s = taup_pi.Vect().Unit()
+    taun_s = taun_pi.Vect().Unit()
+    branch_vals['cosn_plus'][0] = taup_s.Dot(n)
+    branch_vals['cosr_plus'][0] = taup_s.Dot(r)
+    branch_vals['cosk_plus'][0] = taup_s.Dot(k)
+
     ## Fill the new tree
-    #new_tree.Fill()
+    new_tree.Fill()
     count+=1
-    if count % 1 == 0:
+    if count % 100 == 0:
         print('Processed %i events' % count)
 
 # Write the new tree to the output file
