@@ -20,6 +20,9 @@ args = parser.parse_args()
 # for now only setup for pipi channel so only index 1 is used for the pion from tau->pinu decays
 
 branches = [
+'z_x',
+'z_y',
+'z_z',
 'taup_px', 
 'taup_py', 
 'taup_pz',
@@ -104,6 +107,19 @@ while not stopGenerating:
         daughter_ids = [pythia.event[x].id() for x in part.daughterList()]
         #print(pdgid, part.e(), part.charge(), part.status(), mother_ids, daughter_ids)
         LastCopy = IsLastCopy(part, pythia.event)
+        if pdgid == 11 and len(mother_ids) == 0:
+            # the e+ directions defines the z direction
+            # not really needed to store this since its always in the -z direction due to how the sample is produced..
+            z_x = part.px()
+            z_y = part.py()
+            z_z = part.pz()
+            r = (z_x**2 + z_y**2 + z_z**2)**.5
+            z_x/=r
+            z_y/=r
+            z_z/=r
+            branch_vals['z_x' % vars()][0] = z_x
+            branch_vals['z_y' % vars()][0] = z_y
+            branch_vals['z_z' % vars()][0] = z_z
         if abs(pdgid) == 15 and LastCopy:
             pis = GetPiDaughters(part,pythia.event)
             tau_name = 'taun' if pdgid == 15 else 'taup'
