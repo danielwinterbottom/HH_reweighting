@@ -34,6 +34,9 @@ branches = [
         'cosn_plus',
         'cosr_plus',
         'cosk_plus',
+        'cosn_minus',
+        'cosr_minus',
+        'cosk_minus',
 ]
 branch_vals = {}
 for b in branches:
@@ -54,7 +57,6 @@ end_entry = min(end_entry, n_entries)
 
 # Loop over the entries in the input tree
 count = 0
-print(start_entry, end_entry)
 for i in range(start_entry, end_entry):
 
     tree.GetEntry(i)
@@ -68,9 +70,14 @@ for i in range(start_entry, end_entry):
     p = ROOT.TVector3(tree.z_x, tree.z_y, tree.z_z).Unit()
     # k is direction of tau+
     k = taup.Vect().Unit()
-    n = p.Cross(k).Unit() 
+    n = (p.Cross(k)).Unit()
     cosTheta = p.Dot(k)
     r = (p - (k*cosTheta)).Unit() 
+    #print('!!!!!')
+    #print('n:', n.X(), n.Y(), n.Z())
+    #print('p:', p.X(), p.Y(), p.Z())
+    #print('k:', k.X(), k.Y(), k.Z())
+    #print('r:', r.X(), r.Y(), r.Z())
 
     # get pion 4-vectors
     taup_pi = ROOT.TLorentzVector(tree.taup_pi1_px, tree.taup_pi1_py, tree.taup_pi1_pz, tree.taup_pi1_e)
@@ -84,11 +91,15 @@ for i in range(start_entry, end_entry):
     branch_vals['cosn_plus'][0] = taup_s.Dot(n)
     branch_vals['cosr_plus'][0] = taup_s.Dot(r)
     branch_vals['cosk_plus'][0] = taup_s.Dot(k)
+    branch_vals['cosn_minus'][0] = taun_s.Dot(n)
+    branch_vals['cosr_minus'][0] = taun_s.Dot(r)
+    branch_vals['cosk_minus'][0] = taun_s.Dot(k)
+
 
     ## Fill the new tree
     new_tree.Fill()
     count+=1
-    if count % 100 == 0:
+    if count % 1000 == 0:
         print('Processed %i events' % count)
 
 # Write the new tree to the output file
