@@ -61,8 +61,22 @@ for b in branches:
 pythia = pythia8.Pythia("", False)
 pythia.readFile(args.cmnd_file)
 
-pythia.readString("Beams:frameType = 4")
-pythia.readString("Beams:LHEF = %s" % args.input)
+if args.input:
+    pythia.readString("Beams:frameType = 4")
+    pythia.readString("Beams:LHEF = %s" % args.input)
+else:
+    print('Producing full event in pythia')
+    # if no LHE file given then produce full event setup using pythia for the hard process as well
+    pythia.readString("Beams:idA = -11") # Positron
+    pythia.readString("Beams:idB = 11")  # Electron
+    pythia.readString("Beams:eCM = 91.188")  # Center-of-mass energy = Z resonance
+    pythia.readString("TauDecays:externalMode = 1")
+
+    # Enable Z production and decay to taus
+    pythia.readString("WeakSingleBoson:ffbar2gmZ = on")
+    pythia.readString("23:onMode = off")  # Turn off all Z decays
+    pythia.readString("23:onIfAny = 15")  # Enable Z -> tau+ tau-
+
 pythia.init()
 
 pythia.LHAeventSkip(args.n_skip*args.n_events)

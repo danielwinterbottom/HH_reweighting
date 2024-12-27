@@ -37,6 +37,7 @@ branches = [
         'cosn_minus',
         'cosr_minus',
         'cosk_minus',
+        'cosTheta',
 ]
 branch_vals = {}
 for b in branches:
@@ -94,6 +95,7 @@ for i in range(start_entry, end_entry):
     branch_vals['cosn_minus'][0] = taun_s.Dot(n)
     branch_vals['cosr_minus'][0] = taun_s.Dot(r)
     branch_vals['cosk_minus'][0] = taun_s.Dot(k)
+    branch_vals['cosTheta'][0] = cosTheta
 
 
     ## Fill the new tree
