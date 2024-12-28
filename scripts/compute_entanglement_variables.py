@@ -1,8 +1,11 @@
 import argparse
 import ROOT
 import numpy as np
+import uproot
+import pandas as pd
 from entanglement_funcs import EntanglementVariables
 from array import array
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input", required=True, help="Input ROOT file.")
@@ -11,62 +14,74 @@ parser.add_argument('--n_skip', '-s', help='skip n_events*n_skip', default=0, ty
 
 args = parser.parse_args()
 
-f = ROOT.TFile(args.input)
+with uproot.open(args.input) as file:
+    tree = file["new_tree"]
 
-tree = f.Get('new_tree')
+    total_entries = tree.num_entries
+    entry_start = args.n_skip * args.n_events if args.n_events != -1 else 0
+    entry_stop = total_entries if args.n_events == -1 else min(entry_start + args.n_events, total_entries)
 
-sum_cosncosn = 0.
-sum_cosrcosr = 0.
-sum_coskcosk = 0.
+    df = tree.arrays(entry_start=entry_start, entry_stop=entry_stop, library="pd")
 
-sum_cosncosr = 0.
-sum_cosncosk = 0.
-sum_cosrcosk = 0.
+    # example below applys a cut on cosTheta
+    #df = df[abs(df['cosTheta']) < 0.5]
 
-sum_cosrcosn = 0.
-sum_coskcosn = 0.
-sum_coskcosr = 0.
+df["cosncosn"] = df["cosn_plus"]*df["cosn_minus"]
+df["cosrcosr"] = df["cosr_plus"]*df["cosr_minus"]
+df["coskcosk"] = df["cosk_plus"]*df["cosk_minus"]
+df["cosncosr"] = df["cosn_plus"]*df["cosr_minus"]
+df["cosncosk"] = df["cosn_plus"]*df["cosk_minus"]
+df["cosrcosk"] = df["cosr_plus"]*df["cosk_minus"]
+df["cosrcosn"] = df["cosr_plus"]*df["cosn_minus"]
+df["coskcosn"] = df["cosk_plus"]*df["cosn_minus"]
+df["coskcosr"] = df["cosk_plus"]*df["cosr_minus"]
 
-array_cosncosn = array([],'f')
 
-print(array_cosncosn)
+def ComputeEntanglementVariables(df, verbose=False):
 
-#Cij: i = tau+ = row, j = tau- column 
-count=0
-for i in range(1,tree.GetEntries()+1):
-    tree.GetEntry(i)
-    sum_cosncosn += tree.cosn_plus*tree.cosn_minus 
-    sum_cosrcosr += tree.cosr_plus*tree.cosr_minus
-    sum_coskcosk += tree.cosk_plus*tree.cosk_minus
+    # note currently not sure where the minus signs come from below but they are needed to get the correct matrix, although it doesn't change the entanglement variables at all anyway...
+    C11 = -df["cosncosn"].mean()*9
+    C22 = -df["cosrcosr"].mean()*9
+    C33 = -df["coskcosk"].mean()*9
+    C12 = -df["cosncosr"].mean()*9
+    C13 = -df["cosncosk"].mean()*9
+    C23 = -df["cosrcosk"].mean()*9
+    C21 = -df["cosrcosn"].mean()*9
+    C31 = -df["coskcosn"].mean()*9
+    C32 = -df["coskcosr"].mean()*9
     
-    sum_cosncosr += tree.cosn_plus*tree.cosr_minus
-    sum_cosncosk += tree.cosn_plus*tree.cosk_minus
-    sum_cosrcosk += tree.cosr_plus*tree.cosk_minus
+    C = np.array([[C11, C12, C13],
+                  [C21, C22, C23],
+                  [C31, C32, C33]])
     
-    sum_cosrcosn += tree.cosr_plus*tree.cosn_minus
-    sum_coskcosn += tree.cosk_plus*tree.cosn_minus
-    sum_coskcosr += tree.cosk_plus*tree.cosr_minus
-    count += 1
+    
+    con, m12 = EntanglementVariables(C)
+    
+    if verbose:
+        print('C = ')
+        print(C)
+        print('concurrence = %.4f' % con)
+        print('m12 = %.3f' % m12)
+    return(con, m12)
 
-# note currently not sure where the minus signs come from below but they are needed to get the correct matrix, although it doesn't change the entanglement variables at all anyway...
-C11 = -sum_cosncosn/count*9
-C22 = -sum_cosrcosr/count*9
-C33 = -sum_coskcosk/count*9
-C12 = -sum_cosncosr/count*9
-C13 = -sum_cosncosk/count*9
-C23 = -sum_cosrcosk/count*9
-C21 = -sum_cosrcosn/count*9
-C31 = -sum_coskcosn/count*9
-C32 = -sum_coskcosr/count*9
+con, m12 = ComputeEntanglementVariables(df, True)
 
-C = np.array([[C11, C12, C13],
-              [C21, C22, C23],
-              [C31, C32, C33]])
+N = 100  # Number of bootstrap samples to generate
+bootstrap_samples = []
 
-print('C = ')
-print(C)
+bs_con_vals = array('d')
+bs_m12_vals = array('d')
 
-con, m12 = EntanglementVariables(C)
+# Generate N bootstrap samples
+for i in range(N):
+    sample = df.sample(n=len(df), replace=True)
+    bootstrap_samples.append(sample)
+    sample_con, sample_m12 = ComputeEntanglementVariables(sample)
 
-print('concurrence = %.4f' % con)
-print('m12 = %.3f' % m12)
+    bs_con_vals.append(sample_con)
+    bs_m12_vals.append(sample_m12)
+
+print('\nconcurrence = %.4f +/- %.4f' %(con,np.std(bs_con_vals)))
+print('m12 = %.4f +/- %.4f' %(m12,np.std(bs_m12_vals)))
+
+
