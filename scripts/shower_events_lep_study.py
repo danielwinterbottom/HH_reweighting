@@ -167,10 +167,11 @@ def GetPiDaughters(part, event):
 
 stopGenerating = False
 count = 0
+
 while not stopGenerating:
 
-    stopGenerating = pythia.infoPython().atEndOfFile()
     if args.n_events>0 and count+1 >= args.n_events: stopGenerating = True
+
 
     #print('-------------------------------')
     #print('event %i' % (count+1))
@@ -234,7 +235,9 @@ while not stopGenerating:
 
     tree.Fill()
     count+=1
-    pythia.next()
+    stopGenerating = pythia.infoPython().atEndOfFile()
+    if pythia.infoPython().atEndOfFile(): print('1111!!!!', stopGenerating)
+    if not stopGenerating: pythia.next()
 
 # Finalize
 #pythia.stat()
