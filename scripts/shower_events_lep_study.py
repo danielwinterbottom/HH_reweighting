@@ -170,6 +170,7 @@ count = 0
 
 while not stopGenerating:
 
+    stopGenerating = pythia.infoPython().atEndOfFile()
     if args.n_events>0 and count+1 >= args.n_events: stopGenerating = True
 
 
@@ -235,7 +236,6 @@ while not stopGenerating:
 
     tree.Fill()
     count+=1
-    stopGenerating = pythia.infoPython().atEndOfFile()
     if not stopGenerating: pythia.next()
 
 # Finalize
