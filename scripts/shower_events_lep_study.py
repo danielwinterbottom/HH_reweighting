@@ -236,7 +236,6 @@ while not stopGenerating:
     tree.Fill()
     count+=1
     stopGenerating = pythia.infoPython().atEndOfFile()
-    if pythia.infoPython().atEndOfFile(): print('1111!!!!', stopGenerating)
     if not stopGenerating: pythia.next()
 
 # Finalize
