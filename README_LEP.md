@@ -39,3 +39,7 @@ To decay taus in madgraph (from Z/gamma->tautau) do:
 
 Note that sm-lepton_masses model is needed otherwise tau width is set to 0 and this has issues for the decay
 Also note that I had issues producing gridpacks for the above which wasn't solved yet, but I was able to produce 100k events (not from gridpack)
+
+In case of issues due to space available in /tmp directory you can define alternative tmp directory using e.g:
+
+    export TMPDIR=/vols/cms/dw515/tmp/
