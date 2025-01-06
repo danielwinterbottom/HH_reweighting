@@ -43,3 +43,8 @@ Also note that I had issues producing gridpacks for the above which wasn't solve
 In case of issues due to space available in /tmp directory you can define alternative tmp directory using e.g:
 
     export TMPDIR=/vols/cms/dw515/tmp/
+
+
+To compute spin-observables run:
+
+    python scripts/compute_spin_variables.py -i pythia_output_pipiMG.root -o pythia_output_pipiMG_spinObservables.root -n -1

@@ -2,6 +2,7 @@ import ROOT
 import argparse
 import math
 from array import array
+from PolarimetricA1 import PolarimetricA1
 
 # each LEP detector should have about 140000 Z->tautau events (not accounting for acceptance effects)
 
@@ -80,15 +81,31 @@ for i in range(start_entry, end_entry):
     #print('k:', k.X(), k.Y(), k.Z())
     #print('r:', r.X(), r.Y(), r.Z())
 
-    # get pion 4-vectors
-    taup_pi = ROOT.TLorentzVector(tree.taup_pi1_px, tree.taup_pi1_py, tree.taup_pi1_pz, tree.taup_pi1_e)
-    taun_pi = ROOT.TLorentzVector(tree.taun_pi1_px, tree.taun_pi1_py, tree.taun_pi1_pz, tree.taun_pi1_e)
-    # boost into tau rest frames
-    taup_pi.Boost(-taup.BoostVector())
-    taun_pi.Boost(-taun.BoostVector())
+    if tree.taup_npi == 1:
+        taup_pi = ROOT.TLorentzVector(tree.taup_pi1_px, tree.taup_pi1_py, tree.taup_pi1_pz, tree.taup_pi1_e)
+        taup_pi.Boost(-taup.BoostVector())
+        taup_s = taup_pi.Vect().Unit()
+    elif tree.taup_npi == 3:
+        taup_pi1 = ROOT.TLorentzVector(tree.taup_pi1_px, tree.taup_pi1_py, tree.taup_pi1_pz, tree.taup_pi1_e)
+        taup_pi2 = ROOT.TLorentzVector(tree.taup_pi2_px, tree.taup_pi2_py, tree.taup_pi2_pz, tree.taup_pi2_e)
+        taup_pi3 = ROOT.TLorentzVector(tree.taup_pi3_px, tree.taup_pi3_py, tree.taup_pi3_pz, tree.taup_pi3_e)
+        pv =  -PolarimetricA1(taup, taup_pi1, taup_pi2, taup_pi3, +1).PVC()
+        pv.Boost(-taup.BoostVector())
+        taup_s = pv.Vect().Unit()
+    else: raise Exception("Number of pions not equal to 1 or 3") 
+    if tree.taun_npi == 1:    
+        taun_pi = ROOT.TLorentzVector(tree.taun_pi1_px, tree.taun_pi1_py, tree.taun_pi1_pz, tree.taun_pi1_e)
+        taun_pi.Boost(-taun.BoostVector())
+        taun_s = taun_pi.Vect().Unit()
+    elif tree.taun_npi == 3:
+        taun_pi1 = ROOT.TLorentzVector(tree.taun_pi1_px, tree.taun_pi1_py, tree.taun_pi1_pz, tree.taun_pi1_e)
+        taun_pi2 = ROOT.TLorentzVector(tree.taun_pi2_px, tree.taun_pi2_py, tree.taun_pi2_pz, tree.taun_pi2_e)
+        taun_pi3 = ROOT.TLorentzVector(tree.taun_pi3_px, tree.taun_pi3_py, tree.taun_pi3_pz, tree.taun_pi3_e)
+        pv =  -PolarimetricA1(taun, taun_pi1, taun_pi2, taun_pi3, +1).PVC()
+        pv.Boost(-taun.BoostVector())
+        taun_s = pv.Vect().Unit()
+    else: raise Exception("Number of pions not equal to 1 or 3")
 
-    taup_s = taup_pi.Vect().Unit()
-    taun_s = taun_pi.Vect().Unit()
     branch_vals['cosn_plus'][0] = taup_s.Dot(n)
     branch_vals['cosr_plus'][0] = taup_s.Dot(r)
     branch_vals['cosk_plus'][0] = taup_s.Dot(k)
