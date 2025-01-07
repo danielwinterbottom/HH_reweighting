@@ -28,6 +28,7 @@ branches = [
 'taup_pz',
 'taup_e',
 'taup_npi',
+'taup_npizero',
 'taup_pi1_px',
 'taup_pi1_py',
 'taup_pi1_pz',
@@ -49,11 +50,16 @@ branches = [
 'taup_pi3_vx',
 'taup_pi3_vy',
 'taup_pi3_vz',
+'taup_pizero1_px',
+'taup_pizero1_py',
+'taup_pizero1_pz',
+'taup_pizero1_e',
 'taun_px',
 'taun_py',
 'taun_pz',
 'taun_e',
 'taun_npi',
+'taun_npizero',
 'taun_pi1_px',
 'taun_pi1_py',
 'taun_pi1_pz',
@@ -75,6 +81,10 @@ branches = [
 'taun_pi3_vx',
 'taun_pi3_vy',
 'taun_pi3_vz',
+'taun_pizero1_px',
+'taun_pizero1_py',
+'taun_pizero1_pz',
+'taun_pizero1_e',
 ]
 
 
@@ -128,6 +138,7 @@ def IsLastCopy(part, event):
 
 def GetPiDaughters(part, event):
     pis = []
+    pi0s = []
 
     rho0_mass = 0.7755
 
@@ -138,6 +149,8 @@ def GetPiDaughters(part, event):
         daughter = event[d]
         if abs(daughter.id()) == 211:
             pis.append(daughter)
+        if abs(daughter.id()) == 111:
+            pi0s.append(daughter)
 
     if len(pis) == 3:
         # Separate the pion with the opposite charge to the parent tau
@@ -161,9 +174,9 @@ def GetPiDaughters(part, event):
 #            if i>0:
 #                print('mass = %.4f, mass diff = %.4f' % ((sorted_pis[0].p() + pi.p()).mCalc(), abs((sorted_pis[0].p() + pi.p()).mCalc() - rho0_mass)))
 
-        return sorted_pis
+        return (sorted_pis, pi0s)
 
-    return pis
+    return (pis, pi0s)
 
 stopGenerating = False
 count = 0
@@ -198,13 +211,14 @@ while not stopGenerating:
             branch_vals['z_y' % vars()][0] = z_y
             branch_vals['z_z' % vars()][0] = z_z
         if abs(pdgid) == 15 and LastCopy:
-            pis = GetPiDaughters(part,pythia.event)
+            pis, pi0s = GetPiDaughters(part,pythia.event)
             tau_name = 'taun' if pdgid == 15 else 'taup'
             branch_vals['%(tau_name)s_px' % vars()][0] = part.px()
             branch_vals['%(tau_name)s_py' % vars()][0] = part.py()
             branch_vals['%(tau_name)s_pz' % vars()][0] = part.pz()
             branch_vals['%(tau_name)s_e' % vars()][0]  = part.e()
             branch_vals['%(tau_name)s_npi' % vars()][0]  = len(pis)
+            branch_vals['%(tau_name)s_npizero' % vars()][0]  = len(pi0s)
             branch_vals['%(tau_name)s_pi1_px' % vars()][0] = pis[0].px()
             branch_vals['%(tau_name)s_pi1_py' % vars()][0] = pis[0].py()
             branch_vals['%(tau_name)s_pi1_pz' % vars()][0] = pis[0].pz()
@@ -229,6 +243,12 @@ while not stopGenerating:
                 branch_vals['%(tau_name)s_pi3_vx' % vars()][0] = pis[2].xProd()
                 branch_vals['%(tau_name)s_pi3_vy' % vars()][0] = pis[2].yProd()
                 branch_vals['%(tau_name)s_pi3_vz' % vars()][0] = pis[2].zProd()
+
+            if len(pi0s) > 0:
+                branch_vals['%(tau_name)s_pizero1_px' % vars()][0] = pi0s[0].px()
+                branch_vals['%(tau_name)s_pizero1_py' % vars()][0] = pi0s[0].py()
+                branch_vals['%(tau_name)s_pizero1_pz' % vars()][0] = pi0s[0].pz()            
+                branch_vals['%(tau_name)s_pizero1_e' % vars()][0]  = pi0s[0].e()
 
     hepmc_event = HepMC3.GenEvent()
     hepmc_converter.fill_next_event1(pythia, hepmc_event, count+1)

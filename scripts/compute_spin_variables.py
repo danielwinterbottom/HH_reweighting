@@ -81,10 +81,36 @@ for i in range(start_entry, end_entry):
     #print('k:', k.X(), k.Y(), k.Z())
     #print('r:', r.X(), r.Y(), r.Z())
 
-    if tree.taup_npi == 1:
+    if tree.taup_npi == 1 and tree.taup_npizero == 0:
         taup_pi = ROOT.TLorentzVector(tree.taup_pi1_px, tree.taup_pi1_py, tree.taup_pi1_pz, tree.taup_pi1_e)
         taup_pi.Boost(-taup.BoostVector())
         taup_s = taup_pi.Vect().Unit()
+    elif tree.taup_npi == 1 and tree.taup_npizero == 1:
+        taup_pi = ROOT.TLorentzVector(tree.taup_pi1_px, tree.taup_pi1_py, tree.taup_pi1_pz, tree.taup_pi1_e)
+        taup_pizero = ROOT.TLorentzVector(tree.taup_pizero1_px, tree.taup_pizero1_py, tree.taup_pizero1_pz, tree.taup_pizero1_e)
+        q = taup_pi  - taup_pizero;
+        P = taup
+        N = taup - taup_pi - taup_pizero
+        #q.Boost(-taup.BoostVector())
+        #P.Boost(-taup.BoostVector())
+        #N.Boost(-taup.BoostVector())
+        #pv = P.M()*(2*(q*N)*q.Vect() - q.Mag2()*N.Vect()) * (1/ (2*(q*N)*(q*P) - q.Mag2()*(N*P)))
+        #taup_s = pv.Unit()
+        pv = P.M()*(2*(q*N)*q - q.Mag2()*N) * (1/ (2*(q*N)*(q*P) - q.Mag2()*(N*P)))
+        pv.Boost(-taup.BoostVector())
+        taup_s = pv.Vect().Unit()
+        ## alternative - boost first, should give same result
+        #taup_pi.Boost(-taup.BoostVector())
+        #taup_pizero.Boost(-taup.BoostVector())
+        #taup.Boost(-taup.BoostVector())
+        #q = taup_pi  - taup_pizero;
+        #P = taup
+        #N = taup - taup_pi - taup_pizero        
+        #pv_alt = P.M()*(2*(q*N)*q.Vect() - q.Mag2()*N.Vect()) * (1/ (2*(q*N)*(q*P) - q.Mag2()*(N*P)))
+        #taup_s_alt = pv_alt.Unit()
+        #print('!!!!!!')
+        #print(taup_s.X(), taup_s.Y(), taup_s.Z(), pv.M())
+        #print(taup_s_alt.X(), taup_s_alt.Y(), taup_s_alt.Z())
     elif tree.taup_npi == 3:
         taup_pi1 = ROOT.TLorentzVector(tree.taup_pi1_px, tree.taup_pi1_py, tree.taup_pi1_pz, tree.taup_pi1_e)
         taup_pi2 = ROOT.TLorentzVector(tree.taup_pi2_px, tree.taup_pi2_py, tree.taup_pi2_pz, tree.taup_pi2_e)
@@ -93,10 +119,20 @@ for i in range(start_entry, end_entry):
         pv.Boost(-taup.BoostVector())
         taup_s = pv.Vect().Unit()
     else: raise Exception("Number of pions not equal to 1 or 3") 
-    if tree.taun_npi == 1:    
+    if tree.taun_npi == 1 and tree.taun_npizero == 0:    
         taun_pi = ROOT.TLorentzVector(tree.taun_pi1_px, tree.taun_pi1_py, tree.taun_pi1_pz, tree.taun_pi1_e)
         taun_pi.Boost(-taun.BoostVector())
         taun_s = taun_pi.Vect().Unit()
+    if tree.taun_npi == 1 and tree.taun_npizero == 1:    
+        taun_pi = ROOT.TLorentzVector(tree.taun_pi1_px, tree.taun_pi1_py, tree.taun_pi1_pz, tree.taun_pi1_e)
+        taun_pizero = ROOT.TLorentzVector(tree.taun_pizero1_px, tree.taun_pizero1_py, tree.taun_pizero1_pz, tree.taun_pizero1_e)
+        q = taun_pi  - taun_pizero;
+        P = taun
+        N = taun - taun_pi - taun_pizero
+        #pv = P.M()*(2*(q*N)*q.Vect() - q.Mag2()*N.Vect()) * (1/ (2*(q*N)*(q*P) - q.Mag2()*(N*P)))
+        pv = P.M()*(2*(q*N)*q - q.Mag2()*N) * (1/ (2*(q*N)*(q*P) - q.Mag2()*(N*P)))
+        pv.Boost(-taun.BoostVector())
+        taun_s = pv.Vect().Unit()        
     elif tree.taun_npi == 3:
         taun_pi1 = ROOT.TLorentzVector(tree.taun_pi1_px, tree.taun_pi1_py, tree.taun_pi1_pz, tree.taun_pi1_e)
         taun_pi2 = ROOT.TLorentzVector(tree.taun_pi2_px, tree.taun_pi2_py, tree.taun_pi2_pz, tree.taun_pi2_e)
