@@ -123,7 +123,7 @@ for i in range(start_entry, end_entry):
         taun_pi = ROOT.TLorentzVector(tree.taun_pi1_px, tree.taun_pi1_py, tree.taun_pi1_pz, tree.taun_pi1_e)
         taun_pi.Boost(-taun.BoostVector())
         taun_s = taun_pi.Vect().Unit()
-    if tree.taun_npi == 1 and tree.taun_npizero == 1:    
+    elif tree.taun_npi == 1 and tree.taun_npizero == 1:    
         taun_pi = ROOT.TLorentzVector(tree.taun_pi1_px, tree.taun_pi1_py, tree.taun_pi1_pz, tree.taun_pi1_e)
         taun_pizero = ROOT.TLorentzVector(tree.taun_pizero1_px, tree.taun_pizero1_py, tree.taun_pizero1_pz, tree.taun_pizero1_e)
         q = taun_pi  - taun_pizero;

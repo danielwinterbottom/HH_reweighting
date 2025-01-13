@@ -48,3 +48,16 @@ In case of issues due to space available in /tmp directory you can define altern
 To compute spin-observables run:
 
     python scripts/compute_spin_variables.py -i pythia_output_pipiMG.root -o pythia_output_pipiMG_spinObservables.root -n -1
+
+Useful information:
+
+This thread has some tips on generating taus with different helicities:
+
+    https://answers.launchpad.net/mg5amcnlo/+question/694581
+
+To be checked but it seems that you can use this to generate tautau events without entanglement using e.g:
+
+    generate e+ e- > ta+{R} ta-{L} / h, ta+ > pi+ vt~, ta- > pi- vt
+    add process generate e+ e- > ta+{L} ta-{R} / h, ta+ > pi+ vt~, ta- > pi- vt
+    add process generate e+ e- > ta+{L} ta-{L} / h, ta+ > pi+ vt~, ta- > pi- vt
+    add process generate e+ e- > ta+{R} ta-{R} / h, ta+ > pi+ vt~, ta- > pi- vt
