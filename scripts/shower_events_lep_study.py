@@ -223,7 +223,7 @@ while not stopGenerating:
             branch_vals['%(tau_name)s_pi1_py' % vars()][0] = pis[0].py()
             branch_vals['%(tau_name)s_pi1_pz' % vars()][0] = pis[0].pz()
             branch_vals['%(tau_name)s_pi1_e' % vars()][0]  = pis[0].e()
-            branch_vals['%(tau_name)s_pi1_vx' % vars()][0] = pis[0].xProd()
+            branch_vals['%(tau_name)s_pi1_vx' % vars()][0] = pis[0].xProd() # mm units
             branch_vals['%(tau_name)s_pi1_vy' % vars()][0] = pis[0].yProd()
             branch_vals['%(tau_name)s_pi1_vz' % vars()][0] = pis[0].zProd()
 
