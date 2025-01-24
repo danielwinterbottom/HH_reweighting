@@ -3,6 +3,140 @@ import numpy as np
 from scipy.optimize import minimize
 import math
 
+class TauReconstructor:
+    def __init__(self, mtau=1.775538):
+        """
+        Initialize the TauReconstructor class.
+
+        Args:
+            mtau (float): Mass of the tau particle in GeV.
+        """
+        self.mtau = mtau
+
+    def reconstruct_tau(self, P_Z, P_taupvis, P_taunvis, d_min_reco=None, verbose=False):
+        """
+        Reconstruct the tau momenta and direction at the point of closest approach.
+
+        Args:
+            P_Z (ROOT.TLorentzVector): Momentum of the Z boson.
+            P_taupvis (ROOT.TLorentzVector): Visible momentum of the positive tau.
+            P_taunvis (ROOT.TLorentzVector): Visible momentum of the negative tau.
+            d_min_reco (ROOT.TVector3, optional): Reconstructed d_min direction.
+            verbose (bool, optional):
+
+        Returns:
+            tuple: Reconstructed positive tau, negative tau, and d_min direction.
+        """
+        # use analytical results to define initial guesses
+        analytic_solutions = ReconstructTauAnalytically(P_Z, P_taupvis, P_taunvis)
+        solutions = []
+
+        for solution in analytic_solutions:
+            nu_p =  solution[0] - P_taupvis
+            nu_n = solution[1] - P_taunvis
+            initial_guess = [
+                nu_p.X(), nu_p.Y(), nu_p.Z(),
+                nu_n.X(), nu_n.Y(), nu_n.Z()
+            ]
+
+        #initial_guess = [
+        #    P_taupvis.X(), P_taupvis.Y(), P_taupvis.Z(),
+        #    P_taunvis.X(), P_taunvis.Y(), P_taunvis.Z()
+        #]
+
+            # Call the optimizer
+            result = minimize(
+                self._objective, initial_guess,
+                args=(P_Z, P_taupvis, P_taunvis, d_min_reco)
+            )
+
+            if verbose:
+                if result.success:
+                    print("Optimization succeeded!")
+                else:
+                    print("Optimization failed.")
+
+            solutions.append(result)
+
+        result = solutions[0]
+        #nubar_x, nubar_y, nubar_z, nu_x, nu_y, nu_z = vars
+        obj0 = self._objective(solutions[0].x, P_Z, P_taupvis, P_taunvis, d_min_reco)
+        obj1 = self._objective(solutions[1].x, P_Z, P_taupvis, P_taunvis, d_min_reco)
+
+        P_taupnu_reco = ROOT.TLorentzVector(
+            result.x[0], result.x[1], result.x[2],
+            (result.x[0]**2 + result.x[1]**2 + result.x[2]**2)**0.5
+        )
+        P_taunnu_reco = ROOT.TLorentzVector(
+            result.x[3], result.x[4], result.x[5],
+            (result.x[3]**2 + result.x[4]**2 + result.x[5]**2)**0.5
+        )
+
+        P_taup_reco = P_taupvis + P_taupnu_reco
+        P_taun_reco = P_taunvis + P_taunnu_reco
+
+        P_taunvis_new = ChangeFrame(P_taun_reco, P_taunvis, P_taunvis)
+        P_taupvis_new = ChangeFrame(P_taun_reco, P_taunvis, P_taupvis)
+
+        d_min = PredictDmin(
+            P_taunvis_new, P_taupvis_new, ROOT.TVector3(0.0, 0.0, -1.0)
+        ).Unit()
+        d_min = ChangeFrame(P_taun_reco, P_taunvis, d_min, reverse=True)
+
+        return P_taup_reco, P_taun_reco, d_min
+
+    def _objective(self, vars, P_Z, P_taupvis, P_taunvis, d_min_reco=None):
+        """
+        Objective function for tau reconstruction.
+
+        Args:
+            vars (list): Variables to optimize [nubar_x, nubar_y, nubar_z, nu_x, nu_y, nu_z].
+            P_Z (ROOT.TLorentzVector): Momentum of the Z boson.
+            P_taupvis (ROOT.TLorentzVector): Visible momentum of the positive tau.
+            P_taunvis (ROOT.TLorentzVector): Visible momentum of the negative tau.
+            d_min_reco (ROOT.TVector3, optional): Reconstructed d_min direction.
+
+        Returns:
+            float: Value of the objective function.
+        """
+        nubar_x, nubar_y, nubar_z, nu_x, nu_y, nu_z = vars
+
+        P_taupnu = ROOT.TLorentzVector(
+            nubar_x, nubar_y, nubar_z, (nubar_x**2 + nubar_y**2 + nubar_z**2)**0.5
+        )
+        P_taunnu = ROOT.TLorentzVector(
+            nu_x, nu_y, nu_z, (nu_x**2 + nu_y**2 + nu_z**2)**0.5
+        )
+
+        # Tau mass constraints
+        eq1 = (P_taupvis + P_taupnu).M() - self.mtau
+        eq2 = (P_taunvis + P_taunnu).M() - self.mtau
+
+        # Z boson momentum constraints
+        mom_sum = P_taupvis + P_taunvis + P_taupnu + P_taunnu
+        eq3 = mom_sum.T() - P_Z.T()
+        eq4 = mom_sum.X() - P_Z.X()
+        eq5 = mom_sum.Y() - P_Z.Y()
+        eq6 = mom_sum.Z() - P_Z.Z()
+
+        if d_min_reco:
+            # Implement IP constraint
+            P_taun = P_taunvis + P_taunnu
+            P_taunvis_new = ChangeFrame(P_taun, P_taunvis, P_taunvis)
+            P_taupvis_new = ChangeFrame(P_taun, P_taunvis, P_taupvis)
+
+            d_min = PredictDmin(
+                P_taunvis_new, P_taupvis_new, ROOT.TVector3(0.0, 0.0, -1.0)
+            ).Unit()
+            d_min = ChangeFrame(P_taun, P_taunvis, d_min, reverse=True)
+
+            dot_product = d_min.Unit().Dot(d_min_reco.Unit())
+            eq7 = (1.0 - dot_product)
+
+            return eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2 + eq7**2
+
+        return eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2
+
 def ChangeFrame(taun, taunvis, vec, reverse=False):
     '''
     Rotate the coordinate axis as follows:
@@ -50,35 +184,6 @@ def ChangeFrame(taun, taunvis, vec, reverse=False):
     return vec_new
 
 
-def ChangeFrameOld(taun, taunvis, vec, reverse=False):
-    '''
-    Rotate the coordinate axis as follows:
-    z-direction should be direction of the tau-
-    xz-axis should adjust the direction so that the h- lies on the x-z plane, in the +ve x-direction
-    '''
-
-    vec_new = vec.Clone()
-    taunvis_copy = taunvis.Clone()
-    # Step 1: Define the rotation to align the tau- with the z-axis
-    theta = taun.Theta()
-    phi = taun.Phi() 
-    vec_new.RotateZ(-phi)
-    vec_new.RotateY(-theta)
-
-    # Step 2: first need to rotate the the taunvis vector as was done above 
-    taunvis_copy.RotateZ(-phi)
-    taunvis_copy.RotateY(-theta)
-
-    # Step3: now rotate so that the the taunvis 
-    phi2 = taunvis_copy.Phi()
-    vec_new.RotateZ(-phi2)
-
-    # the h- should be in the +ve x-direction, add a check for this
-    if taunvis == vec and vec_new.X() < 0:
-        raise ValueError("h- not pointing in the +ve x direction")
-    return vec_new
-
-
 def objective(vars, P_Z, P_taupvis, P_taunvis, d_min_reco=None):
     mtau = 1.775538 
     nubar_x, nubar_y, nubar_z, nu_x, nu_y, nu_z = vars
@@ -96,19 +201,20 @@ def objective(vars, P_Z, P_taupvis, P_taunvis, d_min_reco=None):
     eq6 = mom_sum.Z() - P_Z.Z()
 
     if d_min_reco: # if the reco d_min is supplied then also implement IP constraint
-        P_taunvis_new = ChangeFrame(P_taunnu, P_taunvis, P_taunvis)
-        P_taupvis_new = ChangeFrame(P_taunnu, P_taunvis, P_taupvis)
+        P_taun = P_taunvis+P_taunnu
+        P_taunvis_new = ChangeFrame(P_taun, P_taunvis, P_taunvis)
+        P_taupvis_new = ChangeFrame(P_taun, P_taunvis, P_taupvis)
 
         d_min = PredictDmin(P_taunvis_new, P_taupvis_new, ROOT.TVector3(0.,0.,-1.)).Unit()
-        d_min = ChangeFrame(P_taunnu, P_taunvis, d_min, reverse=True)
+        d_min = ChangeFrame(P_taun, P_taunvis, d_min, reverse=True)
 
         #eq7 = math.acos(d_min.Unit().Dot(d_min_reco.Unit()))
         dot_product = d_min.Unit().Dot(d_min_reco.Unit())
         #clamped_dot = max(-1.0, min(1.0, dot_product))
         #eq7 = math.acos(clamped_dot)
-        eq7 = -dot_product
+        eq7 = (1.-dot_product)
 
-        return (eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2) #* eq7 # this constant should be of order O(100) scale to match other constraints but this can be tuned
+        return eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2 #+ eq7**2 # this constant should be of order O(100) scale to match other constraints but this can be tuned
 
     return eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2
 
@@ -129,7 +235,13 @@ def ReconstructTau(P_Z, P_taupvis, P_taunvis, d_min_reco=None, verbose=False):
     P_taup_reco =  P_taupvis + P_taupnu_reco
     P_taun_reco =  P_taunvis + P_taunnu_reco
 
-    return P_taup_reco, P_taun_reco
+    P_taunvis_new = ChangeFrame(P_taun_reco, P_taunvis, P_taunvis)
+    P_taupvis_new = ChangeFrame(P_taun_reco, P_taunvis, P_taupvis)
+
+    d_min = PredictDmin(P_taunvis_new, P_taupvis_new, ROOT.TVector3(0.,0.,-1.)).Unit()
+    d_min = ChangeFrame(P_taun_reco, P_taunvis, d_min, reverse=True)  
+
+    return P_taup_reco, P_taun_reco, d_min
 
 def compare_lorentz_pairs(pair1, pair2):
     """
@@ -170,12 +282,8 @@ def GetOpeningAngle(tau, h):
 
     return math.acos(costheta)
 
-def IPConstraints(taup, taun, hp, hn):
-    '''
-    Following this paper: https://arxiv.org/pdf/hep-ph/9307269
-    '''
 
-# analytical reconstruction functions (work fully working)
+# analytical reconstruction functions 
 
 # Define the Levi-Civita symbol in 4D
 def levi_civita_4d():
@@ -304,73 +412,6 @@ def FindDMin(p1, d1, p2, d2):
     # Vector pointing from closest point on Line 1 to Line 2
     return pca2 - pca1
 
-class FindDMinNumerical:
-    """
-    Find the vector pointing from the closest point on Line 1 to the closest point on Line 2 using ROOT classes.
-
-    Args:
-        p1 (TVector3): A point on Line 1.
-        d1 (TVector3): Direction vector of Line 1.
-        p2 (TVector3): A point on Line 2.
-        d2 (TVector3): Direction vector of Line 2.
-
-    Returns:
-        TVector3: Vector pointing from the closest point on Line 1 to the closest point on Line 2.
-    """
-    def __init__(self, p1, d1, p2, d2):
-        self.p1 = p1
-        self.d1 = d1
-        self.p2 = p2
-        self.d2 = d2
-
-    def objective(self, t):
-        """
-        Objective function to minimize the distance between the two lines.
-
-        Args:
-            t (np.array): Array of parameters to minimize.
-
-        Returns:
-            float: Distance between the two lines.
-        """
-        # Compute the points on each line
-        term1 = self.d1.Clone()
-        term2 = self.d2.Clone()
-        term1 *= t[0]
-        term2 *= t[1]
-        l1 = self.p1 + term1  # Point on Line 1
-        l2 = self.p2 + term2  # Point on Line 2
-
-        # Compute the distance between the two points
-        return (l1 - l2).Mag2()
-
-    def minimize(self):
-        """
-        Minimize the distance between the two lines.
-
-        Returns:
-            TVector3: Vector pointing from the closest point on Line 1 to the closest point on Line 2.
-        """
-        # Initial guess for the parameters
-        t0 = np.array([0., 0.])
-
-        # Call the optimizer
-        result = minimize(self.objective, t0)
-
-        # Extract the optimized parameters
-        t_opt = result.x
-
-        # Compute the closest points
-        term1 = self.d1.Clone()
-        term2 = self.d2.Clone()
-        term1 *= t_opt[0]
-        term2 *= t_opt[1]
-
-        l1_closest = self.p1 + term1
-        l2_closest = self.p2 + term2
-
-        # Return the vector pointing from the closest point on Line 1 to Line 2
-        return l2_closest - l1_closest
 
 def PredictDmin(P_taunvis, P_taupvis, d=None):
     if d is None: d_over_l = ROOT.TVector3(0.,0.,-1.) # by definition in the rotated coordinate frame
@@ -387,11 +428,15 @@ def PredictDmin(P_taunvis, P_taupvis, d=None):
 
 if __name__ == '__main__':
 
+    apply_smearing = True
+    # some representative smearing functions (exact resolutions to be taken with pinch of salt)
+    E_smearing = ROOT.TF1("E_smearing","TMath::Gaus(x,1,0.02)",0,2)
     f = ROOT.TFile('pythia_output_ee_To_pipinunu_no_entanglementMG.root')
     tree = f.Get('tree')
     count_total = 0
     count_correct = 0
-    for i in range(1,1000):
+    d_min_reco_ave = 0.
+    for i in range(1,100):
         count_total+=1
         tree.GetEntry(i)
         P_taup_true = ROOT.TLorentzVector(tree.taup_px, tree.taup_py, tree.taup_pz, tree.taup_e) 
@@ -399,6 +444,15 @@ if __name__ == '__main__':
     
         P_taupvis = ROOT.TLorentzVector(tree.taup_pi1_px, tree.taup_pi1_py, tree.taup_pi1_pz, tree.taup_pi1_e)
         P_taunvis = ROOT.TLorentzVector(tree.taun_pi1_px, tree.taun_pi1_py, tree.taun_pi1_pz, tree.taun_pi1_e)
+        P_taupvis_E_before = P_taupvis.E()
+
+        if apply_smearing:
+            rand1 = E_smearing.GetRandom()
+            rand2 = E_smearing.GetRandom()
+            P_taupvis *= rand1
+            P_taunvis *= rand2    
+        P_taupvis_E_after = P_taupvis.E()   
+    
         P_Z = P_taup_true+P_taun_true
         #P_Z = ROOT.TLorentzVector(0.,0.,0.,91.188) # assuming we don't know ISR and have to assume momentum is balanced
   
@@ -414,12 +468,15 @@ if __name__ == '__main__':
         IP_taup = GetGenImpactParam(ROOT.TVector3(0.,0.,0.),VERTEX_taup, P_taupvis.Vect())
         IP_taun = GetGenImpactParam(ROOT.TVector3(0.,0.,0.),VERTEX_taun, P_taunvis.Vect())
     
-        finder = FindDMinNumerical(VERTEX_taun, P_taunvis.Vect().Unit(), VERTEX_taup, P_taupvis.Vect().Unit())
-        d_min_numeric = finder.minimize()
+
 
         d_min_reco = FindDMin(VERTEX_taun, P_taunvis.Vect().Unit(), VERTEX_taup, P_taupvis.Vect().Unit())
-        P_taup_reco, P_taun_reco = ReconstructTau(P_Z, P_taupvis, P_taunvis, d_min_reco, verbose=False)
-   
+        #P_taup_reco, P_taun_reco, d_min_numeric = ReconstructTau(P_Z, P_taupvis, P_taunvis, d_min_reco, verbose=False)
+
+        reconstructor = TauReconstructor()
+        P_taup_reco, P_taun_reco, d_min_numeric = reconstructor.reconstruct_tau(P_Z, P_taupvis, P_taunvis, d_min_reco)
+
+
         solutions = ReconstructTauAnalytically(P_Z, P_taupvis, P_taunvis)
 
         d_sol1 = compare_lorentz_pairs((P_taup_reco,P_taun_reco),solutions[0])
@@ -460,6 +517,7 @@ if __name__ == '__main__':
             print('\nReco taus (numerically):')
             print('tau+:', P_taup_reco.X(), P_taup_reco.Y(), P_taup_reco.Z(), P_taup_reco.T(), P_taup_reco.M())
             print('tau-:', P_taun_reco.X(), P_taun_reco.Y(), P_taun_reco.Z(), P_taun_reco.T(), P_taun_reco.M())
+            print('d_min constraint:', d_min_numeric.Unit().Dot(d_min_reco.Unit()))
     
             print('\nReco taus (analytically):')
             print('solution 1:')
@@ -504,4 +562,8 @@ if __name__ == '__main__':
                 print(d_min_reco.Unit().Dot(d_min.Unit()))
             print('correct solution found?', FoundCorrectSolution)
 
+        d_min_reco_ave+=d_min_reco.Mag()
+    d_min_reco_ave/=count_total
+
+    print('ave d_min = %g' % d_min_reco_ave)
     print('Found correct solution for %i / %i events = %.1f%%' % (count_correct, count_total, count_correct/count_total*100))
