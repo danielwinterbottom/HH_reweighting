@@ -61,8 +61,6 @@ class TauReconstructor:
                 print('best dmin dot product = ', self.d_min.Dot(d_min_reco.Unit()))
 
             solutions.append(result)
-
-        #nubar_x, nubar_y, nubar_z, nu_x, nu_y, nu_z = vars
     
         obj0 = self._objective(solutions[0].x, P_Z, P_taupvis, P_taunvis, d_min_reco)
         obj1 = self._objective(solutions[1].x, P_Z, P_taupvis, P_taunvis, d_min_reco)
@@ -140,15 +138,9 @@ class TauReconstructor:
             d_min = PredictDmin(
                 P_taunvis_new, P_taupvis_new, ROOT.TVector3(0.0, 0.0, -1.0)
             ).Unit()
-            #print('P_taunnu:', P_taunnu.X(), P_taunnu.Y(), P_taunnu.Z(), P_taunnu.T(), P_taunnu.M())
-            #print('P_taun:', P_taun.X(), P_taun.Y(), P_taun.Z(), P_taun.T(), P_taun.M())
-            #print('d_min:', d_min.X(), d_min.Y(), d_min.Z())
             d_min = ChangeFrame(P_taun, P_taunvis, d_min, reverse=True)
-            #print('d_min (rotated back):', d_min.X(), d_min.Y(), d_min.Z())
-            #print('d_min_reco:', d_min_reco.Unit().X(), d_min_reco.Unit().Y(), d_min_reco.Unit().Z())
             dot_product = d_min.Unit().Dot(d_min_reco.Unit())
             eq7 = (1.0 - dot_product)
-            #print('dot_product:', dot_product)
             self.d_min = d_min
 
             return eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2 + eq7**2
@@ -371,6 +363,47 @@ def FindDMin(p1, d1, p2, d2):
     # Vector pointing from closest point on Line 1 to Line 2
     return pca2 - pca1
 
+def PredictD(P_taun, P_taup, P_taunvis, P_taupvis, d_min):
+  d = ROOT.TVector3()
+
+  n_n = P_taunvis.Vect().Unit()
+  n_p = P_taupvis.Vect().Unit()
+
+  theta_n = GetOpeningAngle(P_taun, P_taunvis)
+  theta_p = GetOpeningAngle(P_taup, P_taupvis)
+
+  sin_n = math.sin(theta_n)
+  sin_p = math.sin(theta_p)
+  cos_n = math.cos(theta_n)
+  cos_p = math.cos(theta_p)
+
+
+  proj = d_min.Dot(n_p.Cross(n_n))
+
+  cosphi = (n_n.Dot(n_p) + cos_n*cos_p)/(sin_n*sin_p)
+  sinphi = math.sin(math.acos(cosphi))
+
+  l = abs(proj/(sin_n*sin_p*sinphi)) # this l seems to be close but slightly different to the true l even when inputting gen quantities, need to figure out why
+
+  #print('l_reco:', l)
+
+  d_min_over_l = d_min * (1./l)
+
+  fact1 = (cos_p*n_p.Dot(n_n) + cos_n) / (1.-(n_n.Dot(n_p))**2)
+  fact2 = (-cos_n*n_p.Dot(n_n) - cos_p) / (1.-(n_n.Dot(n_p))**2)
+
+  term1 = n_n*fact1
+  term2 = n_p*fact2
+  d_over_l = d_min_over_l - term1 - term2
+
+  #print('d_unit_reco:', d_over_l.X(), d_over_l.Y(), d_over_l.Z())
+  #print('d_reco:', d_over_l.X()*l_true, d_over_l.Y()*l_true, d_over_l.Z()*l_true)
+
+  d.SetX(d_over_l.X()*l)
+  d.SetY(d_over_l.Y()*l)
+  d.SetZ(d_over_l.Z()*l)
+
+  return d
 
 def PredictDmin(P_taunvis, P_taupvis, d=None):
     if d is None: d_over_l = ROOT.TVector3(0.,0.,-1.) # by definition in the rotated coordinate frame
@@ -431,7 +464,7 @@ class Smearing():
 if __name__ == '__main__':
 
     smearing = Smearing()
-    apply_smearing = True
+    apply_smearing = False
     # some representative smearing functions (exact resolutions to be taken with pinch of salt)
     E_smearing = ROOT.TF1("E_smearing","TMath::Gaus(x,1,0.02)",0,2)
     f = ROOT.TFile('pythia_output_ee_To_pipinunu_no_entanglementMG.root')
@@ -439,7 +472,7 @@ if __name__ == '__main__':
     count_total = 0
     count_correct = 0
     d_min_reco_ave = 0.
-    for i in range(1,1000):
+    for i in range(1,10):
         count_total+=1
         tree.GetEntry(i)
         P_taup_true = ROOT.TLorentzVector(tree.taup_px, tree.taup_py, tree.taup_pz, tree.taup_e) 
@@ -462,8 +495,6 @@ if __name__ == '__main__':
 
         IP_taup = GetGenImpactParam(ROOT.TVector3(0.,0.,0.),VERTEX_taup, P_taupvis.Vect())
         IP_taun = GetGenImpactParam(ROOT.TVector3(0.,0.,0.),VERTEX_taun, P_taunvis.Vect())
-    
-
 
         d_min_reco = FindDMin(VERTEX_taun, P_taunvis.Vect().Unit(), VERTEX_taup, P_taupvis.Vect().Unit())
 
@@ -479,7 +510,6 @@ if __name__ == '__main__':
 
         reconstructor = TauReconstructor()
         P_taup_reco, P_taun_reco, d_min_numeric = reconstructor.reconstruct_tau(P_Z, P_taupvis, P_taunvis, d_min_reco)
-
 
         solutions = ReconstructTauAnalytically(P_Z, P_taupvis, P_taunvis)
 
@@ -527,10 +557,21 @@ if __name__ == '__main__':
             print('solution 1:')
             print('tau+:', solutions[0][0].X(), solutions[0][0].Y(), solutions[0][0].Z(), solutions[0][0].T(), solutions[0][0].M())
             print('tau-:', solutions[0][1].X(), solutions[0][1].Y(), solutions[0][1].Z(), solutions[0][1].T(), solutions[0][1].M())
+            
+            #print('l_true:', l_true)
+            #print('d_unit_true:', d_true.Unit().X(), d_true.Unit().Y(), d_true.Unit().Z())
+            print('d_true:', d_true.Mag(), d_true.X(), d_true.Y(), d_true.Z())
+            d_reco = PredictD(solutions[0][1], solutions[0][0], P_taunvis, P_taupvis, d_min_reco)
+            print('d_reco:', d_reco.Mag(), d_reco.X(), d_reco.Y(), d_reco.Z())
+
             print('solution 2:')
             print('tau+:', solutions[1][0].X(), solutions[1][0].Y(), solutions[1][0].Z(), solutions[1][0].T(), solutions[1][0].M())
             print('tau-:', solutions[1][1].X(), solutions[1][1].Y(), solutions[1][1].Z(), solutions[1][1].T(), solutions[1][1].M())
     
+            print('d_true:', d_true.Mag(), d_true.X(), d_true.Y(), d_true.Z())
+            d_reco = PredictD(solutions[1][1], solutions[1][0], P_taunvis, P_taupvis, d_min_reco)
+            print('d_reco:', d_reco.Mag(), d_reco.X(), d_reco.Y(), d_reco.Z())
+
 #            print('\nboost to tau rest frames')
 #            print('True:')
 #            print('tau+:', P_taupvis_1.X(), P_taupvis_1.Y(), P_taupvis_1.Z(), P_taupvis_1.T(), P_taupvis_1.M())
