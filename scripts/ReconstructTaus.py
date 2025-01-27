@@ -12,6 +12,7 @@ class TauReconstructor:
             mtau (float): Mass of the tau particle in GeV.
         """
         self.mtau = mtau
+        self.d_min = 0.
 
     def reconstruct_tau(self, P_Z, P_taupvis, P_taunvis, d_min_reco=None, verbose=False):
         """
@@ -31,18 +32,19 @@ class TauReconstructor:
         analytic_solutions = ReconstructTauAnalytically(P_Z, P_taupvis, P_taunvis)
         solutions = []
 
-        for solution in analytic_solutions:
+        for i, solution in enumerate(analytic_solutions):
+            if verbose:
+                print('Running optimization for solution %i' % (i))
             nu_p =  solution[0] - P_taupvis
             nu_n = solution[1] - P_taunvis
             initial_guess = [
                 nu_p.X(), nu_p.Y(), nu_p.Z(),
                 nu_n.X(), nu_n.Y(), nu_n.Z()
             ]
-
-        #initial_guess = [
-        #    P_taupvis.X(), P_taupvis.Y(), P_taupvis.Z(),
-        #    P_taunvis.X(), P_taunvis.Y(), P_taunvis.Z()
-        #]
+            #initial_guess = [
+            #    0., 0., 0.,
+            #    0., 0., 0.
+            #]
 
             # Call the optimizer
             result = minimize(
@@ -56,12 +58,22 @@ class TauReconstructor:
                 else:
                     print("Optimization failed.")
 
+                print('best dmin dot product = ', self.d_min.Dot(d_min_reco.Unit()))
+
             solutions.append(result)
 
-        result = solutions[0]
         #nubar_x, nubar_y, nubar_z, nu_x, nu_y, nu_z = vars
+    
         obj0 = self._objective(solutions[0].x, P_Z, P_taupvis, P_taunvis, d_min_reco)
         obj1 = self._objective(solutions[1].x, P_Z, P_taupvis, P_taunvis, d_min_reco)
+
+        if verbose:
+            print('objectives for solutions 0,1:', obj0, obj1)
+
+        if obj0 > obj1:
+            result = solutions[1]
+        else:
+            result = solutions[0]   
 
         P_taupnu_reco = ROOT.TLorentzVector(
             result.x[0], result.x[1], result.x[2],
@@ -128,14 +140,21 @@ class TauReconstructor:
             d_min = PredictDmin(
                 P_taunvis_new, P_taupvis_new, ROOT.TVector3(0.0, 0.0, -1.0)
             ).Unit()
+            #print('P_taunnu:', P_taunnu.X(), P_taunnu.Y(), P_taunnu.Z(), P_taunnu.T(), P_taunnu.M())
+            #print('P_taun:', P_taun.X(), P_taun.Y(), P_taun.Z(), P_taun.T(), P_taun.M())
+            #print('d_min:', d_min.X(), d_min.Y(), d_min.Z())
             d_min = ChangeFrame(P_taun, P_taunvis, d_min, reverse=True)
-
+            #print('d_min (rotated back):', d_min.X(), d_min.Y(), d_min.Z())
+            #print('d_min_reco:', d_min_reco.Unit().X(), d_min_reco.Unit().Y(), d_min_reco.Unit().Z())
             dot_product = d_min.Unit().Dot(d_min_reco.Unit())
             eq7 = (1.0 - dot_product)
+            #print('dot_product:', dot_product)
+            self.d_min = d_min
 
             return eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2 + eq7**2
 
-        return eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2
+        else: 
+            return eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2
 
 def ChangeFrame(taun, taunvis, vec, reverse=False):
     '''
@@ -182,66 +201,6 @@ def ChangeFrame(taun, taunvis, vec, reverse=False):
             raise ValueError("h- not pointing in the +ve x direction")
 
     return vec_new
-
-
-def objective(vars, P_Z, P_taupvis, P_taunvis, d_min_reco=None):
-    mtau = 1.775538 
-    nubar_x, nubar_y, nubar_z, nu_x, nu_y, nu_z = vars
-    P_taupnu = ROOT.TLorentzVector(nubar_x, nubar_y, nubar_z, (nubar_x**2+nubar_y**2+nubar_z**2)**.5) 
-    P_taunnu = ROOT.TLorentzVector(nu_x, nu_y, nu_z, (nu_x**2+nu_y**2+nu_z**2)**.5) 
-    # tau mass constraints
-    eq1 = (P_taupvis+P_taupnu).M() - mtau 
-    eq2 = (P_taunvis+P_taunnu).M() - mtau
-
-    # Z boson momentum constraints
-    mom_sum = P_taupvis+P_taunvis+P_taupnu+P_taunnu
-    eq3 = mom_sum.T() - P_Z.T()
-    eq4 = mom_sum.X() - P_Z.X()
-    eq5 = mom_sum.Y() - P_Z.Y()
-    eq6 = mom_sum.Z() - P_Z.Z()
-
-    if d_min_reco: # if the reco d_min is supplied then also implement IP constraint
-        P_taun = P_taunvis+P_taunnu
-        P_taunvis_new = ChangeFrame(P_taun, P_taunvis, P_taunvis)
-        P_taupvis_new = ChangeFrame(P_taun, P_taunvis, P_taupvis)
-
-        d_min = PredictDmin(P_taunvis_new, P_taupvis_new, ROOT.TVector3(0.,0.,-1.)).Unit()
-        d_min = ChangeFrame(P_taun, P_taunvis, d_min, reverse=True)
-
-        #eq7 = math.acos(d_min.Unit().Dot(d_min_reco.Unit()))
-        dot_product = d_min.Unit().Dot(d_min_reco.Unit())
-        #clamped_dot = max(-1.0, min(1.0, dot_product))
-        #eq7 = math.acos(clamped_dot)
-        eq7 = (1.-dot_product)
-
-        return eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2 #+ eq7**2 # this constant should be of order O(100) scale to match other constraints but this can be tuned
-
-    return eq1**2 + eq2**2 + eq3**2 + eq4**2 + eq5**2 + eq6**2
-
-def ReconstructTau(P_Z, P_taupvis, P_taunvis, d_min_reco=None, verbose=False):
-    initial_guess = [P_taupvis.X(), P_taupvis.Y(), P_taupvis.Z(), P_taunvis.X(), P_taunvis.Y(), P_taunvis.Z()]
-
-    # Call the optimizer
-    result = minimize(objective, initial_guess, args=(P_Z, P_taupvis, P_taunvis, d_min_reco))
-
-    if verbose:
-        if result.success:
-            print("Optimization succeeded!")
-        else:
-            print("Optimization failed.")
- 
-    P_taupnu_reco = ROOT.TLorentzVector(result.x[0], result.x[1], result.x[2], (result.x[0]**2+result.x[1]**2+result.x[2]**2)**.5)
-    P_taunnu_reco = ROOT.TLorentzVector(result.x[3], result.x[4], result.x[5], (result.x[3]**2+result.x[4]**2+result.x[5]**2)**.5)
-    P_taup_reco =  P_taupvis + P_taupnu_reco
-    P_taun_reco =  P_taunvis + P_taunnu_reco
-
-    P_taunvis_new = ChangeFrame(P_taun_reco, P_taunvis, P_taunvis)
-    P_taupvis_new = ChangeFrame(P_taun_reco, P_taunvis, P_taupvis)
-
-    d_min = PredictDmin(P_taunvis_new, P_taupvis_new, ROOT.TVector3(0.,0.,-1.)).Unit()
-    d_min = ChangeFrame(P_taun_reco, P_taunvis, d_min, reverse=True)  
-
-    return P_taup_reco, P_taun_reco, d_min
 
 def compare_lorentz_pairs(pair1, pair2):
     """
@@ -426,8 +385,52 @@ def PredictDmin(P_taunvis, P_taupvis, d=None):
     d_min = d_over_l + (term1 + term2)
     return d_min
 
+class Smearing():
+    """
+    Class to smear the energy and angular resolution of tracks.
+    """
+
+    def __init__(self):
+        self.E_smearing = ROOT.TF1("E_smearing","TMath::Gaus(x,1,[0])",0,2)
+        self.Angular_smearing = ROOT.TF1("Angular_smearing","TMath::Gaus(x,0,0.001)",-1,1) # approximate guess for now (this number was quote for electromagnetic objects but is probably better for tracks)
+        self.IP_z_smearing = ROOT.TF1("IP_z_smearing","TMath::Gaus(x,0,0.042)",-1,1) # number from David's thesis, note unit is mm
+        self.IP_xy_smearing = ROOT.TF1("IP_xy_smearing","TMath::Gaus(x,0,0.023)",-1,1) # number from David's thesis (number for r * sqrt(1/2)), note unit is mm
+
+    def SmearTrack(self,track):
+        E_res = 0.0006*track.P() # use p dependent resolution from David's thesis
+        self.E_smearing.SetParameter(0,E_res)
+        rand_E = self.E_smearing.GetRandom()
+        rand_dphi = self.Angular_smearing.GetRandom()
+        rand_deta = self.Angular_smearing.GetRandom()
+
+        track_smeared = ROOT.TLorentzVector(track)
+
+        phi = track_smeared.Phi()
+        new_phi = ROOT.TVector2.Phi_mpi_pi(phi + rand_dphi)
+        new_eta = track_smeared.Eta() + rand_deta
+        new_theta = 2 * math.atan(math.exp(-new_eta))
+        track_smeared.SetPhi(new_phi)
+        track_smeared.SetTheta(new_theta)
+        track_smeared *= rand_E
+
+        return track_smeared
+
+    def SmearDmin(self, dmin):
+        dmin_smeared = ROOT.TVector3(dmin)
+
+        rand_z = self.IP_z_smearing.GetRandom()
+        rand_x = self.IP_xy_smearing.GetRandom()
+        rand_y = self.IP_xy_smearing.GetRandom()
+
+        dmin_smeared.SetX(dmin_smeared.X() + rand_x)
+        dmin_smeared.SetY(dmin_smeared.Y() + rand_y)
+        dmin_smeared.SetZ(dmin_smeared.Z() + rand_z)
+
+        return dmin_smeared
+
 if __name__ == '__main__':
 
+    smearing = Smearing()
     apply_smearing = True
     # some representative smearing functions (exact resolutions to be taken with pinch of salt)
     E_smearing = ROOT.TF1("E_smearing","TMath::Gaus(x,1,0.02)",0,2)
@@ -436,22 +439,14 @@ if __name__ == '__main__':
     count_total = 0
     count_correct = 0
     d_min_reco_ave = 0.
-    for i in range(1,100):
+    for i in range(1,1000):
         count_total+=1
         tree.GetEntry(i)
         P_taup_true = ROOT.TLorentzVector(tree.taup_px, tree.taup_py, tree.taup_pz, tree.taup_e) 
         P_taun_true = ROOT.TLorentzVector(tree.taun_px, tree.taun_py, tree.taun_pz, tree.taun_e) 
     
         P_taupvis = ROOT.TLorentzVector(tree.taup_pi1_px, tree.taup_pi1_py, tree.taup_pi1_pz, tree.taup_pi1_e)
-        P_taunvis = ROOT.TLorentzVector(tree.taun_pi1_px, tree.taun_pi1_py, tree.taun_pi1_pz, tree.taun_pi1_e)
-        P_taupvis_E_before = P_taupvis.E()
-
-        if apply_smearing:
-            rand1 = E_smearing.GetRandom()
-            rand2 = E_smearing.GetRandom()
-            P_taupvis *= rand1
-            P_taunvis *= rand2    
-        P_taupvis_E_after = P_taupvis.E()   
+        P_taunvis = ROOT.TLorentzVector(tree.taun_pi1_px, tree.taun_pi1_py, tree.taun_pi1_pz, tree.taun_pi1_e)  
     
         P_Z = P_taup_true+P_taun_true
         #P_Z = ROOT.TLorentzVector(0.,0.,0.,91.188) # assuming we don't know ISR and have to assume momentum is balanced
@@ -471,7 +466,16 @@ if __name__ == '__main__':
 
 
         d_min_reco = FindDMin(VERTEX_taun, P_taunvis.Vect().Unit(), VERTEX_taup, P_taupvis.Vect().Unit())
-        #P_taup_reco, P_taun_reco, d_min_numeric = ReconstructTau(P_Z, P_taupvis, P_taunvis, d_min_reco, verbose=False)
+
+        P_taupvis_E_before = P_taupvis.E()
+
+        if apply_smearing:
+            P_taupvis = smearing.SmearTrack(P_taupvis)
+            P_taunvis = smearing.SmearTrack(P_taunvis)
+
+            d_min_reco = smearing.SmearDmin(d_min_reco)
+
+        P_taupvis_E_after = P_taupvis.E() 
 
         reconstructor = TauReconstructor()
         P_taup_reco, P_taun_reco, d_min_numeric = reconstructor.reconstruct_tau(P_Z, P_taupvis, P_taunvis, d_min_reco)
@@ -540,6 +544,7 @@ if __name__ == '__main__':
             
 
             print('d_min_reco = ', d_min_reco.Mag(), d_min_reco.Unit().X(), d_min_reco.Unit().Y(), d_min_reco.Unit().Z())
+            print('d_min_predicted =', d_min_numeric.Mag(), d_min_numeric.Unit().X(), d_min_numeric.Unit().Y(), d_min_numeric.Unit().Z())
 
             d_min = PredictDmin(P_taunvis, P_taupvis, d_true)
             print('d_min_predict (true) = ', d_min.Mag(), d_min.Unit().X(), d_min.Unit().Y(), d_min.Unit().Z())
