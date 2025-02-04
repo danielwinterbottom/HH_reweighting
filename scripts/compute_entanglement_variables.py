@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("-i", "--input", required=True, help="Input ROOT file.")
 parser.add_argument('--n_events', '-n', help='Maximum number of events to process', default=-1, type=int)
 parser.add_argument('--n_skip', '-s', help='skip n_events*n_skip', default=0, type=int)
+parser.add_argument('--reco', '-r', help='use reco variables', action='store_true')
 
 args = parser.parse_args()
 
@@ -23,18 +24,21 @@ with uproot.open(args.input) as file:
 
     df = tree.arrays(entry_start=entry_start, entry_stop=entry_stop, library="pd")
 
-    # example below applys a cut on cosTheta
-    #df = df[abs(df['cosTheta']) < 0.5]
+#example below applys a cut on cosTheta
+#df = df[abs(df['cosTheta']) < 0.5]
 
-df["cosncosn"] = df["cosn_plus"]*df["cosn_minus"]
-df["cosrcosr"] = df["cosr_plus"]*df["cosr_minus"]
-df["coskcosk"] = df["cosk_plus"]*df["cosk_minus"]
-df["cosncosr"] = df["cosn_plus"]*df["cosr_minus"]
-df["cosncosk"] = df["cosn_plus"]*df["cosk_minus"]
-df["cosrcosk"] = df["cosr_plus"]*df["cosk_minus"]
-df["cosrcosn"] = df["cosr_plus"]*df["cosn_minus"]
-df["coskcosn"] = df["cosk_plus"]*df["cosn_minus"]
-df["coskcosr"] = df["cosk_plus"]*df["cosr_minus"]
+extra = ''
+if args.reco:
+    extra = '_reco'
+df["cosncosn"] = df["cosn_plus"+extra]*df["cosn_minus"+extra]
+df["cosrcosr"] = df["cosr_plus"+extra]*df["cosr_minus"+extra]
+df["coskcosk"] = df["cosk_plus"+extra]*df["cosk_minus"+extra]
+df["cosncosr"] = df["cosn_plus"+extra]*df["cosr_minus"+extra]
+df["cosncosk"] = df["cosn_plus"+extra]*df["cosk_minus"+extra]
+df["cosrcosk"] = df["cosr_plus"+extra]*df["cosk_minus"+extra]
+df["cosrcosn"] = df["cosr_plus"+extra]*df["cosn_minus"+extra]
+df["coskcosn"] = df["cosk_plus"+extra]*df["cosn_minus"+extra]
+df["coskcosr"] = df["cosk_plus"+extra]*df["cosr_minus"+extra]
 
 
 def ComputeEntanglementVariables(df, verbose=False):

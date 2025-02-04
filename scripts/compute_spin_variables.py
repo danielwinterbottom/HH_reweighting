@@ -3,6 +3,7 @@ import argparse
 import math
 from array import array
 from PolarimetricA1 import PolarimetricA1
+from ReconstructTaus import *
 
 # each LEP detector should have about 140000 Z->tautau events (not accounting for acceptance effects)
 
